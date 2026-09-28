@@ -21,6 +21,10 @@ public class Explosion : MonoBehaviour
     [Tooltip("Damage dealt to something at the exact center of the blast. Falls off linearly to 0 at the edge of blastRadius.")]
     public int maxDamage = 50;
 
+    [Header("Knockback")]
+    [Tooltip("Push strength at the exact center of the blast. Falls off to 0 at the edge, same as damage.")]
+    public float maxKnockback = 40f;
+
     [Header("Visual")]
     [Tooltip("How long the explosion sprite animation plays before this object destroys itself. Match this to your animation clip's length.")]
     public float effectDuration = 0.6f;
@@ -45,7 +49,30 @@ public class Explosion : MonoBehaviour
         foreach (Collider2D hit in HitColliders)
         {
             ApplyDamage(hit);
+            ApplyKnockback(hit);
         }
+    }
+
+    /// <summary>
+    /// Pushes cockroaches away from the blast center. Strength falls off with
+    /// distance, the same way damage does.
+    /// </summary>
+    private void ApplyKnockback(Collider2D hit)
+    {
+        CockroachMovement mover = hit.GetComponent<CockroachMovement>();
+        if (mover == null) return; // Only cockroaches get pushed for now.
+
+        // Use the collider's center, not its pivot. The pivot is at the feet,
+        // which is often right at the blast point and gives no usable direction.
+        Vector2 bodyCenter = hit.bounds.center;
+        Vector2 away = bodyCenter - (Vector2)transform.position;
+
+        // If the blast is exactly on the body center, push straight up.
+        Vector2 direction = away.sqrMagnitude > 0.0001f ? away.normalized : Vector2.up;
+
+        float falloff = 1f - Mathf.Clamp01(away.magnitude / blastRadius);
+
+        mover.ApplyKnockback(direction * maxKnockback * falloff);
     }
 
     /// <summary>

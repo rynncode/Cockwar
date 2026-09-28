@@ -128,8 +128,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f5db8b20fda0fe43852fc77938f55c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Explosion
-  blastRadius: 10
+  blastRadius: 15
   affectedLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  maxDamage: 50
+  maxKnockback: 60
   effectDuration: 1

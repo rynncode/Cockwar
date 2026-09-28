@@ -25,6 +25,7 @@ public class CockroachShooting : MonoBehaviour
 
     private CockroachAim aim;
     private CockroachMovement movement;
+    private Collider2D ownCollider;
 
     private bool isCharging;
     private float chargeStartTime;
@@ -38,6 +39,12 @@ public class CockroachShooting : MonoBehaviour
     {
         aim = GetComponent<CockroachAim>();
         movement = GetComponent<CockroachMovement>();
+        ownCollider = GetComponent<Collider2D>();
+
+        if (ownCollider == null)
+        {
+            Debug.LogWarning("CockroachShooting: no Collider2D found on this cockroach. Self-collision at spawn will not be prevented.");
+        }
     }
 
     private void Update()
@@ -79,6 +86,15 @@ public class CockroachShooting : MonoBehaviour
         float power = Mathf.Lerp(minPower, maxPower, ChargeRatio01);
 
         GameObject shot = Instantiate(projectilePrefab, aim.AimOrigin, Quaternion.identity);
+
+        // Prevent the projectile from colliding with the cockroach that just fired it,
+        // regardless of aim direction or how close the spawn point is to the body.
+        Collider2D shotCollider = shot.GetComponent<Collider2D>();
+        if (shotCollider != null && ownCollider != null)
+        {
+            Physics2D.IgnoreCollision(shotCollider, ownCollider, true);
+        }
+
         shot.GetComponent<Projectile>().Launch(aim.AimDirection, power);
     }
 }

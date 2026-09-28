@@ -31,6 +31,13 @@ public class CockroachMovement : MonoBehaviour
     [Tooltip("When false the player ignores all input. The turn system will control this later.")]
     public bool isMyTurn = true;
 
+    [Header("Knockback")]
+    [Tooltip("Seconds after being hit during which walking does not override the knockback push.")]
+    public float knockbackLockTime = 0.4f;
+
+    // Counts down after a knockback. While above 0, walking is not applied.
+    private float knockbackTimer;
+
     // Filled in automatically.
     private Rigidbody2D body;
 
@@ -79,8 +86,28 @@ public class CockroachMovement : MonoBehaviour
     {
         // Physics work belongs in FixedUpdate.
         CheckGrounded();
-        ApplyWalkVelocity();
+
+        if (knockbackTimer > 0f)
+        {
+            // Being knocked back: let physics carry us instead of overriding velocity.
+            knockbackTimer -= Time.fixedDeltaTime;
+        }
+        else
+        {
+            ApplyWalkVelocity();
+        }
+
         FaceMoveDirection();
+    }
+
+    /// <summary>
+    /// Called by explosions (step 7). Pushes the cockroach and briefly
+    /// disables walking so the push is not cancelled immediately.
+    /// </summary>
+    public void ApplyKnockback(Vector2 impulse)
+    {
+        knockbackTimer = knockbackLockTime;
+        body.AddForce(impulse, ForceMode2D.Impulse);
     }
 
     /// <summary>
