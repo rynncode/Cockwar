@@ -1,0 +1,379 @@
+fileFormatVersion: 2
+guid: 68defe2d5708e4e40829a48954a15866
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5080105064461451640
+    second: menu_mapselect_spritesheet_0
+  - first:
+      213: -410646776856951224
+    second: menu_mapselect_spritesheet_1
+  - first:
+      213: 7935262900238883626
+    second: menu_mapselect_spritesheet_2
+  - first:
+      213: 1194384219296055963
+    second: menu_mapselect_spritesheet_3
+  - first:
+      213: -1999020688613365406
+    second: menu_mapselect_spritesheet_4
+  - first:
+      213: -1974057232504305587
+    second: menu_mapselect_spritesheet_5
+  - first:
+      213: 4322000070662470723
+    second: menu_mapselect_spritesheet_6
+  - first:
+      213: 2279768613618512512
+    second: menu_mapselect_spritesheet_7
+  - first:
+      213: -21424871078367315
+    second: menu_mapselect_spritesheet_8
+  - first:
+      213: -3816987767962404545
+    second: menu_mapselect_spritesheet_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_0
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 581
+        width: 974
+        height: 274
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87143ecf3a8208640800000000000000
+      internalID: 5080105064461451640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_1
+      rect:
+        serializedVersion: 2
+        x: 979
+        y: 761
+        width: 252
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8464841aee61d4af0800000000000000
+      internalID: -410646776856951224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_2
+      rect:
+        serializedVersion: 2
+        x: 1233
+        y: 730
+        width: 109
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2b1310a097bf1e60800000000000000
+      internalID: 7935262900238883626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_3
+      rect:
+        serializedVersion: 2
+        x: 1344
+        y: 730
+        width: 110
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b92497c8e1e439010800000000000000
+      internalID: 1194384219296055963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_4
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 289
+        width: 438
+        height: 290
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2692b84664d0244e0800000000000000
+      internalID: -1999020688613365406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_5
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 296
+        width: 434
+        height: 283
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d484a42f76dba94e0800000000000000
+      internalID: -1974057232504305587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_6
+      rect:
+        serializedVersion: 2
+        x: 879
+        y: 295
+        width: 434
+        height: 284
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34cbc035a24dafb30800000000000000
+      internalID: 4322000070662470723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_7
+      rect:
+        serializedVersion: 2
+        x: 1315
+        y: 296
+        width: 434
+        height: 283
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 082f0d0b97d53af10800000000000000
+      internalID: 2279768613618512512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_8
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 3
+        width: 432
+        height: 284
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dafe30a7132e3bff0800000000000000
+      internalID: -21424871078367315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: menu_mapselect_spritesheet_9
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 3
+        width: 434
+        height: 284
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f39f69a29d5570bc0800000000000000
+      internalID: -3816987767962404545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      menu_mapselect_spritesheet_0: 5080105064461451640
+      menu_mapselect_spritesheet_1: -410646776856951224
+      menu_mapselect_spritesheet_2: 7935262900238883626
+      menu_mapselect_spritesheet_3: 1194384219296055963
+      menu_mapselect_spritesheet_4: -1999020688613365406
+      menu_mapselect_spritesheet_5: -1974057232504305587
+      menu_mapselect_spritesheet_6: 4322000070662470723
+      menu_mapselect_spritesheet_7: 2279768613618512512
+      menu_mapselect_spritesheet_8: -21424871078367315
+      menu_mapselect_spritesheet_9: -3816987767962404545
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
