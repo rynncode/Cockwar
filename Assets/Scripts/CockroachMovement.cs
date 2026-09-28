@@ -10,7 +10,7 @@ using UnityEngine;
 public class CockroachMovement : MonoBehaviour
 {
     [Header("Walking")]
-    [Tooltip("Walk speed in units per second. Keep this slow, artillery games are not platformers.")]
+    [Tooltip("Walk speed in units per second.")]
     public float walkSpeed = 3f;
 
     [Header("Jumping")]
@@ -21,41 +21,49 @@ public class CockroachMovement : MonoBehaviour
     [Tooltip("Empty child object placed at the cockroach's feet.")]
     public Transform groundCheckPoint;
 
-    [Tooltip("Radius of the circle used to look for ground. Roughly half the body width.")]
+    [Tooltip("Radius of the circle used to look for ground.")]
     public float groundCheckRadius = 0.15f;
 
-    [Tooltip("Which layers count as ground. Set this to your Ground layer.")]
+    [Tooltip("Which layers count as ground.")]
     public LayerMask groundLayer;
 
     [Header("Turn Control")]
-    [Tooltip("When false the player ignores all input. The turn system will control this later.")]
+    [Tooltip("When false the player ignores all input.")]
     public bool isMyTurn = true;
 
     [Header("Knockback")]
-    [Tooltip("Seconds after being hit during which walking does not override the knockback push.")]
-    public float knockbackLockTime = 0.4f;
+    [Tooltip("When true, normal walking is disabled while the player is airborne after a physics push.")]
+    public bool physicsMovementUntilGrounded = true;
 
-    // Counts down after a knockback. While above 0, walking is not applied.
-    private float knockbackTimer;
+    [Tooltip("Multiplies the vertical part of an externally supplied physics push.")]
+    [Range(0f, 1f)]
+    public float verticalPushMultiplier = 0.5f;
+
+    // True while normal player movement is temporarily disabled
+    // because the Rigidbody is being controlled by physics.
+    private bool physicsMovementActive;
 
     // Filled in automatically.
     private Rigidbody2D body;
 
-    // True when the feet are touching ground. Updated once per frame.
+    // True when the feet are touching ground.
     private bool isGrounded;
+
+    // Used to detect the moment the player lands.
+    private bool wasGrounded;
 
     // -1 = walking left, 0 = standing still, 1 = walking right.
     private float moveDirection;
 
-    // --- Read-only state for other scripts (the animator reads these) ---
+    // --- Read-only state for other scripts ---
 
     /// <summary>True while the feet are touching ground.</summary>
     public bool IsGrounded => isGrounded;
 
-    /// <summary>0 when standing still, 1 when walking. Ignores direction.</summary>
+    /// <summary>0 when standing still, 1 when walking.</summary>
     public float WalkAmount => Mathf.Abs(moveDirection);
 
-    /// <summary>Current vertical speed. Positive is rising, negative is falling.</summary>
+    /// <summary>Current vertical speed.</summary>
     public float VerticalSpeed => body != null ? body.linearVelocity.y : 0f;
 
     private void Awake()
@@ -65,7 +73,7 @@ public class CockroachMovement : MonoBehaviour
 
     private void Update()
     {
-        // Read input in Update so a key press is never missed between physics steps.
+        // Read input in Update so key presses are not missed.
         if (!isMyTurn)
         {
             moveDirection = 0f;
@@ -73,10 +81,14 @@ public class CockroachMovement : MonoBehaviour
         }
 
         moveDirection = 0f;
-        if (Input.GetKey(KeyCode.A)) moveDirection = -1f;
-        if (Input.GetKey(KeyCode.D)) moveDirection = 1f;
 
-        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
+        if (Input.GetKey(KeyCode.A))
+            moveDirection = -1f;
+
+        if (Input.GetKey(KeyCode.D))
+            moveDirection = 1f;
+
+        if (Input.GetKeyDown(KeyCode.W) && isGrounded && !physicsMovementActive)
         {
             Jump();
         }
@@ -84,29 +96,39 @@ public class CockroachMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Physics work belongs in FixedUpdate.
         CheckGrounded();
 
-        if (knockbackTimer > 0f)
+        // If physics movement was active and we have now landed,
+        // return control to the player.
+        if (physicsMovementActive && !wasGrounded && isGrounded)
         {
-            // Being knocked back: let physics carry us instead of overriding velocity.
-            knockbackTimer -= Time.fixedDeltaTime;
+            physicsMovementActive = false;
         }
-        else
+
+        if (!physicsMovementActive)
         {
             ApplyWalkVelocity();
         }
 
         FaceMoveDirection();
+
+        wasGrounded = isGrounded;
     }
 
     /// <summary>
-    /// Called by explosions (step 7). Pushes the cockroach and briefly
-    /// disables walking so the push is not cancelled immediately.
+    /// Applies an external physics push.
+    /// Normal walking is temporarily disabled until the player lands.
     /// </summary>
     public void ApplyKnockback(Vector2 impulse)
     {
-        knockbackTimer = knockbackLockTime;
+        if (physicsMovementUntilGrounded)
+        {
+            physicsMovementActive = true;
+        }
+
+        // Reduce only the vertical component of the supplied impulse.
+        impulse.y *= verticalPushMultiplier;
+
         body.AddForce(impulse, ForceMode2D.Impulse);
     }
 
@@ -128,8 +150,7 @@ public class CockroachMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets horizontal speed directly but leaves vertical speed alone,
-    /// so gravity and jumping still behave normally.
+    /// Sets horizontal walking speed while preserving vertical physics.
     /// </summary>
     private void ApplyWalkVelocity()
     {
@@ -144,12 +165,12 @@ public class CockroachMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Flips the sprite so the cockroach faces the way it is walking.
-    /// Does nothing while standing still, so it keeps its last facing.
+    /// Flips the sprite so the cockroach faces the direction it is walking.
     /// </summary>
     private void FaceMoveDirection()
     {
-        if (moveDirection == 0f) return;
+        if (moveDirection == 0f)
+            return;
 
         Vector3 scale = transform.localScale;
         scale.x = Mathf.Abs(scale.x) * Mathf.Sign(moveDirection);
@@ -157,12 +178,17 @@ public class CockroachMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Draws the ground check circle in the Scene view so you can see and size it.
+    /// Draws the ground check circle in the Scene view.
     /// </summary>
     private void OnDrawGizmosSelected()
     {
-        if (groundCheckPoint == null) return;
+        if (groundCheckPoint == null)
+            return;
+
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
+        Gizmos.DrawWireSphere(
+            groundCheckPoint.position,
+            groundCheckRadius);
     }
 }
+
