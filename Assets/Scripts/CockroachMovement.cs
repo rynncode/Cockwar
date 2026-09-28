@@ -55,6 +55,8 @@ public class CockroachMovement : MonoBehaviour
     // -1 = walking left, 0 = standing still, 1 = walking right.
     private float moveDirection;
 
+    private float lockedAirDirection;
+
     // --- Read-only state for other scripts ---
 
     /// <summary>True while the feet are touching ground.</summary>
@@ -153,14 +155,25 @@ public class CockroachMovement : MonoBehaviour
     /// Sets horizontal walking speed while preserving vertical physics.
     /// </summary>
     private void ApplyWalkVelocity()
+{
+    Vector2 velocity = body.linearVelocity;
+
+    if (isGrounded)
     {
-        Vector2 velocity = body.linearVelocity;
         velocity.x = moveDirection * walkSpeed;
-        body.linearVelocity = velocity;
     }
+    else
+    {
+        velocity.x = lockedAirDirection * walkSpeed;
+    }
+
+    body.linearVelocity = velocity;
+}
 
     private void Jump()
     {
+        lockedAirDirection = moveDirection;
+
         body.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
 
