@@ -1,10 +1,11 @@
+using System;
 using UnityEngine;
 
 /// <summary>
 /// Step 6: Damage.
 /// Put this on anything that can take damage — currently just the cockroach.
-/// Death (step 8) will react to health reaching 0. This script only tracks
-/// the number and clamps it at 0; it does not destroy or disable anything itself.
+/// This script only tracks the number and clamps it at 0; it does not destroy
+/// or disable anything itself. CockroachDeath (step 8) listens to OnDeath instead.
 /// </summary>
 public class Health : MonoBehaviour
 {
@@ -16,8 +17,11 @@ public class Health : MonoBehaviour
     /// <summary>Current health, read-only from outside this script.</summary>
     public int CurrentHealth => currentHealth;
 
-    /// <summary>True once health has reached 0. Death (step 8) will check this.</summary>
+    /// <summary>True once health has reached 0.</summary>
     public bool IsDead => currentHealth <= 0;
+
+    /// <summary>Fires exactly once, the moment health reaches 0.</summary>
+    public event Action OnDeath;
 
     private void Awake()
     {
@@ -39,8 +43,8 @@ public class Health : MonoBehaviour
 
         if (IsDead)
         {
-            // Step 8 will hook actual death behaviour here (animation, removing from turn order, etc).
             Debug.Log(gameObject.name + " has reached 0 health.");
+            OnDeath?.Invoke();
         }
     }
 }

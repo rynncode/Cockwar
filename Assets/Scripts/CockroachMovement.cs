@@ -39,18 +39,21 @@ public class CockroachMovement : MonoBehaviour
     [Range(0f, 1f)]
     public float verticalPushMultiplier = 0.5f;
 
+    [Tooltip("Minimum seconds physics control stays active before it can hand control back, even if already grounded. Stops a weak push that never leaves the ground from clearing on the same physics step it was applied.")]
+    public float minPhysicsMovementTime = 0.1f;
+
     // True while normal player movement is temporarily disabled
     // because the Rigidbody is being controlled by physics.
     private bool physicsMovementActive;
+
+    // Counts up while physicsMovementActive is true.
+    private float physicsMovementElapsed;
 
     // Filled in automatically.
     private Rigidbody2D body;
 
     // True when the feet are touching ground.
     private bool isGrounded;
-
-    // Used to detect the moment the player lands.
-    private bool wasGrounded;
 
     // -1 = walking left, 0 = standing still, 1 = walking right.
     private float moveDirection;
@@ -100,11 +103,20 @@ public class CockroachMovement : MonoBehaviour
     {
         CheckGrounded();
 
-        // If physics movement was active and we have now landed,
-        // return control to the player.
-        if (physicsMovementActive && !wasGrounded && isGrounded)
+        if (physicsMovementActive)
         {
-            physicsMovementActive = false;
+            physicsMovementElapsed += Time.fixedDeltaTime;
+
+            // Hand control back once the minimum time has passed AND we are
+            // currently grounded — checking "currently grounded" rather than
+            // waiting for an airborne-to-grounded transition means a push too
+            // weak to lift the cockroach off the ground still releases properly,
+            // instead of locking movement forever.
+            bool minTimePassed = physicsMovementElapsed >= minPhysicsMovementTime;
+            if (minTimePassed && isGrounded)
+            {
+                physicsMovementActive = false;
+            }
         }
 
         if (!physicsMovementActive)
@@ -113,8 +125,6 @@ public class CockroachMovement : MonoBehaviour
         }
 
         FaceMoveDirection();
-
-        wasGrounded = isGrounded;
     }
 
     /// <summary>
@@ -126,6 +136,7 @@ public class CockroachMovement : MonoBehaviour
         if (physicsMovementUntilGrounded)
         {
             physicsMovementActive = true;
+            physicsMovementElapsed = 0f;
         }
 
         // Reduce only the vertical component of the supplied impulse.
@@ -155,20 +166,20 @@ public class CockroachMovement : MonoBehaviour
     /// Sets horizontal walking speed while preserving vertical physics.
     /// </summary>
     private void ApplyWalkVelocity()
-{
-    Vector2 velocity = body.linearVelocity;
-
-    if (isGrounded)
     {
-        velocity.x = moveDirection * walkSpeed;
-    }
-    else
-    {
-        velocity.x = lockedAirDirection * walkSpeed;
-    }
+        Vector2 velocity = body.linearVelocity;
 
-    body.linearVelocity = velocity;
-}
+        if (isGrounded)
+        {
+            velocity.x = moveDirection * walkSpeed;
+        }
+        else
+        {
+            velocity.x = lockedAirDirection * walkSpeed;
+        }
+
+        body.linearVelocity = velocity;
+    }
 
     private void Jump()
     {
@@ -204,4 +215,3 @@ public class CockroachMovement : MonoBehaviour
             groundCheckRadius);
     }
 }
-
