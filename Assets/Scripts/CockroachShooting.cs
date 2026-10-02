@@ -4,6 +4,7 @@ using UnityEngine;
 /// Step 4: Projectile (firing side).
 /// Hold the left mouse button to charge power, release to fire.
 /// Reads aim direction and origin from CockroachAim.
+/// Step 9: raises OnFired after each shot so the TurnManager knows the turn's shot is done.
 /// </summary>
 [RequireComponent(typeof(CockroachAim))]
 [RequireComponent(typeof(CockroachMovement))]
@@ -35,6 +36,13 @@ public class CockroachShooting : MonoBehaviour
     /// <summary>0 when not charging, 1 when fully charged. For a power bar in step 15.</summary>
     public float ChargeRatio01 { get; private set; }
 
+    /// <summary>
+    /// Raised right after a projectile is fired. The TurnManager listens to this
+    /// to end the turn. An event (instead of the TurnManager checking every frame)
+    /// keeps this script unaware of the turn system.
+    /// </summary>
+    public event System.Action OnFired;
+
     private void Awake()
     {
         aim = GetComponent<CockroachAim>();
@@ -51,7 +59,10 @@ public class CockroachShooting : MonoBehaviour
     {
         if (!movement.isMyTurn)
         {
+            // Also reset the charge, so a turn that ends mid-charge
+            // does not leave a half-full power bar behind.
             isCharging = false;
+            ChargeRatio01 = 0f;
             return;
         }
 
@@ -96,5 +107,8 @@ public class CockroachShooting : MonoBehaviour
         }
 
         shot.GetComponent<Projectile>().Launch(aim.AimDirection, power);
+
+        // Tell anyone listening (the TurnManager) that a shot was fired.
+        OnFired?.Invoke();
     }
 }
