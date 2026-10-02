@@ -24,6 +24,10 @@ public class CockroachShooting : MonoBehaviour
     [Tooltip("How many seconds of holding it takes to go from min to max power.")]
     public float maxChargeTime = 1.5f;
 
+    [Header("Turn System")]
+    [Tooltip("Step 9: whether firing this weapon ends the turn. Leave on for the current weapon. Future weapons (step 13) — a utility item, say — can turn this off so firing them does not end the turn.")]
+    public bool endsTurnOnFire = true;
+
     private CockroachAim aim;
     private CockroachMovement movement;
     private Collider2D ownCollider;

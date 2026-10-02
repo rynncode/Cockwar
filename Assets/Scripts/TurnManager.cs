@@ -7,15 +7,21 @@ using UnityEngine;
 /// so only that one can walk, jump, aim and shoot (CockroachMovement and
 /// CockroachShooting already check isMyTurn).
 ///
-/// A turn ends when:
-///  - the active player fires (after a short delay so the explosion and
-///    knockback can settle), or
+/// A turn ends when any of the following happens:
+///  - the player manually ends it (manualEndTurnKey for now; a real button
+///    arrives in step 15), or
+///  - the active player's Stamina (optional component) runs out, or
+///  - the active player fires a weapon that has endsTurnOnFire = true
+///    (after a short delay so the explosion and knockback can settle), or
 ///  - the turn time limit runs out, or
 ///  - the active player dies.
 ///
 /// Dead players are skipped. When only one player is left alive, turns stop
 /// and a message is logged. Step 14 (Game rules) will replace that message
 /// with a real win screen.
+///
+/// Step 10: also tells the CameraController who to follow at the start of
+/// each turn, instead of a pass-the-device screen.
 /// </summary>
 public class TurnManager : MonoBehaviour
 {
@@ -29,6 +35,14 @@ public class TurnManager : MonoBehaviour
 
     [Tooltip("Seconds to wait after a shot before passing to the next player. Gives the explosion and any knockback time to finish. Increase it if players are still flying when the next turn starts.")]
     public float endTurnDelay = 4f;
+
+    [Header("Manual End Turn")]
+    [Tooltip("Press this key to end the current turn immediately. Stands in for a real End Turn button until step 15 (UI) adds one.")]
+    public KeyCode manualEndTurnKey = KeyCode.Return;
+
+    [Header("Step 10: Camera")]
+    [Tooltip("Drag the Main Camera here (the one with CameraController on it). When set, the camera pans to whoever's turn it is.")]
+    public CameraController cameraController;
 
     // Index into the players list of whoever is playing now. -1 = nobody yet.
     private int currentIndex = -1;
@@ -69,6 +83,13 @@ public class TurnManager : MonoBehaviour
             {
                 shooting.OnFired += HandleShotFired;
             }
+
+            // Stamina is optional — a cockroach without it just has unlimited movement.
+            Stamina stamina = player.GetComponent<Stamina>();
+            if (stamina != null)
+            {
+                stamina.OnStaminaDepleted += HandleStaminaDepleted;
+            }
         }
 
         AdvanceToNextPlayer();
@@ -86,6 +107,12 @@ public class TurnManager : MonoBehaviour
             {
                 shooting.OnFired -= HandleShotFired;
             }
+
+            Stamina stamina = player.GetComponent<Stamina>();
+            if (stamina != null)
+            {
+                stamina.OnStaminaDepleted -= HandleStaminaDepleted;
+            }
         }
     }
 
@@ -99,6 +126,12 @@ public class TurnManager : MonoBehaviour
         {
             // Died before firing: nothing left to wait for.
             if (!IsAlive(current))
+            {
+                EndTurn();
+                return;
+            }
+
+            if (Input.GetKeyDown(manualEndTurnKey))
             {
                 EndTurn();
                 return;
@@ -132,11 +165,31 @@ public class TurnManager : MonoBehaviour
     {
         if (gameOver || shotFired || currentIndex < 0) return;
 
+        CockroachMovement current = players[currentIndex];
+        CockroachShooting shooting = current.GetComponent<CockroachShooting>();
+
+        // Some weapons (step 13) will not end the turn when fired — a utility
+        // item, say. If this one doesn't, leave the turn running as normal.
+        if (shooting != null && !shooting.endsTurnOnFire) return;
+
         shotFired = true;
         endDelayLeft = endTurnDelay;
 
         // Lock the shooter out right away: one shot per turn, no walking while waiting.
-        players[currentIndex].isMyTurn = false;
+        current.isMyTurn = false;
+    }
+
+    /// <summary>
+    /// Called by Stamina.OnStaminaDepleted. Only the active player's stamina
+    /// drains (Stamina checks isMyTurn itself), so this always means the
+    /// current player ran out.
+    /// </summary>
+    private void HandleStaminaDepleted()
+    {
+        if (gameOver || shotFired || currentIndex < 0) return;
+
+        Debug.Log("TurnManager: stamina depleted, ending turn.");
+        EndTurn();
     }
 
     private void EndTurn()
@@ -185,6 +238,17 @@ public class TurnManager : MonoBehaviour
         turnTimeLeft = turnTimeLimit;
 
         players[index].isMyTurn = true;
+
+        Stamina stamina = players[index].GetComponent<Stamina>();
+        if (stamina != null)
+        {
+            stamina.ResetStamina();
+        }
+
+        if (cameraController != null)
+        {
+            cameraController.SetTarget(players[index].transform);
+        }
 
         Debug.Log("TurnManager: it is now " + players[index].name + "'s turn.");
     }
