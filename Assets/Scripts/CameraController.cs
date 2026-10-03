@@ -58,6 +58,10 @@ public class CameraController : MonoBehaviour
     private float targetZoom;
     private float zoomVelocity;
 
+    // A hidden, reused point for holding the camera on a fixed world position
+    // (e.g. an explosion) instead of following a real moving Transform.
+    private Transform staticPointHolder;
+
     // Intro pan: while active, pan and zoom use introSmoothTime so the camera
     // visibly glides instead of snapping (the normal smoothTime can be 0).
     private bool introActive;
@@ -186,6 +190,25 @@ public class CameraController : MonoBehaviour
         {
             recenterVelocity = Vector2.zero;
         }
+    }
+
+    /// <summary>
+    /// Holds the camera on a fixed world position instead of following a
+    /// moving Transform — for example, lingering on an explosion after the
+    /// Transform that caused it (a projectile) has already been destroyed.
+    /// Call SetTarget again later to go back to following something.
+    /// </summary>
+    public void SetTargetPosition(Vector3 worldPosition)
+    {
+        if (staticPointHolder == null)
+        {
+            GameObject holder = new GameObject("CameraStaticPoint (hidden)");
+            holder.hideFlags = HideFlags.HideInHierarchy;
+            staticPointHolder = holder.transform;
+        }
+
+        staticPointHolder.position = worldPosition;
+        SetTarget(staticPointHolder);
     }
 
     /// <summary>The zoom (Orthographic Size) the camera is heading for.</summary>

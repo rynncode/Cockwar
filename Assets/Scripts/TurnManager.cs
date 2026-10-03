@@ -12,10 +12,17 @@ using UnityEngine;
 ///  - the player manually ends it (manualEndTurnKey for now; a real button
 ///    arrives in step 15), or
 ///  - the active player's Stamina (optional component) runs out, or
-///  - the active player fires a weapon that has endsTurnOnFire = true
-///    (after a short delay so the explosion and knockback can settle), or
+///  - the active player fires a weapon that has endsTurnOnFire = true, THEN
+///    the fired projectile actually lands (Projectile.OnLanded), THEN a
+///    short endTurnDelay settle period passes so the explosion and knockback
+///    can finish — this no longer guesses a fixed wait time, so a shot that
+///    flies a long way no longer passes the turn before it lands, or
 ///  - the turn time limit runs out, or
 ///  - the active player dies.
+///
+/// While a shot is in flight, the camera follows the projectile. Press
+/// toggleCameraViewKey to switch back and forth between it and the active
+/// player while waiting for it to land.
 ///
 /// Dead players are skipped. When only one player is left alive, turns stop
 /// and a message is logged. Step 14 (Game rules) will replace that message
@@ -44,6 +51,10 @@ public class TurnManager : MonoBehaviour
     [Header("Manual End Turn")]
     [Tooltip("Press this key to end the current turn immediately. Stands in for a real End Turn button until step 15 (UI) adds one.")]
     public KeyCode manualEndTurnKey = KeyCode.Return;
+
+    [Header("Projectile Camera")]
+    [Tooltip("While a shot is in flight, press this key to toggle the camera between the projectile and the active player.")]
+    public KeyCode toggleCameraViewKey = KeyCode.Space;
 
     [Header("Step 10: Camera")]
     [Tooltip("Drag the Main Camera here (the one with CameraController on it). When set, the camera pans to whoever's turn it is.")]
@@ -86,6 +97,17 @@ public class TurnManager : MonoBehaviour
     // True once the active player has fired this turn.
     private bool shotFired;
 
+    // True from the moment of firing until Projectile.OnLanded confirms impact.
+    // Replaces an old fixed-delay guess that could end the turn before a
+    // long-distance shot had actually landed.
+    private bool waitingForImpact;
+
+    // The projectile currently in flight, if any. Used for the camera toggle.
+    private Projectile activeProjectile;
+
+    // True while the camera is on the projectile instead of the active player.
+    private bool followingProjectile;
+
     private float turnTimeLeft;
     private float endDelayLeft;
     private bool gameOver;
@@ -118,6 +140,7 @@ public class TurnManager : MonoBehaviour
             if (shooting != null)
             {
                 shooting.OnFired += HandleShotFired;
+                shooting.OnProjectileLaunched += HandleProjectileLaunched;
             }
 
             // Stamina is optional — a cockroach without it just has unlimited movement.
@@ -212,6 +235,7 @@ public class TurnManager : MonoBehaviour
             if (shooting != null)
             {
                 shooting.OnFired -= HandleShotFired;
+                shooting.OnProjectileLaunched -= HandleProjectileLaunched;
             }
 
             Stamina stamina = player.GetComponent<Stamina>();
@@ -219,6 +243,14 @@ public class TurnManager : MonoBehaviour
             {
                 stamina.OnStaminaDepleted -= HandleStaminaDepleted;
             }
+        }
+
+        // In case a turn ends mid-flight (e.g. this object is destroyed while a
+        // shot is in the air), make sure we don't leave a dangling subscription
+        // on a projectile that may outlive us briefly.
+        if (activeProjectile != null)
+        {
+            activeProjectile.OnLanded -= HandleProjectileLanded;
         }
     }
 
@@ -251,15 +283,34 @@ public class TurnManager : MonoBehaviour
                     EndTurn();
                 }
             }
+
+            return;
         }
-        else
+
+        if (waitingForImpact)
         {
-            // Shot already fired: wait for the explosion and knockback to settle.
-            endDelayLeft -= Time.deltaTime;
-            if (endDelayLeft <= 0f)
+            // Still in the air. HandleProjectileLanded (via Projectile.OnLanded)
+            // is what moves things forward from here — not a timer — so a long
+            // shot is never cut off before it actually lands.
+            if (activeProjectile != null && Input.GetKeyDown(toggleCameraViewKey))
             {
-                EndTurn();
+                followingProjectile = !followingProjectile;
+
+                if (cameraController != null)
+                {
+                    Transform viewTarget = followingProjectile ? activeProjectile.transform : current.transform;
+                    cameraController.SetTarget(viewTarget);
+                }
             }
+
+            return;
+        }
+
+        // Landed: wait for the explosion and knockback to settle.
+        endDelayLeft -= Time.deltaTime;
+        if (endDelayLeft <= 0f)
+        {
+            EndTurn();
         }
     }
 
@@ -279,10 +330,55 @@ public class TurnManager : MonoBehaviour
         if (shooting != null && !shooting.endsTurnOnFire) return;
 
         shotFired = true;
-        endDelayLeft = endTurnDelay;
+        waitingForImpact = true;
 
         // Lock the shooter out right away: one shot per turn, no walking while waiting.
         current.isMyTurn = false;
+    }
+
+    /// <summary>
+    /// Called by CockroachShooting.OnProjectileLaunched. Starts following the
+    /// projectile with the camera and listens for it to land.
+    /// </summary>
+    private void HandleProjectileLaunched(Projectile projectile)
+    {
+        activeProjectile = projectile;
+        followingProjectile = true;
+        projectile.OnLanded += HandleProjectileLanded;
+
+        if (cameraController != null)
+        {
+            cameraController.SetTarget(projectile.transform);
+        }
+    }
+
+    /// <summary>
+    /// Called by Projectile.OnLanded once the shot actually lands (hit
+    /// something, or its own max lifetime ran out). This is what ends the
+    /// "waiting for impact" phase and starts the normal settle delay — not a
+    /// fixed timer started the moment the shot was fired.
+    ///
+    /// The camera deliberately stays on the impact point rather than
+    /// snapping straight back to the shooter: it holds there for the rest of
+    /// the settle delay, then StartTurn naturally pans to whoever plays next
+    /// once the turn actually passes.
+    /// </summary>
+    private void HandleProjectileLanded(Vector2 landingPosition)
+    {
+        if (activeProjectile != null)
+        {
+            activeProjectile.OnLanded -= HandleProjectileLanded;
+        }
+
+        activeProjectile = null;
+        followingProjectile = false;
+        waitingForImpact = false;
+        endDelayLeft = endTurnDelay;
+
+        if (cameraController != null)
+        {
+            cameraController.SetTargetPosition(landingPosition);
+        }
     }
 
     /// <summary>
@@ -342,6 +438,17 @@ public class TurnManager : MonoBehaviour
         currentIndex = index;
         shotFired = false;
         turnTimeLeft = turnTimeLimit;
+
+        // Defensive cleanup: a fresh turn should never start still watching an
+        // old projectile. In the normal flow HandleProjectileLanded already
+        // cleared these, but this guards against any stuck edge case.
+        if (activeProjectile != null)
+        {
+            activeProjectile.OnLanded -= HandleProjectileLanded;
+            activeProjectile = null;
+        }
+        waitingForImpact = false;
+        followingProjectile = false;
 
         players[index].isMyTurn = true;
 

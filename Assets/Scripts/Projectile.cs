@@ -15,8 +15,18 @@ public class Projectile : MonoBehaviour
     [Tooltip("Explosion prefab to spawn at the impact point. Leave empty to just disappear silently, like before step 5.")]
     public GameObject explosionPrefab;
 
+    /// <summary>
+    /// Fires exactly once, right before this projectile is destroyed —
+    /// whether that's from hitting something or from maxLifetime running out.
+    /// Carries the landing position, since the projectile itself (and its
+    /// Transform) is gone by the time anything can react to this.
+    /// TurnManager listens to this to know when a shot has actually landed.
+    /// </summary>
+    public event System.Action<Vector2> OnLanded;
+
     private Rigidbody2D body;
     private bool hasHit;
+    private bool hasNotifiedLanded;
 
     private void Awake()
     {
@@ -26,6 +36,18 @@ public class Projectile : MonoBehaviour
     private void Start()
     {
         Destroy(gameObject, maxLifetime);
+    }
+
+    /// <summary>
+    /// OnDestroy is the one place that always runs no matter which path
+    /// destroyed this object (a collision, or the maxLifetime timeout), so
+    /// this is the single, reliable spot to raise OnLanded exactly once.
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (hasNotifiedLanded) return;
+        hasNotifiedLanded = true;
+        OnLanded?.Invoke(transform.position);
     }
 
     /// <summary>

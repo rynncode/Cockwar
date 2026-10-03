@@ -47,6 +47,12 @@ public class CockroachShooting : MonoBehaviour
     /// </summary>
     public event System.Action OnFired;
 
+    /// <summary>
+    /// Raised right after a projectile is launched, carrying the projectile
+    /// itself. TurnManager uses this to have the camera follow it in flight.
+    /// </summary>
+    public event System.Action<Projectile> OnProjectileLaunched;
+
     private void Awake()
     {
         aim = GetComponent<CockroachAim>();
@@ -110,9 +116,12 @@ public class CockroachShooting : MonoBehaviour
             Physics2D.IgnoreCollision(shotCollider, ownCollider, true);
         }
 
-        shot.GetComponent<Projectile>().Launch(aim.AimDirection, power);
+        Projectile projectile = shot.GetComponent<Projectile>();
+        projectile.Launch(aim.AimDirection, power);
 
-        // Tell anyone listening (the TurnManager) that a shot was fired.
+        // Tell anyone listening (the TurnManager) that a shot was fired,
+        // and which projectile it was, so the camera can follow it.
         OnFired?.Invoke();
+        OnProjectileLaunched?.Invoke(projectile);
     }
 }
