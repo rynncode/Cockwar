@@ -170,6 +170,8 @@ GameObject:
   - component: {fileID: 96414074}
   - component: {fileID: 96414075}
   - component: {fileID: 96414076}
+  - component: {fileID: 96414077}
+  - component: {fileID: 96414078}
   m_Layer: 0
   m_Name: Cockroach
   m_TagString: Player
@@ -266,7 +268,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachMovement
   walkSpeed: 20
-  jumpForce: 15
+  jumpKey: 32
+  minJumpPower: 20
+  maxJumpPower: 45
+  maxChargeTime: 1
+  steerWhileRising: 1
+  steerWhileFalling: 1
+  stopInAirWhenNoInput: 1
+  airAcceleration: 40
+  coyoteTime: 0.1
+  jumpBufferTime: 0.3
+  fallGravityMultiplier: 3
+  apexThreshold: 3
+  apexGravityMultiplier: 0.5
+  cornerSlipWidth: 0.15
+  cornerNudgeAmount: 0.1
+  cornerCheckDistance: 0.5
+  maxClimbAngle: 65
   groundCheckPoint: {fileID: 19818752}
   groundCheckRadius: 0.05
   groundLayer:
@@ -444,8 +462,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2032f37612c338a4ca8257dc2de203fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Stamina
-  maxStamina: 20
+  maxStamina: 100
   drainPerSecond: 2
+  minJumpCost: 1
+  maxJumpCost: 5
+--- !u!114 &96414077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96414064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e6330a472c21240b8d22af7457d69d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JumpPowerBar
+  barWidth: 5
+  barHeight: 0.7
+  borderThickness: 0.15
+  heightAboveHead: 1.5
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.7}
+  lowPowerColor: {r: 0, g: 1, b: 0, a: 1}
+  highPowerColor: {r: 1, g: 0, b: 0, a: 1}
+  sortingOrder: 100
+--- !u!114 &96414078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96414064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbf246d6d77f97498f9309c4ff274ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLabel
+  playerNumber: 1
+  showAtTurnStart: 1
+  holdTime: 3
+  fadeTime: 1
+  pixelSize: 0.6
+  gapAboveHead: 1
+  sortingOrder: 100
 --- !u!1 &427621460
 GameObject:
   m_ObjectHideFlags: 0
@@ -896,7 +955,7 @@ MonoBehaviour:
   positionffset: {x: 0, y: 0, z: -200}
   zoomSpeed: 10
   minZoom: 20
-  maxZoom: 200
+  maxZoom: 100
   zoomSmoothTime: 0.15
 --- !u!1 &619394800
 GameObject:
@@ -1037,6 +1096,8 @@ GameObject:
   - component: {fileID: 777903159}
   - component: {fileID: 777903158}
   - component: {fileID: 777903169}
+  - component: {fileID: 777903170}
+  - component: {fileID: 777903171}
   m_Layer: 0
   m_Name: Cockroach (P2)
   m_TagString: Player
@@ -1149,7 +1210,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachMovement
   walkSpeed: 20
-  jumpForce: 15
+  jumpKey: 32
+  minJumpPower: 20
+  maxJumpPower: 45
+  maxChargeTime: 1
+  steerWhileRising: 1
+  steerWhileFalling: 1
+  stopInAirWhenNoInput: 1
+  airAcceleration: 40
+  coyoteTime: 0.1
+  jumpBufferTime: 0.3
+  fallGravityMultiplier: 3
+  apexThreshold: 3
+  apexGravityMultiplier: 0.5
+  cornerSlipWidth: 0.15
+  cornerNudgeAmount: 0.1
+  cornerCheckDistance: 0.5
+  maxClimbAngle: 65
   groundCheckPoint: {fileID: 1167402276}
   groundCheckRadius: 0.05
   groundLayer:
@@ -1311,8 +1388,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2032f37612c338a4ca8257dc2de203fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Stamina
-  maxStamina: 20
+  maxStamina: 100
   drainPerSecond: 2
+  minJumpCost: 1
+  maxJumpCost: 5
+--- !u!114 &777903170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777903157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e6330a472c21240b8d22af7457d69d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JumpPowerBar
+  barWidth: 5
+  barHeight: 0.7
+  borderThickness: 0.15
+  heightAboveHead: 1.5
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.7}
+  lowPowerColor: {r: 0, g: 1, b: 0, a: 1}
+  highPowerColor: {r: 1, g: 0, b: 0, a: 1}
+  sortingOrder: 100
+--- !u!114 &777903171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777903157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbf246d6d77f97498f9309c4ff274ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLabel
+  playerNumber: 2
+  showAtTurnStart: 1
+  holdTime: 0.6
+  fadeTime: 3
+  pixelSize: 0.6
+  gapAboveHead: 1
+  sortingOrder: 100
 --- !u!1 &780781122
 GameObject:
   m_ObjectHideFlags: 0
@@ -1349,6 +1467,12 @@ MonoBehaviour:
   endTurnDelay: 3
   manualEndTurnKey: 13
   cameraController: {fileID: 519420033}
+  playIntro: 1
+  introStartDelay: 0.5
+  introFocusTime: 2.2
+  introZoom: 30
+  introSmoothTime: 0.8
+  skipIntroKey: 9
 --- !u!4 &780781124
 Transform:
   m_ObjectHideFlags: 0

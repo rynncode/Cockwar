@@ -27,6 +27,11 @@ public class CameraController : MonoBehaviour
     private float targetZoom;
     private float zoomVelocity;
 
+    // Intro pan: while active, pan and zoom use introSmoothTime so the camera
+    // visibly glides instead of snapping (the normal smoothTime can be 0).
+    private bool introActive;
+    private float introSmoothTime;
+
     private void Awake()
     {
         // Fallback only, in case nothing has called SetTarget yet
@@ -65,13 +70,15 @@ public class CameraController : MonoBehaviour
     {
         if (cam != null)
         {
-            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetZoom, ref zoomVelocity, zoomSmoothTime);
+            float zoomSmooth = introActive ? introSmoothTime : zoomSmoothTime;
+            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetZoom, ref zoomVelocity, zoomSmooth);
         }
 
         if (target == null) return;
 
         Vector3 targetPosition = target.position + positionffset;
-        transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
+        float panSmooth = introActive ? introSmoothTime : smoothTime;
+        transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, panSmooth);
     }
 
     /// <summary>
@@ -83,6 +90,31 @@ public class CameraController : MonoBehaviour
     {
         target = newTarget;
     }
+
+    /// <summary>The zoom (Orthographic Size) the camera is heading for.</summary>
+    public float TargetZoom => targetZoom;
+
+    /// <summary>
+    /// Sets the zoom the camera eases toward. Kept inside minZoom / maxZoom.
+    /// </summary>
+    public void SetZoom(float size)
+    {
+        targetZoom = Mathf.Clamp(size, minZoom, maxZoom);
+    }
+
+    /// <summary>
+    /// Start of the game intro: pan and zoom glide with the given smooth time
+    /// (bigger = slower and smoother) until EndIntro is called.
+    /// </summary>
+    public void BeginIntro(float smoothTime)
+    {
+        introActive = true;
+        introSmoothTime = Mathf.Max(0.01f, smoothTime);
+    }
+
+    /// <summary>Back to the normal camera smoothing.</summary>
+    public void EndIntro()
+    {
+        introActive = false;
+    }
 }
-
-
