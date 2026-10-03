@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Step 9: Turn system (stamina).
 /// Optional: only cockroaches that have this component are limited by stamina.
-/// Drains while walking during your own turn. TurnManager refills it at the
+/// Drains while walking and when jumping (bigger jump = bigger cost) during your own turn. TurnManager refills it at the
 /// start of each turn and listens for OnStaminaDepleted to end the turn early.
 /// </summary>
 [RequireComponent(typeof(CockroachMovement))]
@@ -15,6 +15,12 @@ public class Stamina : MonoBehaviour
 
     [Tooltip("Stamina drained per second while walking.")]
     public float drainPerSecond = 2f;
+
+    [Tooltip("Stamina cost of the SMALLEST jump (a quick tap).")]
+    public float minJumpCost = 1f;
+
+    [Tooltip("Stamina cost of the BIGGEST jump (fully charged). Cost scales between min and max with jump power.")]
+    public float maxJumpCost = 5f;
 
     private CockroachMovement movement;
     private float currentStamina;
@@ -45,19 +51,39 @@ public class Stamina : MonoBehaviour
 
         if (movement.WalkAmount > 0f)
         {
-            currentStamina = Mathf.Max(0f, currentStamina - drainPerSecond * Time.deltaTime);
+            DrainStamina(drainPerSecond * Time.deltaTime);
 
             if (Time.time >= nextStaminaLogTime)
             {
                 Debug.Log(gameObject.name + " stamina: " + currentStamina);
                 nextStaminaLogTime = Time.time + 1f;
             }
+        }
+    }
 
-            if (currentStamina <= 0f && !hasFiredDepletedEvent)
-            {
-                hasFiredDepletedEvent = true;
-                OnStaminaDepleted?.Invoke();
-            }
+    /// <summary>
+    /// Charges stamina for a jump. charge01 is the jump power from 0 (min) to 1 (max),
+    /// so a stronger jump costs more. Called by CockroachMovement when the jump fires.
+    /// </summary>
+    public void SpendForJump(float charge01)
+    {
+        float cost = Mathf.Lerp(minJumpCost, maxJumpCost, Mathf.Clamp01(charge01));
+        DrainStamina(cost);
+        Debug.Log(gameObject.name + " jumped, cost " + cost + ", stamina left: " + currentStamina);
+    }
+
+    /// <summary>
+    /// Removes stamina (never below 0) and fires OnStaminaDepleted once when it hits 0.
+    /// Shared by walking and jumping so both end the turn the same way.
+    /// </summary>
+    private void DrainStamina(float amount)
+    {
+        currentStamina = Mathf.Max(0f, currentStamina - amount);
+
+        if (currentStamina <= 0f && !hasFiredDepletedEvent)
+        {
+            hasFiredDepletedEvent = true;
+            OnStaminaDepleted?.Invoke();
         }
     }
 

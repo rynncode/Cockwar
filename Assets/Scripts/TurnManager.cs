@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,6 +23,10 @@ using UnityEngine;
 ///
 /// Step 10: also tells the CameraController who to follow at the start of
 /// each turn, instead of a pass-the-device screen.
+///
+/// Game intro: before the first turn, the camera zooms in and pans to each
+/// player in turn order (showing their P1 / P2 label), then zooms back out and
+/// the first player's turn begins.
 /// </summary>
 public class TurnManager : MonoBehaviour
 {
@@ -43,6 +48,33 @@ public class TurnManager : MonoBehaviour
     [Header("Step 10: Camera")]
     [Tooltip("Drag the Main Camera here (the one with CameraController on it). When set, the camera pans to whoever's turn it is.")]
     public CameraController cameraController;
+
+    [Header("Game Intro")]
+    [Tooltip("When on, the camera visits each player before the first turn. Needs the Camera Controller above.")]
+    public bool playIntro = true;
+
+    [Tooltip("Seconds to wait before the intro starts (lets a scene fade-in finish first).")]
+    public float introStartDelay = 0.5f;
+
+    [Tooltip("Seconds the camera spends on each player (travel time plus time to look at them).")]
+    public float introFocusTime = 2.2f;
+
+    [Tooltip("Zoom during the intro (Orthographic Size). Smaller = closer. Kept inside the camera's min / max zoom.")]
+    public float introZoom = 30f;
+
+    [Tooltip("How smooth the intro pan and zoom are. Bigger = slower, softer movement.")]
+    public float introSmoothTime = 0.8f;
+
+    [Tooltip("Press this key to skip the intro and start playing straight away.")]
+    public KeyCode skipIntroKey = KeyCode.Tab;
+
+    // Seconds into each player's focus before their label appears (camera has mostly arrived).
+    private const float IntroLabelDelay = 0.5f;
+
+    // Seconds spent zooming back out before the first turn starts.
+    private const float IntroZoomOutTime = 1.2f;
+
+    private bool introSkipped;
 
     // Index into the players list of whoever is playing now. -1 = nobody yet.
     private int currentIndex = -1;
@@ -92,7 +124,77 @@ public class TurnManager : MonoBehaviour
             }
         }
 
+        if (playIntro && cameraController != null)
+        {
+            StartCoroutine(PlayIntro());
+        }
+        else
+        {
+            AdvanceToNextPlayer();
+        }
+    }
+
+    /// <summary>
+    /// Camera visits every living player in turn order, then the first turn starts.
+    /// Nobody can act during this: isMyTurn is false for everyone, and the turn
+    /// logic in Update does nothing until a turn has started.
+    /// </summary>
+    private IEnumerator PlayIntro()
+    {
+        float originalZoom = cameraController.TargetZoom;
+        introSkipped = false;
+
+        cameraController.BeginIntro(introSmoothTime);
+
+        yield return StartCoroutine(WaitUnlessSkipped(introStartDelay));
+
+        if (!introSkipped)
+        {
+            cameraController.SetZoom(introZoom);
+
+            foreach (CockroachMovement player in players)
+            {
+                if (introSkipped) break;
+                if (!IsAlive(player)) continue;
+
+                cameraController.SetTarget(player.transform);
+
+                // Wait for the camera to get most of the way there, then show the label.
+                yield return StartCoroutine(WaitUnlessSkipped(IntroLabelDelay));
+                if (introSkipped) break;
+
+                PlayerLabel label = player.GetComponent<PlayerLabel>();
+                if (label != null) label.ShowLabel();
+
+                yield return StartCoroutine(WaitUnlessSkipped(Mathf.Max(0f, introFocusTime - IntroLabelDelay)));
+            }
+        }
+
+        // Zoom back out to where the player had it. Skipping goes straight on.
+        cameraController.SetZoom(originalZoom);
+
+        if (!introSkipped)
+        {
+            yield return StartCoroutine(WaitUnlessSkipped(IntroZoomOutTime));
+        }
+
+        cameraController.EndIntro();
+
+        // Player 1 (the first living player in the list) starts.
         AdvanceToNextPlayer();
+    }
+
+    /// <summary>Waits the given seconds, but stops early if the skip key is pressed.</summary>
+    private IEnumerator WaitUnlessSkipped(float seconds)
+    {
+        float elapsed = 0f;
+        while (elapsed < seconds && !introSkipped)
+        {
+            if (Input.GetKeyDown(skipIntroKey)) introSkipped = true;
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
     }
 
     private void OnDestroy()
