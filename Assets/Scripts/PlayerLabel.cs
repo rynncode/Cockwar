@@ -9,6 +9,7 @@ using UnityEngine;
 /// The pixel text is generated in code, so no image assets are needed.
 /// Add this component to each cockroach next to CockroachMovement.
 /// </summary>
+[DefaultExecutionOrder(13)] // runs after the bars, so it can sit on top of whichever are showing
 [RequireComponent(typeof(CockroachMovement))]
 public class PlayerLabel : MonoBehaviour
 {
@@ -27,12 +28,9 @@ public class PlayerLabel : MonoBehaviour
     [Tooltip("Seconds the fade-out takes.")]
     public float fadeTime = 1f;
 
-    [Header("Size and position (world units)")]
+    [Header("Size (world units)")]
     [Tooltip("Size of ONE pixel of the label. The label is 9 x 7 pixels, so 0.6 gives about 5.4 x 4.2 units.")]
     public float pixelSize = 0.6f;
-
-    [Tooltip("Gap between the top of the cockroach's head and the bottom of the label.")]
-    public float gapAboveHead = 1f;
 
     [Header("Drawing")]
     [Tooltip("The label is drawn on the cockroach's own sorting layer, this many steps ABOVE the cockroach sprite.")]
@@ -40,7 +38,7 @@ public class PlayerLabel : MonoBehaviour
 
     // Filled in automatically.
     private CockroachMovement movement;
-    private Collider2D bodyCollider;
+    private OverheadStack stack;
 
     private GameObject labelObject;
     private SpriteRenderer labelRenderer;
@@ -71,7 +69,7 @@ public class PlayerLabel : MonoBehaviour
     private void Awake()
     {
         movement = GetComponent<CockroachMovement>();
-        bodyCollider = GetComponent<Collider2D>();
+        stack = OverheadStack.For(gameObject);
 
         if (playerNumber <= 0)
             playerNumber = DetectPlayerNumber();
@@ -224,7 +222,10 @@ public class PlayerLabel : MonoBehaviour
         wasMyTurn = isMyTurn;
 
         if (!showing)
+        {
+            stack.Report(OverheadStack.SlotLabel, false, 0f);
             return;
+        }
 
         showElapsed += Time.deltaTime;
 
@@ -237,15 +238,20 @@ public class PlayerLabel : MonoBehaviour
         {
             showing = false;
             labelObject.SetActive(false);
+            stack.Report(OverheadStack.SlotLabel, false, 0f);
             return;
         }
 
         SetAlpha(alpha);
 
-        // Float above the top of the cockroach's collider.
-        float topY = bodyCollider != null ? bodyCollider.bounds.max.y : transform.position.y;
-        float centerX = bodyCollider != null ? bodyCollider.bounds.center.x : transform.position.x;
-        labelObject.transform.position = new Vector3(centerX, topY + gapAboveHead, 0f);
+        // Sit on top of whichever bars (health, stamina, jump power) are showing below.
+        float labelHeight = labelTexture.height * pixelSize;
+        stack.Report(OverheadStack.SlotLabel, true, labelHeight);
+
+        labelObject.transform.position = new Vector3(
+            stack.CenterX,
+            stack.GetBottomY(OverheadStack.SlotLabel),
+            0f);
     }
 
     private void SetAlpha(float alpha)
@@ -259,6 +265,9 @@ public class PlayerLabel : MonoBehaviour
             labelObject.SetActive(false);
 
         showing = false;
+
+        if (stack != null)
+            stack.Report(OverheadStack.SlotLabel, false, 0f);
     }
 
     private void OnDestroy()
