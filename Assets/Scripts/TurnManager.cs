@@ -49,6 +49,10 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Drag the Main Camera here (the one with CameraController on it). When set, the camera pans to whoever's turn it is.")]
     public CameraController cameraController;
 
+    [Header("Opponent Indicator")]
+    [Tooltip("Points at the opponent when they're off-screen. 1v1 only for now — leave empty if you haven't added one yet.")]
+    public OffscreenIndicator opponentIndicator;
+
     [Header("Game Intro")]
     [Tooltip("When on, the camera visits each player before the first turn. Needs the Camera Controller above.")]
     public bool playIntro = true;
@@ -352,6 +356,12 @@ public class TurnManager : MonoBehaviour
             cameraController.SetTarget(players[index].transform);
         }
 
+        // 1v1 only for now: the "opponent" is just the other player in the list.
+        if (opponentIndicator != null && players.Count == 2)
+        {
+            CockroachMovement opponent = players[(index + 1) % players.Count];
+            opponentIndicator.SetTarget(opponent.transform, players[index].transform);
+        }
         Debug.Log("TurnManager: it is now " + players[index].name + "'s turn.");
     }
 

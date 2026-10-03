@@ -96,7 +96,7 @@ public class PlayerLabel : MonoBehaviour
         return 1;
     }
 
-    private static Color GetPlayerColor(int number)
+    public static Color GetPlayerColor(int number)
     {
         switch (number)
         {
