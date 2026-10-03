@@ -29,6 +29,10 @@ public class Explosion : MonoBehaviour
     [Tooltip("How long the explosion sprite animation plays before this object destroys itself. Match this to your animation clip's length.")]
     public float effectDuration = 0.6f;
 
+    [Header("Terrain")]
+    [Tooltip("Step 12: radius of the crater carved into the ground. Leave at 0 to just reuse Blast Radius.")]
+    public float craterRadius = 0f;
+
     /// <summary>
     /// Everything the blast found, filled in once at spawn time.
     /// Damage (step 6) and knockback (step 7) will read this list.
@@ -38,7 +42,21 @@ public class Explosion : MonoBehaviour
     private void Awake()
     {
         DetectHits();
+        CarveTerrain();
         Destroy(gameObject, effectDuration);
+    }
+
+    /// <summary>
+    /// Step 12: erases a circle of ground where the explosion happened.
+    /// Does nothing if there is no TerrainGenerator in the scene, so this is
+    /// safe to leave on even while testing without terrain.
+    /// </summary>
+    private void CarveTerrain()
+    {
+        if (TerrainGenerator.Instance == null) return;
+
+        float radius = craterRadius > 0f ? craterRadius : blastRadius;
+        TerrainGenerator.Instance.CarveCircle(transform.position, radius);
     }
 
     private void DetectHits()
