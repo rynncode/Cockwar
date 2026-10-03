@@ -3,6 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// Step 11: Procedural terrain (Worms W.M.D. style).
+/// Step 12: Destructible terrain — see CarveCircle near the bottom.
 ///
 /// The ground is stored as a grid of solid/empty pixels (the "solid" array),
 /// NOT as a height per column. That is what allows overhangs and arches now,
@@ -22,6 +23,17 @@ using UnityEngine;
 ///  6. A PolygonCollider2D is built from a hidden "mask" sprite of just the solid
 ///     pixels, so decorations like grass blades never affect collisions.
 ///  7. Every cockroach in the TurnManager's list is placed on flat open ground.
+///
+/// How a crater is carved (step 12):
+///  1. CarveCircle flips solid pixels to false inside a circle. Only removes
+///     ground, never adds it back.
+///  2. Only the columns the circle actually touched are repainted (not the
+///     whole map), using the same tile-picking logic as the full build, kept
+///     around as cached fields so it does not need to re-read your tiles.
+///  3. The hidden mask sprite is recreated from the updated pixels — Unity
+///     bakes a sprite's physics outline in at creation time, so just
+///     re-applying texture pixels does NOT update the collider by itself.
+///  4. The PolygonCollider2D is rebuilt from that new mask sprite.
 ///
 /// Keep this object's Scale at (1,1,1) and Rotation at 0. The collider and
 /// the spawn maths both assume that.
@@ -161,12 +173,18 @@ public class TerrainGenerator : MonoBehaviour
     [Tooltip("Shuffle which player gets which part of the map (otherwise player 1 is always on the far left).")]
     public bool randomizeSpawnOrder = true;
 
+    /// <summary>
+    /// Step 12: lets Explosion (and anything else) find the one terrain in the
+    /// scene without an expensive search. Set automatically in Awake.
+    /// </summary>
+    public static TerrainGenerator Instance { get; private set; }
+
     // --- Generated data ---
     private int widthPx;
     private int heightPx;
 
     // One entry per pixel: true = solid ground. Index = y * widthPx + x.
-    // Step 12 (destructible terrain) will flip entries to false and repaint.
+    // CarveCircle flips entries to false and triggers a repaint.
     private bool[] solid;
 
     private System.Random rng;
@@ -187,8 +205,30 @@ public class TerrainGenerator : MonoBehaviour
     private int tileW;
     private int tileH;
 
+    // --- Step 12: cached paint buffers and settings ---
+    // Kept after a full generation so CarveCircle can repaint just the
+    // columns that changed, instead of redoing the whole map and re-reading
+    // every tile from disk again.
+    private Color32[] pixels;
+    private Color32[] maskPixels;
+
+    private List<Color32[]> grassData = new List<Color32[]>();
+    private List<Color32[]> dirtData = new List<Color32[]>();
+    private List<Color32[]> rareData = new List<Color32[]>();
+    private bool useGrassArt;
+    private bool useDirtArt;
+    private int paintScale;
+    private int artGrassRows;
+    private int artTipRows;
+    private int grassPxFallback;
+    private Color32 clearPixel;
+    private Color32 maskClearPixel;
+    private Color32 maskSolidPixel;
+
     private void Awake()
     {
+        Instance = this;
+
         GenerateTerrain();
         PlacePlayers();
     }
@@ -459,170 +499,27 @@ public class TerrainGenerator : MonoBehaviour
     /// Paints the solid grid into two textures:
     ///  - the visible one (your art, or plain colours where no art is assigned), and
     ///  - a hidden black/white mask used only to build the collider.
+    /// This is the FULL build, used after generating a new map. CarveCircle
+    /// uses RepaintColumns instead, which reuses the cached data this sets up.
     /// </summary>
     private void BuildTextureAndSprite()
     {
-        Color32[] pixels = new Color32[widthPx * heightPx];
-        Color32[] maskPixels = new Color32[widthPx * heightPx];
+        pixels = new Color32[widthPx * heightPx];
+        maskPixels = new Color32[widthPx * heightPx];
 
-        // Read all of the user's tiles once. Tiles that can't be read are skipped.
-        tileW = 0;
-        tileH = 0;
-        List<Color32[]> grassData = new List<Color32[]>();
-        List<Color32[]> dirtData = new List<Color32[]>();
-        List<Color32[]> rareData = new List<Color32[]>();
-
-        LoadTiles(grassTiles, grassData);
-        LoadTiles(dirtTiles, dirtData);
-        LoadTiles(rareDirtTiles, rareData);
-
-        // Tiles need at least 2 rows to be split into "grass part" and "dirt part".
-        if (tileH < 2)
-        {
-            grassData.Clear();
-            dirtData.Clear();
-            rareData.Clear();
-        }
-
-        bool useGrassArt = grassData.Count > 0;
-        bool useDirtArt = dirtData.Count > 0;
-        int scale = Mathf.Max(1, terrainPixelsPerArtPixel);
-
-        // How a grass tile is split: top rows = grass part (below that the dirt tiles take over).
-        int artGrassRows = 0;
-        int artTipRows = 0;
-        if (useGrassArt)
-        {
-            artGrassRows = Mathf.Clamp(grassRows, 1, tileH - 1);
-            artTipRows = Mathf.Clamp(grassTipRows, 0, artGrassRows);
-        }
-
-        // Empty pixels use the dirt colour with alpha 0, so smoothed edges
-        // do not get a dark or white fringe.
-        Color clearColor = dirtColorDark;
-        clearColor.a = 0f;
-        Color32 clear = clearColor;
-
-        Color32 maskClear = new Color32(255, 255, 255, 0);
-        Color32 maskSolid = new Color32(255, 255, 255, 255);
-
-        // Only used when there are no grass tiles.
-        int grassPx = grassThickness <= 0f ? 0 : Mathf.Max(1, Mathf.RoundToInt(grassThickness * pixelsPerUnit));
+        PreparePaintData();
 
         for (int x = 0; x < widthPx; x++)
         {
-            // Position in "art pixels", and which tile-wide cell this column is in.
-            int artPixelX = x / scale;
-            int artX = tileW > 0 ? artPixelX % tileW : 0;
-            int cellX = tileW > 0 ? artPixelX / tileW : 0;
-
-            // One grass variant per cell, so a stretch of surface looks like one tile.
-            Color32[] grassTile = useGrassArt ? grassData[PickIndex(cellX, 0, grassData.Count, 1)] : null;
-
-            // Counts solid pixels going down a column since we last saw empty air.
-            // 0 = the very top pixel of the ground.
-            int depthBelowAir = 0;
-
-            for (int y = heightPx - 1; y >= 0; y--)
-            {
-                int index = y * widthPx + x;
-
-                if (!solid[index])
-                {
-                    depthBelowAir = 0;
-                    pixels[index] = clear;
-                    maskPixels[index] = maskClear;
-                    continue;
-                }
-
-                maskPixels[index] = maskSolid;
-
-                int depthIndex = depthBelowAir;
-                depthBelowAir++;
-
-                // 1) The grass edge along the surface.
-                if (useGrassArt)
-                {
-                    // Tip rows sit above the ground line, so the first solid pixel starts below them.
-                    int grassRow = depthIndex / scale + artTipRows;
-                    if (grassRow < artGrassRows)
-                    {
-                        pixels[index] = SampleArt(grassTile, tileW, tileH, artX, grassRow);
-                        continue;
-                    }
-                }
-                else if (depthIndex < grassPx)
-                {
-                    pixels[index] = grassColor;
-                    continue;
-                }
-
-                // 2) Everything below the grass: dirt.
-                if (useDirtArt)
-                {
-                    // Dirt cells are anchored to the world (not the surface),
-                    // so the pebbles don't shear apart on slopes.
-                    int artPixelY = y / scale;
-                    int cellY = artPixelY / tileH;
-                    int rowFromTop = tileH - 1 - (artPixelY % tileH);
-
-                    Color32[] dirtTile;
-                    if (rareData.Count > 0 && Hash01(cellX, cellY, 2) < rareDirtChance)
-                    {
-                        dirtTile = rareData[PickIndex(cellX, cellY, rareData.Count, 3)];
-                    }
-                    else
-                    {
-                        dirtTile = dirtData[PickIndex(cellX, cellY, dirtData.Count, 4)];
-                    }
-
-                    pixels[index] = SampleArt(dirtTile, tileW, tileH, artX, rowFromTop);
-                }
-                else
-                {
-                    // Cheap speckle so the fallback dirt is not one flat colour.
-                    float t = Mathf.PerlinNoise(x * 0.04f + dirtOffsetX, y * 0.04f + dirtOffsetY);
-                    pixels[index] = Color.Lerp(dirtColorDark, dirtColorLight, t);
-                }
-            }
+            PaintColumn(x);
         }
 
-        // Second pass: draw the grass blade tips in the empty pixels directly ABOVE the ground.
-        // They only go into the visible texture, never the mask, so they have no collision.
-        if (useGrassArt && artTipRows > 0)
+        // Second pass: grass blade tips, drawn in the empty pixels directly
+        // above the ground. Needs every column's ground already painted first,
+        // which the loop above just did.
+        for (int x = 0; x < widthPx; x++)
         {
-            int tipPx = artTipRows * scale;
-
-            for (int x = 0; x < widthPx; x++)
-            {
-                int artPixelX = x / scale;
-                int artX = artPixelX % tileW;
-                int cellX = artPixelX / tileW;
-                Color32[] grassTile = grassData[PickIndex(cellX, 0, grassData.Count, 1)];
-
-                for (int y = 0; y < heightPx; y++)
-                {
-                    int index = y * widthPx + x;
-                    if (!solid[index]) continue;
-
-                    // Only the top pixel of each stretch of ground (air directly above) gets tips.
-                    bool airAbove = (y == heightPx - 1) || !solid[index + widthPx];
-                    if (!airAbove) continue;
-
-                    for (int h = 1; h <= tipPx; h++)
-                    {
-                        int ty = y + h;
-                        if (ty >= heightPx) break;
-
-                        int tipIndex = ty * widthPx + x;
-                        if (solid[tipIndex]) break;   // ran into other ground
-
-                        int tipRow = artTipRows - 1 - (h - 1) / scale;
-                        Color32 c = SampleArt(grassTile, tileW, tileH, artX, tipRow);
-                        if (c.a > 0) pixels[tipIndex] = c;
-                    }
-                }
-            }
+            PaintColumnTips(x);
         }
 
         // Throw away last map's textures/sprites (only ones we made ourselves).
@@ -654,6 +551,265 @@ public class TerrainGenerator : MonoBehaviour
         maskTexture.Apply();
 
         maskSprite = Sprite.Create(maskTexture, fullRect, new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.Tight, Vector4.zero, true);
+    }
+
+    /// <summary>
+    /// Reads every assigned tile once and works out how to paint with them
+    /// (which rows are grass, which are dirt, and so on). Cached into fields
+    /// so CarveCircle can repaint columns later without doing this again.
+    /// </summary>
+    private void PreparePaintData()
+    {
+        tileW = 0;
+        tileH = 0;
+        grassData.Clear();
+        dirtData.Clear();
+        rareData.Clear();
+
+        LoadTiles(grassTiles, grassData);
+        LoadTiles(dirtTiles, dirtData);
+        LoadTiles(rareDirtTiles, rareData);
+
+        // Tiles need at least 2 rows to be split into "grass part" and "dirt part".
+        if (tileH < 2)
+        {
+            grassData.Clear();
+            dirtData.Clear();
+            rareData.Clear();
+        }
+
+        useGrassArt = grassData.Count > 0;
+        useDirtArt = dirtData.Count > 0;
+        paintScale = Mathf.Max(1, terrainPixelsPerArtPixel);
+
+        // How a grass tile is split: top rows = grass part (below that the dirt tiles take over).
+        artGrassRows = 0;
+        artTipRows = 0;
+        if (useGrassArt)
+        {
+            artGrassRows = Mathf.Clamp(grassRows, 1, tileH - 1);
+            artTipRows = Mathf.Clamp(grassTipRows, 0, artGrassRows);
+        }
+
+        // Empty pixels use the dirt colour with alpha 0, so smoothed edges
+        // do not get a dark or white fringe.
+        Color clearColor = dirtColorDark;
+        clearColor.a = 0f;
+        clearPixel = clearColor;
+
+        maskClearPixel = new Color32(255, 255, 255, 0);
+        maskSolidPixel = new Color32(255, 255, 255, 255);
+
+        // Only used when there are no grass tiles.
+        grassPxFallback = grassThickness <= 0f ? 0 : Mathf.Max(1, Mathf.RoundToInt(grassThickness * pixelsPerUnit));
+    }
+
+    /// <summary>
+    /// Paints one column of the "pixels" and "maskPixels" arrays from the
+    /// current "solid" data: grass along the surface, dirt underneath.
+    /// Self-contained — does not read or depend on neighbouring columns —
+    /// so CarveCircle can safely call this for just the columns it changed.
+    /// </summary>
+    private void PaintColumn(int x)
+    {
+        // Position in "art pixels", and which tile-wide cell this column is in.
+        int artPixelX = x / paintScale;
+        int artX = tileW > 0 ? artPixelX % tileW : 0;
+        int cellX = tileW > 0 ? artPixelX / tileW : 0;
+
+        // One grass variant per cell, so a stretch of surface looks like one tile.
+        Color32[] grassTile = useGrassArt ? grassData[PickIndex(cellX, 0, grassData.Count, 1)] : null;
+
+        // Counts solid pixels going down a column since we last saw empty air.
+        // 0 = the very top pixel of the ground.
+        int depthBelowAir = 0;
+
+        for (int y = heightPx - 1; y >= 0; y--)
+        {
+            int index = y * widthPx + x;
+
+            if (!solid[index])
+            {
+                depthBelowAir = 0;
+                pixels[index] = clearPixel;
+                maskPixels[index] = maskClearPixel;
+                continue;
+            }
+
+            maskPixels[index] = maskSolidPixel;
+
+            int depthIndex = depthBelowAir;
+            depthBelowAir++;
+
+            // 1) The grass edge along the surface.
+            if (useGrassArt)
+            {
+                // Tip rows sit above the ground line, so the first solid pixel starts below them.
+                int grassRow = depthIndex / paintScale + artTipRows;
+                if (grassRow < artGrassRows)
+                {
+                    pixels[index] = SampleArt(grassTile, tileW, tileH, artX, grassRow);
+                    continue;
+                }
+            }
+            else if (depthIndex < grassPxFallback)
+            {
+                pixels[index] = grassColor;
+                continue;
+            }
+
+            // 2) Everything below the grass: dirt.
+            if (useDirtArt)
+            {
+                // Dirt cells are anchored to the world (not the surface),
+                // so the pebbles don't shear apart on slopes.
+                int artPixelY = y / paintScale;
+                int cellY = artPixelY / tileH;
+                int rowFromTop = tileH - 1 - (artPixelY % tileH);
+
+                Color32[] dirtTile;
+                if (rareData.Count > 0 && Hash01(cellX, cellY, 2) < rareDirtChance)
+                {
+                    dirtTile = rareData[PickIndex(cellX, cellY, rareData.Count, 3)];
+                }
+                else
+                {
+                    dirtTile = dirtData[PickIndex(cellX, cellY, dirtData.Count, 4)];
+                }
+
+                pixels[index] = SampleArt(dirtTile, tileW, tileH, artX, rowFromTop);
+            }
+            else
+            {
+                // Cheap speckle so the fallback dirt is not one flat colour.
+                float t = Mathf.PerlinNoise(x * 0.04f + dirtOffsetX, y * 0.04f + dirtOffsetY);
+                pixels[index] = Color.Lerp(dirtColorDark, dirtColorLight, t);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Draws grass blade tips for one column, in the empty pixels directly
+    /// ABOVE the ground. Only goes into the visible texture, never the mask,
+    /// so blade tips have no collision. Call PaintColumn for this column first.
+    /// </summary>
+    private void PaintColumnTips(int x)
+    {
+        if (!useGrassArt || artTipRows <= 0) return;
+
+        int tipPx = artTipRows * paintScale;
+
+        int artPixelX = x / paintScale;
+        int artX = artPixelX % tileW;
+        int cellX = artPixelX / tileW;
+        Color32[] grassTile = grassData[PickIndex(cellX, 0, grassData.Count, 1)];
+
+        for (int y = 0; y < heightPx; y++)
+        {
+            int index = y * widthPx + x;
+            if (!solid[index]) continue;
+
+            // Only the top pixel of each stretch of ground (air directly above) gets tips.
+            bool airAbove = (y == heightPx - 1) || !solid[index + widthPx];
+            if (!airAbove) continue;
+
+            for (int h = 1; h <= tipPx; h++)
+            {
+                int ty = y + h;
+                if (ty >= heightPx) break;
+
+                int tipIndex = ty * widthPx + x;
+                if (solid[tipIndex]) break;   // ran into other ground
+
+                int tipRow = artTipRows - 1 - (h - 1) / paintScale;
+                Color32 c = SampleArt(grassTile, tileW, tileH, artX, tipRow);
+                if (c.a > 0) pixels[tipIndex] = c;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Repaints just the given range of columns (inclusive) and pushes the
+    /// result to the GPU, then rebuilds the collider from a fresh mask
+    /// sprite. Used by CarveCircle so a shot does not repaint the whole map.
+    /// </summary>
+    private void RepaintColumns(int xStart, int xEnd)
+    {
+        xStart = Mathf.Clamp(xStart, 0, widthPx - 1);
+        xEnd = Mathf.Clamp(xEnd, 0, widthPx - 1);
+
+        for (int x = xStart; x <= xEnd; x++)
+        {
+            PaintColumn(x);
+        }
+        for (int x = xStart; x <= xEnd; x++)
+        {
+            PaintColumnTips(x);
+        }
+
+        texture.SetPixels32(pixels);
+        texture.Apply();
+
+        maskTexture.SetPixels32(maskPixels);
+        maskTexture.Apply();
+
+        // A sprite's physics outline is baked in when the sprite is created,
+        // so re-applying the texture above does NOT update the collider by
+        // itself. The mask sprite has to be recreated for BuildCollider to
+        // see the new shape. The visible sprite does not need this, since it
+        // has no physics shape.
+        if (maskSprite != null) Destroy(maskSprite);
+
+        Rect fullRect = new Rect(0, 0, widthPx, heightPx);
+        maskSprite = Sprite.Create(maskTexture, fullRect, new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.Tight, Vector4.zero, true);
+
+        BuildCollider();
+    }
+
+    /// <summary>
+    /// Step 12: erases a circle of ground (never adds it back), then repaints
+    /// only the columns the circle touched and rebuilds the collider.
+    /// </summary>
+    /// <param name="worldPosition">Centre of the crater, in world space (e.g. an explosion's position).</param>
+    /// <param name="radiusWorldUnits">Crater radius in world units.</param>
+    public void CarveCircle(Vector2 worldPosition, float radiusWorldUnits)
+    {
+        if (solid == null) return; // Terrain has not been generated yet.
+
+        // World position to pixel position: the inverse of PixelToWorld.
+        float localX = (worldPosition.x - transform.position.x) * pixelsPerUnit + widthPx * 0.5f;
+        float localY = (worldPosition.y - transform.position.y) * pixelsPerUnit + heightPx * 0.5f;
+        float radiusPx = Mathf.Max(1f, radiusWorldUnits * pixelsPerUnit);
+
+        int minX = Mathf.Clamp(Mathf.FloorToInt(localX - radiusPx), 0, widthPx - 1);
+        int maxX = Mathf.Clamp(Mathf.CeilToInt(localX + radiusPx), 0, widthPx - 1);
+        int minY = Mathf.Clamp(Mathf.FloorToInt(localY - radiusPx), 0, heightPx - 1);
+        int maxY = Mathf.Clamp(Mathf.CeilToInt(localY + radiusPx), 0, heightPx - 1);
+
+        float radiusPxSqr = radiusPx * radiusPx;
+        bool anyChanged = false;
+
+        for (int y = minY; y <= maxY; y++)
+        {
+            for (int x = minX; x <= maxX; x++)
+            {
+                float dx = x - localX;
+                float dy = y - localY;
+                if (dx * dx + dy * dy > radiusPxSqr) continue;
+
+                int index = y * widthPx + x;
+                if (solid[index])
+                {
+                    solid[index] = false;
+                    anyChanged = true;
+                }
+            }
+        }
+
+        // Blast landed entirely in open air, or entirely off the map: nothing to repaint.
+        if (!anyChanged) return;
+
+        RepaintColumns(minX, maxX);
     }
 
     /// <summary>
