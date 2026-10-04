@@ -114,6 +114,9 @@ public class TurnManager : MonoBehaviour
 
     // --- Read-only state for other scripts (turn UI in step 15) ---
 
+    /// <summary>True while a turn-ending shot is in flight. The weapon panel uses this to lock itself.</summary>
+    public bool IsShotInFlight => waitingForImpact;
+
     /// <summary>The cockroach whose turn it is, or null if there is none.</summary>
     public CockroachMovement CurrentPlayer =>
         (currentIndex >= 0 && currentIndex < players.Count) ? players[currentIndex] : null;
@@ -327,7 +330,7 @@ public class TurnManager : MonoBehaviour
 
         // Some weapons (step 13) will not end the turn when fired — a utility
         // item, say. If this one doesn't, leave the turn running as normal.
-        if (shooting != null && !shooting.endsTurnOnFire) return;
+        if (shooting != null && !shooting.EndsTurnOnFire) return;
 
         shotFired = true;
         waitingForImpact = true;

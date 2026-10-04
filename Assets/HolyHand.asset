@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
+  m_Name: HolyHand
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  displayName: Weapon
+  icon: {fileID: -6830143381277021775, guid: 41f9f9805c89a564f90bf0b8e898c55d, type: 3}
+  projectilePrefab: {fileID: 258008830510017049, guid: 1c61563c4f13fb744a58dc0f9cf8a1e5, type: 3}
+  minPower: 10
+  maxPower: 60
+  endsTurnOnFire: 1
+  ammo: -1

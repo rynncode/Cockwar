@@ -150,6 +150,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 96414066}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &67884320
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 67884322}
+  - component: {fileID: 67884321}
+  m_Layer: 0
+  m_Name: WeaponPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &67884321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67884320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9395f85b43102604e9a2bd822817c869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponPanel
+  canvas: {fileID: 0}
+  turnManager: {fileID: 0}
+  buttonSize: {x: 260, y: 56}
+  margin: {x: 20, y: 20}
+  fontSize: 26
+  buttonColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.9}
+  lockedColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.45}
+  currentColor: {r: 0.25, g: 0.55, b: 0.25, a: 0.95}
+  emptyColor: {r: 0.45, g: 0.2, b: 0.2, a: 0.9}
+--- !u!4 &67884322
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67884320}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 24.22047, y: 47.47881, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &91881081
 GameObject:
   m_ObjectHideFlags: 0
@@ -519,11 +572,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19ade3478a56106458eb1baa63dd7e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachShooting
+  weapons:
+  - {fileID: 11400000, guid: 801e31fa0c2367543b999425bc824f3a, type: 2}
+  - {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
   minPower: 10
   maxPower: 70
   maxChargeTime: 3
-  endsTurnOnFire: 1
+  singleWeaponEndsTurn: 1
 --- !u!114 &96414073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1443,11 +1499,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19ade3478a56106458eb1baa63dd7e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachShooting
+  weapons:
+  - {fileID: 11400000, guid: 801e31fa0c2367543b999425bc824f3a, type: 2}
+  - {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
   minPower: 10
   maxPower: 70
   maxChargeTime: 3
-  endsTurnOnFire: 1
+  singleWeaponEndsTurn: 1
 --- !u!114 &777903161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2650,3 +2709,4 @@ SceneRoots:
   - {fileID: 780781124}
   - {fileID: 439755026}
   - {fileID: 830748738}
+  - {fileID: 67884322}
