@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
   m_Name: Grenade
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  displayName: Grenade
+  displayName: Dynamite
   icon: {fileID: 0}
   projectilePrefab: {fileID: 258008830510017049, guid: 75f1ffd9f624ece449ac5bb894e0900b, type: 3}
   minPower: 10
   maxPower: 55
+  heldSprite: {fileID: 0}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}
   indicatorDistance: 0

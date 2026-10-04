@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
   m_Name: Basic Projectile
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  displayName: Basic Projectile
+  displayName: Caca (Default)
   icon: {fileID: 0}
   projectilePrefab: {fileID: 258008830510017049, guid: 03f19c8e9c23c0d44b8cb33f2646a3c8, type: 3}
   minPower: 10
   maxPower: 70
+  heldSprite: {fileID: -3384824636879892932, guid: e1591d7c19c7b834186e704b0454eab1, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}
   indicatorDistance: 0

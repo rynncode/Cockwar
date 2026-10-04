@@ -342,6 +342,7 @@ GameObject:
   - component: {fileID: 96414080}
   - component: {fileID: 96414079}
   - component: {fileID: 96414081}
+  - component: {fileID: 96414082}
   m_Layer: 0
   m_Name: Cockroach
   m_TagString: Player
@@ -575,7 +576,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachShooting
   weapons:
-  - {fileID: 11400000, guid: 801e31fa0c2367543b999425bc824f3a, type: 2}
   - {fileID: 11400000, guid: 94c9f1dabc68e1b4288bb4fca3ed6c18, type: 2}
   - {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
   - {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
@@ -747,6 +747,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AimIndicator
   visualMaterial: {fileID: 0}
   sortingOrder: 50
+--- !u!114 &96414082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96414064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5500fffcb612c8842a5a5f0db1418120, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimGun
+  bodyRenderer: {fileID: 0}
+  gunDistance: 0.4
+  gunScale: 1
+  faceAimWhileCharging: 1
 --- !u!1 &427621460
 GameObject:
   m_ObjectHideFlags: 0
@@ -1486,6 +1502,7 @@ GameObject:
   - component: {fileID: 777903173}
   - component: {fileID: 777903172}
   - component: {fileID: 777903174}
+  - component: {fileID: 777903175}
   m_Layer: 0
   m_Name: Cockroach (P2)
   m_TagString: Player
@@ -1532,7 +1549,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachShooting
   weapons:
-  - {fileID: 11400000, guid: 801e31fa0c2367543b999425bc824f3a, type: 2}
   - {fileID: 11400000, guid: 94c9f1dabc68e1b4288bb4fca3ed6c18, type: 2}
   - {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
   - {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
@@ -1891,6 +1907,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AimIndicator
   visualMaterial: {fileID: 0}
   sortingOrder: 50
+--- !u!114 &777903175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777903157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5500fffcb612c8842a5a5f0db1418120, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimGun
+  bodyRenderer: {fileID: 777903167}
+  gunDistance: 0.5
+  gunScale: 1
+  faceAimWhileCharging: 1
 --- !u!1 &780781122
 GameObject:
   m_ObjectHideFlags: 0
@@ -2420,8 +2452,8 @@ Transform:
   m_GameObject: {fileID: 1403456941}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 42, z: 0}
-  m_LocalScale: {x: 60, y: 50, z: 1}
+  m_LocalPosition: {x: 10, y: -11, z: 0}
+  m_LocalScale: {x: 50, y: 50, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
