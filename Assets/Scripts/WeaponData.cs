@@ -24,6 +24,19 @@ public class WeaponData : ScriptableObject
     [Tooltip("Launch speed when fully charged.")]
     public float maxPower = 70f;
 
+    [Header("Aim Indicator")]
+    [Tooltip("Crosshair/indicator shown while aiming this weapon. Leave empty to use the cockroach's default Crosshair.")]
+    public GameObject aimIndicatorPrefab;
+
+    [Tooltip("Distance from the cockroach to the indicator. 0 = use the default from CockroachAim.")]
+    public float indicatorDistance = 0f;
+
+    [Tooltip("Turn the indicator to point along the aim direction (art should point right). Needs an indicator prefab.")]
+    public bool rotateIndicatorWithAim = false;
+
+    [Tooltip("Indicator size at full charge, as a multiple of its normal size. 1 = no change. Needs an indicator prefab.")]
+    public float chargeScaleMultiplier = 1f;
+
     [Header("Turn System")]
     [Tooltip("Whether firing this weapon ends the turn (after the shot lands).")]
     public bool endsTurnOnFire = true;

@@ -41,7 +41,7 @@ public class WeaponPanel : MonoBehaviour
 
     private void Start()
     {
-        if (turnManager == null) turnManager = FindFirstObjectByType<TurnManager>();
+        if (turnManager == null) turnManager = FindAnyObjectByType<TurnManager>();
         if (turnManager == null)
         {
             Debug.LogError("WeaponPanel: no TurnManager found in the scene.");
@@ -57,14 +57,14 @@ public class WeaponPanel : MonoBehaviour
 
     private void EnsureEventSystem()
     {
-        if (FindFirstObjectByType<EventSystem>() != null) return;
+        if (FindAnyObjectByType<EventSystem>() != null) return;
         GameObject es = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
         es.transform.SetParent(null);
     }
 
     private void EnsureCanvas()
     {
-        if (canvas == null) canvas = FindFirstObjectByType<Canvas>();
+        if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
         if (canvas != null) return;
 
         GameObject go = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));

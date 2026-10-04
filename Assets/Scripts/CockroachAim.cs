@@ -23,6 +23,9 @@ public class CockroachAim : MonoBehaviour
     private CockroachMovement movement;
     private Camera mainCamera;
 
+    // Step 13b: if an AimIndicator is on this cockroach, it owns the crosshair visuals.
+    private bool indicatorSystemPresent;
+
     // Unit-length direction from the aim origin toward the mouse. Starts facing right.
     private Vector2 aimDirection = Vector2.right;
 
@@ -40,6 +43,7 @@ public class CockroachAim : MonoBehaviour
     private void Awake()
     {
         movement = GetComponent<CockroachMovement>();
+        indicatorSystemPresent = GetComponent<AimIndicator>() != null;
         mainCamera = Camera.main;
 
         if (mainCamera == null)
@@ -51,7 +55,7 @@ public class CockroachAim : MonoBehaviour
     private void Update()
     {
         // Hide the crosshair and ignore the mouse when it is not this player's turn.
-        if (crosshair != null)
+        if (crosshair != null && !indicatorSystemPresent)
         {
             crosshair.gameObject.SetActive(movement.isMyTurn);
         }
@@ -83,7 +87,7 @@ public class CockroachAim : MonoBehaviour
     /// </summary>
     private void UpdateCrosshairPosition()
     {
-        if (crosshair == null) return;
+        if (crosshair == null || indicatorSystemPresent) return;
 
         crosshair.position = AimOrigin + aimDirection * crosshairDistance;
     }
