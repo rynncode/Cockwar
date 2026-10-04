@@ -41,6 +41,10 @@ public class CockroachShooting : MonoBehaviour
     [Tooltip("Whether firing ends the turn. (Single-weapon mode only. With weapons, each weapon has its own setting.)")]
     public bool singleWeaponEndsTurn = true;
 
+    [Header("Optional: Keyboard")]
+    [Tooltip("Optional. Press this key to cycle to the next weapon in the list, without opening the panel. Set to None to disable.")]
+    public KeyCode cycleWeaponKey = KeyCode.Tab;
+
     private CockroachAim aim;
     private CockroachMovement movement;
     private Collider2D ownCollider;
@@ -124,6 +128,19 @@ public class CockroachShooting : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Selects the next weapon in the list, wrapping back to the start.
+    /// Reuses SelectWeapon, so this is blocked while charging and still
+    /// raises OnWeaponChanged for the panel to refresh.
+    /// </summary>
+    private void CycleWeapon()
+    {
+        if (weapons == null || weapons.Count <= 1) return;
+
+        int nextIndex = (currentWeaponIndex + 1) % weapons.Count;
+        SelectWeapon(nextIndex);
+    }
+
     private bool HasAmmo()
     {
         if (CurrentWeapon == null) return true;
@@ -140,6 +157,11 @@ public class CockroachShooting : MonoBehaviour
             isCharging = false;
             ChargeRatio01 = 0f;
             return;
+        }
+
+        if (cycleWeaponKey != KeyCode.None && Input.GetKeyDown(cycleWeaponKey) && !isCharging)
+        {
+            CycleWeapon();
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -184,18 +206,67 @@ public class CockroachShooting : MonoBehaviour
 
         float power = Mathf.Lerp(low, high, ChargeRatio01);
 
-        GameObject shot = Instantiate(prefab, aim.AimOrigin, Quaternion.identity);
+        // Step 13: Multi-Shot. A weapon can fire more than one projectile per
+        // shot, fanned out across an angle centred on the aim direction.
+        // Everything else (a single shot) is just this loop running once.
+        int shotCount = weapon != null ? Mathf.Max(1, weapon.multiShotCount) : 1;
+        float spread = weapon != null ? weapon.multiShotSpreadDegrees : 0f;
 
-        // Prevent the projectile from colliding with the cockroach that just fired it,
-        // regardless of aim direction or how close the spawn point is to the body.
-        Collider2D shotCollider = shot.GetComponent<Collider2D>();
-        if (shotCollider != null && ownCollider != null)
+        // Only one projectile per shot is reported to the camera/turn system
+        // (the middle one), so a 5-shot weapon does not need five separate
+        // "wait for landing" trackers. The others still fly, hit and explode
+        // normally — they are just not individually followed or waited on.
+        int trackedIndex = shotCount / 2;
+
+        // All of a multi-shot volley spawns at the exact same point in the
+        // same frame, so their colliders start out overlapping each other —
+        // physics would otherwise shove them violently apart the instant it
+        // next runs, which can easily fling one straight back into the
+        // shooter. Every pellet in this volley ignores collision with every
+        // other pellet already spawned in it, the same way each already
+        // ignores collision with the shooter itself.
+        List<Collider2D> volleyColliders = new List<Collider2D>();
+
+        for (int i = 0; i < shotCount; i++)
         {
-            Physics2D.IgnoreCollision(shotCollider, ownCollider, true);
-        }
+            Vector2 direction = aim.AimDirection;
 
-        Projectile projectile = shot.GetComponent<Projectile>();
-        projectile.Launch(aim.AimDirection, power);
+            if (shotCount > 1)
+            {
+                float t = (float)i / (shotCount - 1); // 0 to 1 across the fan
+                float angleOffset = Mathf.Lerp(-spread * 0.5f, spread * 0.5f, t);
+                direction = Quaternion.Euler(0f, 0f, angleOffset) * direction;
+            }
+
+            GameObject shot = Instantiate(prefab, aim.AimOrigin, Quaternion.identity);
+            Collider2D shotCollider = shot.GetComponent<Collider2D>();
+
+            // Prevent the projectile from colliding with the cockroach that just fired it,
+            // regardless of aim direction or how close the spawn point is to the body.
+            if (shotCollider != null && ownCollider != null)
+            {
+                Physics2D.IgnoreCollision(shotCollider, ownCollider, true);
+            }
+
+            if (shotCollider != null)
+            {
+                foreach (Collider2D sibling in volleyColliders)
+                {
+                    Physics2D.IgnoreCollision(shotCollider, sibling, true);
+                }
+                volleyColliders.Add(shotCollider);
+            }
+
+            Projectile projectile = shot.GetComponent<Projectile>();
+            projectile.Launch(direction, power);
+
+            if (i == trackedIndex)
+            {
+                // Tell anyone listening (the TurnManager) which projectile to
+                // follow with the camera and wait on for landing.
+                OnProjectileLaunched?.Invoke(projectile);
+            }
+        }
 
         // Use up one shot of limited ammo, and let the panel refresh.
         if (weapon != null && ammoLeft[currentWeaponIndex] > 0)
@@ -204,9 +275,7 @@ public class CockroachShooting : MonoBehaviour
             OnWeaponChanged?.Invoke();
         }
 
-        // Tell anyone listening (the TurnManager) that a shot was fired,
-        // and which projectile it was, so the camera can follow it.
+        // One firing action, even if it launched several projectiles.
         OnFired?.Invoke();
-        OnProjectileLaunched?.Invoke(projectile);
     }
 }

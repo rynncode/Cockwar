@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Grenade
   icon: {fileID: 0}
-  projectilePrefab: {fileID: 258008830510017049, guid: e1a493996701a04488d31260286571d5, type: 3}
+  projectilePrefab: {fileID: 258008830510017049, guid: 75f1ffd9f624ece449ac5bb894e0900b, type: 3}
   minPower: 10
   maxPower: 55
   aimStyle: 1
@@ -28,4 +28,6 @@ MonoBehaviour:
   lineWidth: 0.25
   lineMaxLength: 150
   endsTurnOnFire: 1
-  ammo: 5
+  ammo: -1
+  multiShotCount: 1
+  multiShotSpreadDegrees: 12

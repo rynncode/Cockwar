@@ -10,22 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
-  m_Name: Digger
+  m_Name: Timed Projectile
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  displayName: Digger
+  displayName: Timed Projectile
   icon: {fileID: 0}
-  projectilePrefab: {fileID: 258008830510017049, guid: 549b9999b74787344b6a8ea71e7b7ac1, type: 3}
+  projectilePrefab: {fileID: 258008830510017049, guid: 3e9a44f9e88a1c04b8da9f2d552a052c, type: 3}
   minPower: 10
-  maxPower: 60
+  maxPower: 70
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}
   indicatorDistance: 0
   rotateIndicatorWithAim: 0
-  aimColor: {r: 0.85, g: 0.65, b: 0.4, a: 0.9}
-  aimColorFull: {r: 0.55, g: 0.35, b: 0.15, a: 1}
+  aimColor: {r: 1, g: 0.6, b: 0.3, a: 0.9}
+  aimColorFull: {r: 1, g: 0.25, b: 0.05, a: 1}
   coneWidth: 0
   coneStartOffset: 1.5
   lineWidth: 0.25
   lineMaxLength: 150
   endsTurnOnFire: 1
   ammo: -1
+  multiShotCount: 1
+  multiShotSpreadDegrees: 12

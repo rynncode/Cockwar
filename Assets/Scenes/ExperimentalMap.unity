@@ -181,6 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPanel
   canvas: {fileID: 0}
   turnManager: {fileID: 0}
+  toggleKey: 113
   buttonSize: {x: 260, y: 56}
   margin: {x: 20, y: 20}
   fontSize: 26
@@ -340,6 +341,7 @@ GameObject:
   - component: {fileID: 96414078}
   - component: {fileID: 96414080}
   - component: {fileID: 96414079}
+  - component: {fileID: 96414081}
   m_Layer: 0
   m_Name: Cockroach
   m_TagString: Player
@@ -574,12 +576,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CockroachShooting
   weapons:
   - {fileID: 11400000, guid: 801e31fa0c2367543b999425bc824f3a, type: 2}
+  - {fileID: 11400000, guid: 94c9f1dabc68e1b4288bb4fca3ed6c18, type: 2}
+  - {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
+  - {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
+  - {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
+  - {fileID: 11400000, guid: 93a9617b2b3225045a9a439f23053698, type: 2}
   - {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
   minPower: 10
   maxPower: 70
   maxChargeTime: 3
   singleWeaponEndsTurn: 1
+  cycleWeaponKey: 9
 --- !u!114 &96414073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -714,8 +722,31 @@ MonoBehaviour:
   sortingOrder: 100
   hideAfterSeconds: 0
   fadeTime: 0.3
+  showNumber: 1
+  numberPixelSize: 0.2
+  hitPauseTime: 0.4
+  countPerSecond: 30
+  maxCountSeconds: 1.5
+  popupPixelSize: 0.3
+  popupRise: 4
+  popupSeconds: 1.2
+  popupColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   fullHealthColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   lowHealthColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+--- !u!114 &96414081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96414064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51139e424ee3b3549a9f14d382de2856, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimIndicator
+  visualMaterial: {fileID: 0}
+  sortingOrder: 50
 --- !u!1 &427621460
 GameObject:
   m_ObjectHideFlags: 0
@@ -844,10 +875,10 @@ MonoBehaviour:
   pixelsPerUnit: 3
   randomSeedEachGame: 1
   seed: 12345
-  groundLevel: 0.38
+  groundLevel: 0.278
   hillHeight: 50
   hillSize: 150
-  towerHeight: 60
+  towerHeight: 110
   towerSize: 80
   towerThreshold: 0.6
   overhangStrength: 20
@@ -858,7 +889,7 @@ MonoBehaviour:
   caveAmount: 0.3
   caveWidth: 0.15
   caveFeatureSize: 50
-  caveMinDepth: 30
+  caveMinDepth: 50
   grassTiles:
   - {fileID: 2800000, guid: 99bd06adb2a8b774fb96c48f2e9cf48b, type: 3}
   - {fileID: 2800000, guid: a204bb5dcee77b24093472629ebda7a4, type: 3}
@@ -1094,7 +1125,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.7294118, g: 0.70980394, b: 0.69411767, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1454,6 +1485,7 @@ GameObject:
   - component: {fileID: 777903171}
   - component: {fileID: 777903173}
   - component: {fileID: 777903172}
+  - component: {fileID: 777903174}
   m_Layer: 0
   m_Name: Cockroach (P2)
   m_TagString: Player
@@ -1501,12 +1533,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CockroachShooting
   weapons:
   - {fileID: 11400000, guid: 801e31fa0c2367543b999425bc824f3a, type: 2}
+  - {fileID: 11400000, guid: 94c9f1dabc68e1b4288bb4fca3ed6c18, type: 2}
+  - {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
+  - {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
+  - {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
+  - {fileID: 11400000, guid: 93a9617b2b3225045a9a439f23053698, type: 2}
   - {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
   minPower: 10
   maxPower: 70
   maxChargeTime: 3
   singleWeaponEndsTurn: 1
+  cycleWeaponKey: 9
 --- !u!114 &777903161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1807,6 +1845,15 @@ MonoBehaviour:
   sortingOrder: 100
   hideAfterSeconds: 0
   fadeTime: 0.3
+  showNumber: 1
+  numberPixelSize: 0.2
+  hitPauseTime: 0.4
+  countPerSecond: 30
+  maxCountSeconds: 1.5
+  popupPixelSize: 0.3
+  popupRise: 4
+  popupSeconds: 1.2
+  popupColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   fullHealthColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   lowHealthColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
 --- !u!114 &777903173
@@ -1830,6 +1877,20 @@ MonoBehaviour:
   fadeTime: 0.3
   fullStaminaColor: {r: 1, g: 0.85, b: 0.1, a: 1}
   lowStaminaColor: {r: 1, g: 0.4, b: 0.1, a: 1}
+--- !u!114 &777903174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777903157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51139e424ee3b3549a9f14d382de2856, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimIndicator
+  visualMaterial: {fileID: 0}
+  sortingOrder: 50
 --- !u!1 &780781122
 GameObject:
   m_ObjectHideFlags: 0
@@ -1866,6 +1927,7 @@ MonoBehaviour:
   turnTimeLimit: 25
   endTurnDelay: 3
   manualEndTurnKey: 13
+  skipHealthCountKey: 13
   toggleCameraViewKey: 32
   cameraController: {fileID: 519420033}
   opponentIndicator: {fileID: 91881084}
@@ -2272,6 +2334,98 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1324015198}
   m_CullTransparentMesh: 1
+--- !u!1 &1403456941
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1403456943}
+  - component: {fileID: 1403456942}
+  m_Layer: 0
+  m_Name: Bathroom_0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!212 &1403456942
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403456941}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: -100
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 21300000, guid: fa21f8f10fd83f64f878c713c441730f, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 14.48, y: 5.48}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
+--- !u!4 &1403456943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403456941}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10, y: 42, z: 0}
+  m_LocalScale: {x: 60, y: 50, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1493460881
 GameObject:
   m_ObjectHideFlags: 0
@@ -2710,3 +2864,4 @@ SceneRoots:
   - {fileID: 439755026}
   - {fileID: 830748738}
   - {fileID: 67884322}
+  - {fileID: 1403456943}

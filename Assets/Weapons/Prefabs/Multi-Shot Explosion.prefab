@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8253273323676606548}
   - component: {fileID: 8692556612020930119}
   m_Layer: 0
-  m_Name: Digger Explosion
+  m_Name: Multi-Shot Explosion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 17, y: 37.1, z: 0}
-  m_LocalScale: {x: 8, y: 8, z: 0.4}
+  m_LocalScale: {x: 13.333334, y: 13.333334, z: 0.6666667}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -128,11 +128,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f5db8b20fda0fe43852fc77938f55c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Explosion
-  blastRadius: 6
+  blastRadius: 10
   affectedLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  maxDamage: 0
-  maxKnockback: 0
+  maxDamage: 25
+  maxKnockback: 35
   effectDuration: 1
-  craterRadius: 26
+  craterRadius: 0

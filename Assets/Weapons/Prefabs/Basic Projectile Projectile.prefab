@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8923222821229302757}
   - component: {fileID: 6770583230380442017}
   m_Layer: 0
-  m_Name: Sniper Rifle Projectile
+  m_Name: Basic Projectile Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -31.7, y: 47.2, z: 0}
-  m_LocalScale: {x: 7, y: 7, z: 0.35}
+  m_LocalScale: {x: 20, y: 20, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -110,7 +110,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   maxLifetime: 10
-  explosionPrefab: {fileID: 5379489956093211821, guid: 076a5c1a346397b49b2d378fe6cc0ba9, type: 3}
+  explosionPrefab: {fileID: 5379489956093211821, guid: 13997d3677be25c4c8665492a865b4d9, type: 3}
   explodeOnImpact: 1
   fuseSeconds: 3
   fuseStartsOnFirstHit: 0

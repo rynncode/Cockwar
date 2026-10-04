@@ -44,43 +44,46 @@ public static class StarterWeaponsCreator
         public Color colorFull = new Color(1f, 0.35f, 0.05f, 1f);
         public float lineWidth = 0.25f;
         public float lineMaxLength = 150f;
+
+        // Multi-Shot
+        public int multiShotCount = 1;
+        public float multiShotSpread = 12f;
     }
 
     private static Spec[] Specs()
     {
         return new Spec[]
         {
-            // The classic arcing shell. Same numbers as your current projectile.
-            new Spec { name = "Bazooka", blast = 15f, crater = 0f, damage = 50f, knockback = 60f,
+            // Simple direct shot. The baseline every other weapon is compared to.
+            new Spec { name = "Basic Projectile", blast = 15f, crater = 0f, damage = 50f, knockback = 60f,
                        minPower = 10f, maxPower = 70f },
 
-            // Heavy arc, big hole, less damage, limited ammo.
-            new Spec { name = "Mortar", blast = 20f, crater = 24f, damage = 40f, knockback = 70f,
-                       scale = 1.1f, gravity = 1.6f, minPower = 20f, maxPower = 95f, ammo = 6,
-                       colorLow = new Color(0.8f, 0.6f, 1f, 0.9f), colorFull = new Color(0.55f, 0.2f, 0.95f, 1f) },
-
-            // Bounces and rolls, explodes when the 3 second fuse runs out.
-            new Spec { name = "Grenade", blast = 18f, crater = 20f, damage = 55f, knockback = 70f,
-                       scale = 0.8f, explodeOnImpact = false, fuse = 3f, bounciness = 0.45f, friction = 0.8f,
-                       angularDamping = 0.2f, minPower = 10f, maxPower = 55f, ammo = 5,
+            // Same projectile and explosion as Basic Projectile — the only
+            // difference is a higher gravity scale, so it arcs shorter and
+            // steeper instead of flying flat and far.
+            new Spec { name = "Grenade", blast = 15f, crater = 0f, damage = 50f, knockback = 60f,
+                       gravity = 1.6f, minPower = 10f, maxPower = 55f,
                        colorLow = new Color(0.7f, 1f, 0.4f, 0.9f), colorFull = new Color(0.2f, 0.75f, 0.2f, 1f) },
 
-            // One shot. Rolls, short fuse, huge blast.
-            new Spec { name = "Holy Hand Grenade", blast = 32f, crater = 38f, damage = 100f, knockback = 120f,
-                       scale = 1.3f, explodeOnImpact = false, fuse = 3f, bounciness = 0.35f, friction = 0.9f,
-                       angularDamping = 0.3f, minPower = 10f, maxPower = 50f, ammo = 1,
-                       colorLow = new Color(1f, 0.95f, 0.5f, 0.9f), colorFull = new Color(1f, 0.75f, 0.1f, 1f) },
+            // Same behaviour as Basic Projectile (explodes on impact, normal
+            // arc) — just bigger, heavier and hits much harder.
+            new Spec { name = "Heavy Projectile", blast = 24f, crater = 0f, damage = 85f, knockback = 95f,
+                       scale = 1.6f, mass = 2.5f, minPower = 10f, maxPower = 55f,
+                       colorLow = new Color(0.8f, 0.6f, 1f, 0.9f), colorFull = new Color(0.55f, 0.2f, 0.95f, 1f) },
 
-            // Flat, fast, tiny blast, straight laser line. Fixed power.
-            new Spec { name = "Sniper Rifle", blast = 4f, crater = 5f, damage = 75f, knockback = 30f,
-                       scale = 0.35f, gravity = 0f, minPower = 160f, maxPower = 160f, ammo = 3,
-                       style = AimStyle.Line, colorLow = new Color(1f, 0.15f, 0.15f, 0.9f),
-                       lineWidth = 0.25f, lineMaxLength = 150f },
+            // One click fires several small shells in a fan. Each one does
+            // less damage than Basic Projectile, so landing all of them is
+            // what makes it strong rather than any single hit.
+            new Spec { name = "Multi-Shot", blast = 10f, crater = 0f, damage = 25f, knockback = 35f,
+                       scale = 0.7f, minPower = 10f, maxPower = 70f,
+                       multiShotCount = 3, multiShotSpread = 14f,
+                       colorLow = new Color(0.5f, 0.9f, 1f, 0.9f), colorFull = new Color(0.1f, 0.6f, 0.9f, 1f) },
 
-            // Digs a big hole, hurts nobody.
-            new Spec { name = "Digger", blast = 6f, crater = 26f, damage = 0f, knockback = 0f,
-                       scale = 0.9f, minPower = 10f, maxPower = 60f,
-                       colorLow = new Color(0.85f, 0.65f, 0.4f, 0.9f), colorFull = new Color(0.55f, 0.35f, 0.15f, 1f) },
+            // Same projectile and explosion as Basic Projectile, but it
+            // ignores impacts and explodes on its own after a timer instead.
+            new Spec { name = "Timed Projectile", blast = 15f, crater = 0f, damage = 50f, knockback = 60f,
+                       explodeOnImpact = false, fuse = 3f, minPower = 10f, maxPower = 70f,
+                       colorLow = new Color(1f, 0.6f, 0.3f, 0.9f), colorFull = new Color(1f, 0.25f, 0.05f, 1f) },
         };
     }
 
@@ -131,6 +134,8 @@ public static class StarterWeaponsCreator
             data.aimColorFull = spec.colorFull;
             data.lineWidth = spec.lineWidth;
             data.lineMaxLength = spec.lineMaxLength;
+            data.multiShotCount = spec.multiShotCount;
+            data.multiShotSpreadDegrees = spec.multiShotSpread;
             AssetDatabase.CreateAsset(data, weaponPath);
 
             if (first == null) first = data;
