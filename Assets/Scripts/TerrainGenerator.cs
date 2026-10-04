@@ -19,7 +19,10 @@ using UnityEngine;
 ///  3. A few thin tunnels are carved deep inside the ground (optional).
 ///  4. Tiny floating specks are deleted and tiny air pockets are filled in.
 ///  5. The grid is painted into a texture using your grass and dirt tiles (a
-///     random variant per 16-pixel cell) and shown with a Sprite.
+///     random variant per 16-pixel cell) and shown with a Sprite. Grass goes
+///     ONLY on the original top surface (the first ground met from the sky in
+///     each column, remembered in grassDepthMap). Craters, cave floors and
+///     overhang undersides are plain dirt, and stay dirt after being carved.
 ///  6. A PolygonCollider2D is built from a hidden "mask" sprite of just the solid
 ///     pixels, so decorations like grass blades never affect collisions.
 ///  7. Every cockroach in the TurnManager's list is placed on flat open ground.
@@ -211,6 +214,13 @@ public class TerrainGenerator : MonoBehaviour
     // every tile from disk again.
     private Color32[] pixels;
     private Color32[] maskPixels;
+
+    // For every pixel: how many pixels below the ORIGINAL top surface it is, if it is
+    // part of the grass layer (0 = the very top pixel), or NotGrass if it is just dirt.
+    // Worked out once when the map is generated and never changed by craters, so ground
+    // exposed by an explosion later stays dirt instead of growing a new grass edge.
+    private byte[] grassDepthMap;
+    private const byte NotGrass = 255;
 
     private List<Color32[]> grassData = new List<Color32[]>();
     private List<Color32[]> dirtData = new List<Color32[]>();
@@ -508,6 +518,7 @@ public class TerrainGenerator : MonoBehaviour
         maskPixels = new Color32[widthPx * heightPx];
 
         PreparePaintData();
+        BuildGrassMap();
 
         for (int x = 0; x < widthPx; x++)
         {
@@ -605,8 +616,44 @@ public class TerrainGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// Marks which pixels are the grass layer: in each column, the first ground met
+    /// scanning down from the sky, and the few pixels just below it (as thick as the
+    /// grass part of your tile). Everything else, including cave floors, the tops of
+    /// lower ledges, and any ground a crater exposes later, is not grass.
+    /// Called once per full map build, after the shape is final.
+    /// </summary>
+    private void BuildGrassMap()
+    {
+        grassDepthMap = new byte[widthPx * heightPx];
+        for (int i = 0; i < grassDepthMap.Length; i++)
+        {
+            grassDepthMap[i] = NotGrass;
+        }
+
+        // How thick the grass layer is, in terrain pixels: the tile's grass rows
+        // (not counting the blade tips, which are drawn above the ground).
+        int bandPx = useGrassArt ? (artGrassRows - artTipRows) * paintScale : grassPxFallback;
+        bandPx = Mathf.Clamp(bandPx, 0, NotGrass - 1);
+        if (bandPx <= 0) return;
+
+        for (int x = 0; x < widthPx; x++)
+        {
+            int top = FindSurfaceY(x, heightPx - 1);
+            if (top < 0) continue; // no ground in this column
+
+            for (int depth = 0; depth < bandPx; depth++)
+            {
+                int y = top - depth;
+                if (y < 0 || !solid[y * widthPx + x]) break; // thin ground: stop where it ends
+
+                grassDepthMap[y * widthPx + x] = (byte)depth;
+            }
+        }
+    }
+
+    /// <summary>
     /// Paints one column of the "pixels" and "maskPixels" arrays from the
-    /// current "solid" data: grass along the surface, dirt underneath.
+    /// current "solid" data: grass on the original top surface, dirt everywhere else.
     /// Self-contained — does not read or depend on neighbouring columns —
     /// so CarveCircle can safely call this for just the columns it changed.
     /// </summary>
@@ -620,17 +667,12 @@ public class TerrainGenerator : MonoBehaviour
         // One grass variant per cell, so a stretch of surface looks like one tile.
         Color32[] grassTile = useGrassArt ? grassData[PickIndex(cellX, 0, grassData.Count, 1)] : null;
 
-        // Counts solid pixels going down a column since we last saw empty air.
-        // 0 = the very top pixel of the ground.
-        int depthBelowAir = 0;
-
         for (int y = heightPx - 1; y >= 0; y--)
         {
             int index = y * widthPx + x;
 
             if (!solid[index])
             {
-                depthBelowAir = 0;
                 pixels[index] = clearPixel;
                 maskPixels[index] = maskClearPixel;
                 continue;
@@ -638,24 +680,27 @@ public class TerrainGenerator : MonoBehaviour
 
             maskPixels[index] = maskSolidPixel;
 
-            int depthIndex = depthBelowAir;
-            depthBelowAir++;
-
-            // 1) The grass edge along the surface.
-            if (useGrassArt)
+            // 1) The grass edge: ONLY pixels that belong to the original top surface.
+            //    depthIndex = how far below that original surface this pixel is. Ground that
+            //    a crater has exposed is not in the grass map, so it falls through to dirt.
+            int depthIndex = grassDepthMap[index];
+            if (depthIndex != NotGrass)
             {
-                // Tip rows sit above the ground line, so the first solid pixel starts below them.
-                int grassRow = depthIndex / paintScale + artTipRows;
-                if (grassRow < artGrassRows)
+                if (useGrassArt)
                 {
-                    pixels[index] = SampleArt(grassTile, tileW, tileH, artX, grassRow);
+                    // Tip rows sit above the ground line, so the first solid pixel starts below them.
+                    int grassRow = depthIndex / paintScale + artTipRows;
+                    if (grassRow < artGrassRows)
+                    {
+                        pixels[index] = SampleArt(grassTile, tileW, tileH, artX, grassRow);
+                        continue;
+                    }
+                }
+                else
+                {
+                    pixels[index] = grassColor;
                     continue;
                 }
-            }
-            else if (depthIndex < grassPxFallback)
-            {
-                pixels[index] = grassColor;
-                continue;
             }
 
             // 2) Everything below the grass: dirt.
@@ -709,7 +754,11 @@ public class TerrainGenerator : MonoBehaviour
             int index = y * widthPx + x;
             if (!solid[index]) continue;
 
-            // Only the top pixel of each stretch of ground (air directly above) gets tips.
+            // Blade tips only grow on the original top surface (depth 0), never on
+            // ground that a crater or cave has exposed.
+            if (grassDepthMap[index] != 0) continue;
+
+            // And only where there is open air directly above it.
             bool airAbove = (y == heightPx - 1) || !solid[index + widthPx];
             if (!airAbove) continue;
 
