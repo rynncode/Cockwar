@@ -1,22 +1,25 @@
 fileFormatVersion: 2
-guid: e6df590b7c00fee46badb2f0b792a5cb
+guid: 54d147f7e93a33e46ae3ad6aca3dfd5b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5223244959993742031
-    second: PAUSE PANEL-frame0_0
+      213: 7186031182119188430
+    second: PAUSE PANEL-spritesheet_0
   - first:
-      213: -5036322002491723634
-    second: PAUSE PANEL-frame0_1
+      213: 822233797358155326
+    second: PAUSE PANEL-spritesheet_1
   - first:
-      213: 1731063612477852696
-    second: PAUSE PANEL-frame0_2
+      213: -5911882506679098627
+    second: PAUSE PANEL-spritesheet_2
   - first:
-      213: 1425740378936597725
-    second: PAUSE PANEL-frame0_3
+      213: -8209426292232836754
+    second: PAUSE PANEL-spritesheet_3
   - first:
-      213: -1196920911332940667
-    second: PAUSE PANEL-frame0_4
+      213: -5340504981501562568
+    second: PAUSE PANEL-spritesheet_4
+  - first:
+      213: 6986215221366592183
+    second: PAUSE PANEL-spritesheet_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -89,7 +92,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -114,7 +117,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PAUSE PANEL-frame0_0
+      name: PAUSE PANEL-spritesheet_0
       rect:
         serializedVersion: 2
         x: 20
@@ -129,14 +132,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fc2c64ffd91bc7840800000000000000
-      internalID: 5223244959993742031
+      spriteID: ec738137949e9b360800000000000000
+      internalID: 7186031182119188430
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: PAUSE PANEL-frame0_1
+      name: PAUSE PANEL-spritesheet_1
       rect:
         serializedVersion: 2
         x: 15
@@ -151,14 +154,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e803ff282d36b1ab0800000000000000
-      internalID: -5036322002491723634
+      spriteID: e367ad54849296b00800000000000000
+      internalID: 822233797358155326
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: PAUSE PANEL-frame0_2
+      name: PAUSE PANEL-spritesheet_2
       rect:
         serializedVersion: 2
         x: 63
@@ -173,14 +176,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 81cc8591f29f50810800000000000000
-      internalID: 1731063612477852696
+      spriteID: df2eb83ce26c4fda0800000000000000
+      internalID: -5911882506679098627
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: PAUSE PANEL-frame0_3
+      name: PAUSE PANEL-spritesheet_3
       rect:
         serializedVersion: 2
         x: 111
@@ -195,14 +198,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ddc527c125f39c310800000000000000
-      internalID: 1425740378936597725
+      spriteID: e69a5b95842421e80800000000000000
+      internalID: -8209426292232836754
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: PAUSE PANEL-frame0_4
+      name: PAUSE PANEL-spritesheet_4
       rect:
         serializedVersion: 2
         x: 15
@@ -217,8 +220,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 58463cfc5cea36fe0800000000000000
-      internalID: -1196920911332940667
+      spriteID: 8313568b307b2e5b0800000000000000
+      internalID: -5340504981501562568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PAUSE PANEL-spritesheet_5
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 139
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b29bf1bab504f060800000000000000
+      internalID: 6986215221366592183
       vertices: []
       indices: 
       edges: []
@@ -237,11 +262,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PAUSE PANEL-frame0_0: 5223244959993742031
-      PAUSE PANEL-frame0_1: -5036322002491723634
-      PAUSE PANEL-frame0_2: 1731063612477852696
-      PAUSE PANEL-frame0_3: 1425740378936597725
-      PAUSE PANEL-frame0_4: -1196920911332940667
+      PAUSE PANEL-spritesheet_0: 7186031182119188430
+      PAUSE PANEL-spritesheet_1: 822233797358155326
+      PAUSE PANEL-spritesheet_2: -5911882506679098627
+      PAUSE PANEL-spritesheet_3: -8209426292232836754
+      PAUSE PANEL-spritesheet_4: -5340504981501562568
+      PAUSE PANEL-spritesheet_5: 6986215221366592183
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
