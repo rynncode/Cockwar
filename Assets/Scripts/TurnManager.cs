@@ -24,6 +24,10 @@ using UnityEngine;
 /// toggleCameraViewKey to switch back and forth between it and the active
 /// player while waiting for it to land.
 ///
+/// Health countdown: when a hit lands, the victim's HealthBar plays a short
+/// "-10" label and counts the number down one by one. The turn is held until
+/// that has finished, and skipHealthCountKey (the main Enter key) skips it.
+///
 /// Dead players are skipped. When only one player is left alive, turns stop
 /// and a message is logged. Step 14 (Game rules) will replace that message
 /// with a real win screen.
@@ -51,6 +55,10 @@ public class TurnManager : MonoBehaviour
     [Header("Manual End Turn")]
     [Tooltip("Press this key to end the current turn immediately. Stands in for a real End Turn button until step 15 (UI) adds one.")]
     public KeyCode manualEndTurnKey = KeyCode.Return;
+
+    [Header("Health Countdown")]
+    [Tooltip("Press this key to skip the health counting down after a hit and show the final number straight away. KeyCode.Return is the main Enter key; the numpad Enter is a different key (KeypadEnter), so it does nothing here.")]
+    public KeyCode skipHealthCountKey = KeyCode.Return;
 
     [Header("Projectile Camera")]
     [Tooltip("While a shot is in flight, press this key to toggle the camera between the projectile and the active player.")]
@@ -261,6 +269,14 @@ public class TurnManager : MonoBehaviour
     {
         if (gameOver || currentIndex < 0) return;
 
+        // Enter while a health bar is counting down: skip the countdown and do nothing else.
+        // Returning here also means this same key press can never end the turn (Enter is
+        // also the manual end-turn key). The next press, with nothing counting, ends it as usual.
+        if (Input.GetKeyDown(skipHealthCountKey) && SkipHealthCountdowns())
+        {
+            return;
+        }
+
         CockroachMovement current = players[currentIndex];
 
         if (!shotFired)
@@ -313,8 +329,55 @@ public class TurnManager : MonoBehaviour
         endDelayLeft -= Time.deltaTime;
         if (endDelayLeft <= 0f)
         {
+            // Hold the turn while a health number is still counting down, so the
+            // next player doesn't start (or the game doesn't end) before it is seen.
+            if (IsAnyHealthCountingDown())
+            {
+                return;
+            }
+
             EndTurn();
         }
+    }
+
+    /// <summary>True while any player's health bar is still showing a hit (pause, label or countdown).</summary>
+    private bool IsAnyHealthCountingDown()
+    {
+        foreach (CockroachMovement player in players)
+        {
+            if (player == null) continue;
+
+            HealthBar healthBar = player.GetComponent<HealthBar>();
+            if (healthBar != null && healthBar.IsAnimating)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Skips every health countdown that is playing. Returns true if there was
+    /// anything to skip, so the caller knows the key press has been used up.
+    /// </summary>
+    private bool SkipHealthCountdowns()
+    {
+        bool skippedAny = false;
+
+        foreach (CockroachMovement player in players)
+        {
+            if (player == null) continue;
+
+            HealthBar healthBar = player.GetComponent<HealthBar>();
+            if (healthBar != null && healthBar.IsAnimating)
+            {
+                healthBar.SkipAnimation();
+                skippedAny = true;
+            }
+        }
+
+        return skippedAny;
     }
 
     /// <summary>

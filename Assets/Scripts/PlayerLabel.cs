@@ -96,6 +96,7 @@ public class PlayerLabel : MonoBehaviour
         return 1;
     }
 
+    /// <summary>The color for a player number (1 red, 2 blue, 3 green, 4 yellow). Also used by DistanceHud.</summary>
     public static Color GetPlayerColor(int number)
     {
         switch (number)
