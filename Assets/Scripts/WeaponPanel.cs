@@ -20,6 +20,10 @@ public class WeaponPanel : MonoBehaviour
     [Tooltip("Optional. Found automatically if empty.")]
     public TurnManager turnManager;
 
+    [Header("Hotkey (optional)")]
+    [Tooltip("Press this key to open or close the weapon list. Set to None to turn the hotkey off. Already used elsewhere: A, D, Space, Tab, Enter.")]
+    public KeyCode toggleKey = KeyCode.Q;
+
     [Header("Layout")]
     public Vector2 buttonSize = new Vector2(260f, 56f);
     public Vector2 margin = new Vector2(20f, 20f);
@@ -222,6 +226,8 @@ public class WeaponPanel : MonoBehaviour
         mainImage.color = canUse ? buttonColor : lockedColor;
 
         if (!canUse && listRoot.gameObject.activeSelf) listRoot.gameObject.SetActive(false);
+
+        if (canUse && toggleKey != KeyCode.None && Input.GetKeyDown(toggleKey)) ToggleList();
 
         if (!hasWeapons)
         {

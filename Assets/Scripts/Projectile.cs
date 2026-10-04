@@ -15,6 +15,16 @@ public class Projectile : MonoBehaviour
     [Tooltip("Explosion prefab to spawn at the impact point. Leave empty to just disappear silently, like before step 5.")]
     public GameObject explosionPrefab;
 
+    [Header("Fuse (grenades)")]
+    [Tooltip("On = explodes when it touches something (normal shell). Off = it bounces and rolls, and explodes when the fuse runs out.")]
+    public bool explodeOnImpact = true;
+
+    [Tooltip("Seconds until a fused projectile explodes. Only used when Explode On Impact is off.")]
+    public float fuseSeconds = 3f;
+
+    [Tooltip("Off = the fuse starts when thrown. On = the fuse starts the first time it touches something.")]
+    public bool fuseStartsOnFirstHit = false;
+
     /// <summary>
     /// Fires exactly once, right before this projectile is destroyed —
     /// whether that's from hitting something or from maxLifetime running out.
@@ -27,6 +37,8 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D body;
     private bool hasHit;
     private bool hasNotifiedLanded;
+    private bool fuseRunning;
+    private float fuseTimer;
 
     private void Awake()
     {
@@ -35,7 +47,25 @@ public class Projectile : MonoBehaviour
 
     private void Start()
     {
-        Destroy(gameObject, maxLifetime);
+        // A fused projectile must live long enough for its fuse to finish.
+        float life = explodeOnImpact ? maxLifetime : Mathf.Max(maxLifetime, fuseSeconds + 1f);
+        Destroy(gameObject, life);
+
+        if (!explodeOnImpact && !fuseStartsOnFirstHit) StartFuse();
+    }
+
+    private void StartFuse()
+    {
+        fuseRunning = true;
+        fuseTimer = fuseSeconds;
+    }
+
+    private void Update()
+    {
+        if (!fuseRunning || hasHit) return;
+
+        fuseTimer -= Time.deltaTime;
+        if (fuseTimer <= 0f) Explode(transform.position);
     }
 
     /// <summary>
@@ -60,14 +90,26 @@ public class Projectile : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // Fused projectile: just bounce/roll. Touching something may start the fuse.
+        if (!explodeOnImpact)
+        {
+            if (fuseStartsOnFirstHit && !fuseRunning) StartFuse();
+            return;
+        }
+
+        Explode(collision.GetContact(0).point);
+    }
+
+    /// <summary>Spawns the explosion at the given point and removes this projectile (runs once).</summary>
+    private void Explode(Vector2 point)
+    {
         // Ignore anything after the first hit, in case of multiple contact points in one frame.
         if (hasHit) return;
         hasHit = true;
 
         if (explosionPrefab != null)
         {
-            Vector2 contactPoint = collision.GetContact(0).point;
-            Instantiate(explosionPrefab, contactPoint, Quaternion.identity);
+            Instantiate(explosionPrefab, point, Quaternion.identity);
         }
 
         Destroy(gameObject);

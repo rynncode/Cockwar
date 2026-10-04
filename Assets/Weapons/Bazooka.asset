@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
-  m_Name: HolyHand
+  m_Name: Bazooka
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  displayName: Holy Hand Grenade
-  icon: {fileID: -6830143381277021775, guid: 41f9f9805c89a564f90bf0b8e898c55d, type: 3}
-  projectilePrefab: {fileID: 258008830510017049, guid: 1c61563c4f13fb744a58dc0f9cf8a1e5, type: 3}
+  displayName: Bazooka
+  icon: {fileID: 0}
+  projectilePrefab: {fileID: 258008830510017049, guid: 7ebe142fcd6cc654fa0d1f9b34b98772, type: 3}
   minPower: 10
-  maxPower: 60
-  aimStyle: 0
-  aimIndicatorPrefab: {fileID: 182865699737849725, guid: 79e5e78234fd6ae48884f468cc89b949, type: 3}
+  maxPower: 70
+  aimStyle: 1
+  aimIndicatorPrefab: {fileID: 0}
   indicatorDistance: 0
   rotateIndicatorWithAim: 0
   aimColor: {r: 1, g: 0.85, b: 0.2, a: 0.9}
