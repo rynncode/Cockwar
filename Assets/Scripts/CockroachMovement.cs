@@ -99,12 +99,39 @@ public class CockroachMovement : MonoBehaviour
     [Tooltip("Minimum seconds physics control stays active before it can hand control back, even if already grounded. Stops a weak push that never leaves the ground from clearing on the same physics step it was applied.")]
     public float minPhysicsMovementTime = 0.1f;
 
+    [Tooltip("isGrounded must stay continuously true for this many seconds before knockback physics control is handed back. Stops a single-frame false 'grounded' reading (e.g. right as an explosion destroys the terrain underneath, or while bouncing over bumpy ground) from ending knockback while still visibly airborne.")]
+    public float requiredGroundedTime = 0.12f;
+
+    [Header("Bounce")]
+    [Tooltip("When on, a hard landing from a knockback bounces instead of stopping dead — each bounce weaker than the last.")]
+    public bool enableBounce = true;
+
+    [Tooltip("Fraction of the incoming downward speed kept as the next bounce's upward speed. 0.45 means each bounce reaches about 45% of the previous one's height. Lower = bounces die out faster.")]
+    [Range(0f, 1f)]
+    public float bounciness = 0.45f;
+
+    [Tooltip("Once a bounce's upward speed would be below this, it stops bouncing and settles instead, so it doesn't bounce forever on tiny amounts.")]
+    public float minBounceSpeed = 3f;
+
+    [Tooltip("Safety cap on how many times it can bounce, even if the math says it should keep going.")]
+    public int maxBounces = 6;
+
     // True while normal player movement is temporarily disabled
     // because the Rigidbody is being controlled by physics.
     private bool physicsMovementActive;
 
     // Counts up while physicsMovementActive is true.
     private float physicsMovementElapsed;
+
+    // Seconds isGrounded has been continuously true while physics-controlled.
+    // Reset to 0 the instant isGrounded goes false, or a bounce fires.
+    private float groundedStreak;
+
+    // Fastest downward speed seen while airborne this knockback, used to size the next bounce.
+    private float lastAirborneVerticalSpeed;
+
+    // How many times we've bounced this knockback, capped by maxBounces.
+    private int bounceCount;
 
     // Filled in automatically.
     private Rigidbody2D body;
@@ -164,6 +191,19 @@ public class CockroachMovement : MonoBehaviour
     /// <summary>0 when standing still, 1 when walking.</summary>
     public float WalkAmount => Mathf.Abs(moveDirection);
 
+    /// <summary>
+    /// True from the moment an external push (an explosion) lands until the cockroach is
+    /// back on the ground and under normal control again. Stays true through any bounces.
+    /// </summary>
+    public bool IsKnockedBack => physicsMovementActive;
+
+    /// <summary>
+    /// Raised every time an external push is applied. The vector is the push as it is actually
+    /// applied (after the vertical multiplier), so its length is the push strength.
+    /// KnockbackAnimation listens to this.
+    /// </summary>
+    public event System.Action<Vector2> OnKnockedBack;
+
     /// <summary>True while the jump key is held and a jump is charging.</summary>
     public bool IsChargingJump => isChargingJump;
 
@@ -218,16 +258,59 @@ public class CockroachMovement : MonoBehaviour
         {
             physicsMovementElapsed += Time.fixedDeltaTime;
 
-            // Hand control back once the minimum time has passed AND we are
-            // currently grounded — checking "currently grounded" rather than
-            // waiting for an airborne-to-grounded transition means a push too
-            // weak to lift the cockroach off the ground still releases properly,
-            // instead of locking movement forever.
+            if (!isGrounded)
+            {
+                // Remember the fastest downward speed seen while still airborne, so the
+                // bounce below is based on "how hard did it actually hit" rather than
+                // whatever's left after a collision may have already slowed it down.
+                lastAirborneVerticalSpeed = body.linearVelocity.y;
+                groundedStreak = 0f;
+            }
+            else
+            {
+                // First physics step actually touching ground this cycle: maybe bounce.
+                if (groundedStreak <= 0f)
+                {
+                    float incomingSpeed = Mathf.Max(0f, -lastAirborneVerticalSpeed);
+                    float bounceSpeed = incomingSpeed * bounciness;
+
+                    if (enableBounce && bounceCount < maxBounces && bounceSpeed >= minBounceSpeed)
+                    {
+                        Vector2 v = body.linearVelocity;
+                        v.y = bounceSpeed;
+                        body.linearVelocity = v;
+                        bounceCount++;
+                        groundedStreak = 0f;
+                    }
+                    else
+                    {
+                        groundedStreak += Time.fixedDeltaTime;
+                    }
+                }
+                else
+                {
+                    groundedStreak += Time.fixedDeltaTime;
+                }
+            }
+
+            // Hand control back once the minimum time has passed AND we have been
+            // continuously grounded for requiredGroundedTime — a single-frame "grounded"
+            // reading can be wrong (bumpy terrain, a collider that hasn't updated yet
+            // after an explosion), and ending knockback on that would show the landed
+            // pose, or stop bouncing, while still visibly airborne.
             bool minTimePassed = physicsMovementElapsed >= minPhysicsMovementTime;
-            if (minTimePassed && isGrounded)
+            bool steadyOnGround = groundedStreak >= requiredGroundedTime;
+
+            if (minTimePassed && steadyOnGround)
             {
                 physicsMovementActive = false;
+                bounceCount = 0;
             }
+        }
+        else
+        {
+            groundedStreak = 0f;
+            bounceCount = 0;
         }
 
         if (!physicsMovementActive)
@@ -254,7 +337,7 @@ public class CockroachMovement : MonoBehaviour
 
     /// <summary>
     /// Applies an external physics push.
-    /// Normal walking is temporarily disabled until the player lands.
+    /// Normal walking is temporarily disabled until the player lands (and stops bouncing).
     /// </summary>
     public void ApplyKnockback(Vector2 impulse)
     {
@@ -262,12 +345,17 @@ public class CockroachMovement : MonoBehaviour
         {
             physicsMovementActive = true;
             physicsMovementElapsed = 0f;
+            groundedStreak = 0f;
+            bounceCount = 0;
+            lastAirborneVerticalSpeed = body.linearVelocity.y;
         }
 
         // Reduce only the vertical component of the supplied impulse.
         impulse.y *= verticalPushMultiplier;
 
         body.AddForce(impulse, ForceMode2D.Impulse);
+
+        OnKnockedBack?.Invoke(impulse);
     }
 
     /// <summary>

@@ -287,6 +287,7 @@ GameObject:
   - component: {fileID: 96414078}
   - component: {fileID: 96414080}
   - component: {fileID: 96414079}
+  - component: {fileID: 96414082}
   m_Layer: 0
   m_Name: Cockroach
   m_TagString: Player
@@ -407,8 +408,13 @@ MonoBehaviour:
     m_Bits: 8
   isMyTurn: 1
   physicsMovementUntilGrounded: 1
-  verticalPushMultiplier: 0.827
+  verticalPushMultiplier: 0.943
   minPhysicsMovementTime: 0.5
+  requiredGroundedTime: 0.12
+  enableBounce: 1
+  bounciness: 0.45
+  minBounceSpeed: 3
+  maxBounces: 6
 --- !u!70 &96414068
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -470,7 +476,7 @@ Rigidbody2D:
     serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 1
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 4
 --- !u!95 &96414070
@@ -658,8 +664,56 @@ MonoBehaviour:
   sortingOrder: 100
   hideAfterSeconds: 0
   fadeTime: 0.3
+  showNumber: 1
+  numberPixelSize: 0.2
+  hitPauseTime: 0.4
+  countPerSecond: 30
+  maxCountSeconds: 1.5
+  popupPixelSize: 0.3
+  popupRise: 4
+  popupSeconds: 1.2
+  popupColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   fullHealthColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   lowHealthColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+--- !u!114 &96414082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96414064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25bace4be5b7ade4abff5cdd186dfc83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KnockbackAnimation
+  spriteRenderer: {fileID: 0}
+  frames:
+  - {fileID: 2803700231475323234, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 2803700231475323234, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -2021033796102572771, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -8710571635190730954, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 5581805279929850117, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 3102444255847680503, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -5160589862718620612, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -450979106593826303, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 105238702868877098, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -5910645732151959265, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  flyFrameCount: 1
+  landedFrameIndex: 3
+  firstDizzyFrame: 4
+  minKnockbackStrength: 20
+  logKnockbackStrength: 1
+  flyFramesPerSecond: 10
+  landedHoldTime: 0.2
+  dizzyFramesPerSecond: 10
+  dizzyDuration: 1.6
+  maxAnimationSeconds: 10
+  faceTowardBlast: 1
+  sheetFacesRight: 1
+  adjustColliderOnKnockback: 1
+  horizontalColliderSize: {x: 0.08, y: 0.1}
+  horizontalColliderOffset: {x: 0, y: 0.2}
 --- !u!1 &427621460
 GameObject:
   m_ObjectHideFlags: 0
@@ -1398,6 +1452,7 @@ GameObject:
   - component: {fileID: 777903171}
   - component: {fileID: 777903173}
   - component: {fileID: 777903172}
+  - component: {fileID: 777903174}
   m_Layer: 0
   m_Name: Cockroach (P2)
   m_TagString: Player
@@ -1536,6 +1591,11 @@ MonoBehaviour:
   physicsMovementUntilGrounded: 1
   verticalPushMultiplier: 0.827
   minPhysicsMovementTime: 0.5
+  requiredGroundedTime: 0.12
+  enableBounce: 1
+  bounciness: 0.45
+  minBounceSpeed: 3
+  maxBounces: 6
 --- !u!70 &777903165
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -1748,6 +1808,15 @@ MonoBehaviour:
   sortingOrder: 100
   hideAfterSeconds: 0
   fadeTime: 0.3
+  showNumber: 1
+  numberPixelSize: 0.2
+  hitPauseTime: 0.4
+  countPerSecond: 30
+  maxCountSeconds: 1.5
+  popupPixelSize: 0.3
+  popupRise: 4
+  popupSeconds: 1.2
+  popupColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   fullHealthColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   lowHealthColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
 --- !u!114 &777903173
@@ -1771,6 +1840,45 @@ MonoBehaviour:
   fadeTime: 0.3
   fullStaminaColor: {r: 1, g: 0.85, b: 0.1, a: 1}
   lowStaminaColor: {r: 1, g: 0.4, b: 0.1, a: 1}
+--- !u!114 &777903174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777903157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25bace4be5b7ade4abff5cdd186dfc83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KnockbackAnimation
+  spriteRenderer: {fileID: 0}
+  frames:
+  - {fileID: 2803700231475323234, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 2803700231475323234, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -2021033796102572771, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -8710571635190730954, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 5581805279929850117, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 3102444255847680503, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -5160589862718620612, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -450979106593826303, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: 105238702868877098, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  - {fileID: -5910645732151959265, guid: 759792cd0ad2a254495ca1f2448a5528, type: 3}
+  flyFrameCount: 1
+  landedFrameIndex: 3
+  firstDizzyFrame: 4
+  minKnockbackStrength: 20
+  logKnockbackStrength: 1
+  flyFramesPerSecond: 10
+  landedHoldTime: 0.2
+  dizzyFramesPerSecond: 10
+  dizzyDuration: 1.6
+  maxAnimationSeconds: 10
+  faceTowardBlast: 1
+  sheetFacesRight: 1
+  adjustColliderOnKnockback: 1
+  horizontalColliderSize: {x: 0.08, y: 0.1}
+  horizontalColliderOffset: {x: 0, y: 0.2}
 --- !u!1 &780781122
 GameObject:
   m_ObjectHideFlags: 0
@@ -1807,6 +1915,7 @@ MonoBehaviour:
   turnTimeLimit: 25
   endTurnDelay: 3
   manualEndTurnKey: 13
+  skipHealthCountKey: 13
   toggleCameraViewKey: 32
   cameraController: {fileID: 519420033}
   opponentIndicator: {fileID: 91881084}

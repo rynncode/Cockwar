@@ -4,7 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Health bar: only appears once the cockroach has taken damage. It shows the health
 /// as a number on the bar, and when a hit lands it plays a short sequence:
-///   1. a brief pause (hitPauseTime),
+///   1. a brief pause (hitPauseTime), which only starts once any knockback animation
+///      (tumble, landing, dizzy stars) has finished and the cockroach is back to idle,
 ///   2. a red "-10" label floats up above the head,
 ///   3. the number counts down one by one (100, 99, 98 ... 90) with the bar shrinking with it.
 /// TurnManager holds the turn while this is playing, and the skip key (Enter) jumps
@@ -64,6 +65,7 @@ public class HealthBar : OverheadBar
     }
 
     private Health health;
+    private KnockbackAnimation knockbackAnimation;
 
     private Phase phase = Phase.Idle;
     private int knownHealth;       // the real health we saw last frame, to spot hits
@@ -116,6 +118,9 @@ public class HealthBar : OverheadBar
         knownHealth = health.CurrentHealth;
         displayedHealth = health.CurrentHealth;
 
+        // Optional: if the cockroach has a knockback animation, the countdown waits for it.
+        knockbackAnimation = GetComponent<KnockbackAnimation>();
+
         // The number sits in the middle of the bar, above the fill.
         healthNumber = new PixelNumber(BarRoot, "HealthNumber", BarSortingLayerId, BarBaseOrder + 2, numberPixelSize);
         healthNumber.SetColor(Color.white);
@@ -143,9 +148,18 @@ public class HealthBar : OverheadBar
 
         if (phase == Phase.Pause)
         {
-            pauseTimer -= Time.deltaTime;
-            if (pauseTimer <= 0f)
-                BeginCount();
+            if (knockbackAnimation != null && knockbackAnimation.IsPlaying)
+            {
+                // Still tumbling or dizzy: keep the pause full. It only starts counting
+                // down once the cockroach is back to idle.
+                pauseTimer = hitPauseTime;
+            }
+            else
+            {
+                pauseTimer -= Time.deltaTime;
+                if (pauseTimer <= 0f)
+                    BeginCount();
+            }
         }
         else if (phase == Phase.Count)
         {
@@ -227,6 +241,10 @@ public class HealthBar : OverheadBar
 
         displayedHealth = health.CurrentHealth;
         phase = Phase.Idle;
+
+        // Skipping also ends the knockback animation straight away.
+        if (knockbackAnimation != null)
+            knockbackAnimation.Skip();
     }
 
     // ---------------- Bar visuals ----------------
