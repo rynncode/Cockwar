@@ -1815,7 +1815,7 @@ MonoBehaviour:
   introFocusTime: 2.2
   introZoom: 30
   introSmoothTime: 0.8
-  skipIntroKey: 9
+  skipIntroKey: 32
 --- !u!4 &780781124
 Transform:
   m_ObjectHideFlags: 0
@@ -2010,7 +2010,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6527909698009454867, guid: e48a7c9cffea5524ebe679f14c6e5da8, type: 3}
+  m_Sprite: {fileID: -6527909698009454867, guid: da05957dab693a14085fc0a8802e8b2a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

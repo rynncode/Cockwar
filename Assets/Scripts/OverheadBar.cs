@@ -42,8 +42,34 @@ public abstract class OverheadBar : MonoBehaviour
     /// <summary>Seconds the bar takes to fade in / out. 0 = instant.</summary>
     protected virtual float FadeTime => 0f;
 
+    /// <summary>Called once from Awake, BEFORE the bar is built. A subclass can adjust its size here.</summary>
+    protected virtual void OnBeforeBuild() { }
+
     /// <summary>Called once from Awake, after the bar is built, so subclasses can find their components.</summary>
     protected virtual void OnBarAwake() { }
+
+    /// <summary>
+    /// Called at the end of every LateUpdate, whether the bar is showing or not.
+    /// visible = the bar is on screen this frame; alpha = how faded in it is (0 to 1).
+    /// </summary>
+    protected virtual void AfterBarUpdate(bool visible, float alpha) { }
+
+    /// <summary>Called when the bar is being destroyed, so a subclass can clean up what it made.</summary>
+    protected virtual void OnBarDestroyed() { }
+
+    // --- For subclasses that add their own visuals ---
+
+    /// <summary>The bar's centre. Children of this move, hide and show with the bar.</summary>
+    protected Transform BarRoot => barRoot != null ? barRoot.transform : null;
+
+    /// <summary>Sorting layer the bar is drawn on (the cockroach's own).</summary>
+    protected int BarSortingLayerId { get; private set; }
+
+    /// <summary>Sorting order of the bar's background. The fill is +1; use +2 or more to draw on top.</summary>
+    protected int BarBaseOrder { get; private set; }
+
+    /// <summary>The stack above the head that positions this bar.</summary>
+    protected OverheadStack Stack => stack;
 
     // Total height including the outline.
     private float TotalHeight => barHeight + borderThickness * 2f;
@@ -64,6 +90,7 @@ public abstract class OverheadBar : MonoBehaviour
     {
         stack = OverheadStack.For(gameObject);
 
+        OnBeforeBuild();
         BuildBar();
         barRoot.SetActive(false);
 
@@ -88,6 +115,9 @@ public abstract class OverheadBar : MonoBehaviour
         SpriteRenderer cockroachSprite = GetComponentInChildren<SpriteRenderer>();
         int sortingLayerId = cockroachSprite != null ? cockroachSprite.sortingLayerID : 0;
         int baseOrder = (cockroachSprite != null ? cockroachSprite.sortingOrder : 0) + sortingOrder;
+
+        BarSortingLayerId = sortingLayerId;
+        BarBaseOrder = baseOrder;
 
         barRoot = new GameObject(GetType().Name + "_" + gameObject.name);
 
@@ -138,7 +168,10 @@ public abstract class OverheadBar : MonoBehaviour
         stack.Report(Slot, visible, TotalHeight);
 
         if (!visible)
+        {
+            AfterBarUpdate(false, 0f);
             return;
+        }
 
         float value = Mathf.Clamp01(Value01());
 
@@ -155,6 +188,8 @@ public abstract class OverheadBar : MonoBehaviour
         // Sit on top of whatever is stacked below this bar.
         float centerY = stack.GetBottomY(Slot) + TotalHeight * 0.5f;
         barRoot.transform.position = new Vector3(stack.CenterX, centerY, 0f);
+
+        AfterBarUpdate(true, alpha);
     }
 
     private void OnDisable()
@@ -170,6 +205,8 @@ public abstract class OverheadBar : MonoBehaviour
 
     private void OnDestroy()
     {
+        OnBarDestroyed();
+
         // Clean up the objects we created (e.g. when the cockroach dies and is destroyed).
         if (barRoot != null)
             Destroy(barRoot);
