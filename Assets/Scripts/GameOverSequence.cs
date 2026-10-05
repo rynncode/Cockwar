@@ -4,15 +4,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-/// <summary>
-/// Game over: once the loser's death is finished, the camera glides and zooms to the winner,
-/// a pixel-art "WINNER" appears above their head, and after a few seconds a panel with
-/// Retry and Home buttons fades in.
-/// TurnManager calls Begin when the match ends. The panel is your own UI: duplicate your
-/// Pause panel, keep two buttons, and drag them into the fields below.
-/// </summary>
 public class GameOverSequence : MonoBehaviour
 {
+    [Header("Audio")]
+    [Tooltip("Background music AudioSource to stop when the game ends.")]
+    public AudioSource bgmSource;
+
     [Header("Camera")]
     [Tooltip("Zoom on the winner (Orthographic Size). Smaller = closer.")]
     public float zoom = 30f;
@@ -65,7 +62,6 @@ public class GameOverSequence : MonoBehaviour
 
     private bool started;
 
-    // The winner text follows the winner from LateUpdate.
     private PixelNumber winnerLabel;
     private Transform winnerTransform;
     private OverheadStack winnerStack;
@@ -75,19 +71,18 @@ public class GameOverSequence : MonoBehaviour
 
     private void Awake()
     {
-        // Start hidden, whatever state the panel was saved in.
         if (panel != null)
             panel.SetActive(false);
     }
 
-    /// <summary>
-    /// Starts the game-over sequence. winner is null for a draw (nobody left alive).
-    /// Called by TurnManager.
-    /// </summary>
     public void Begin(CockroachMovement winner)
     {
         if (started) return;
         started = true;
+
+        // Stop background music as soon as the sequence begins
+        if (bgmSource != null)
+            bgmSource.Stop();
 
         StartCoroutine(Run(winner));
     }
@@ -96,7 +91,6 @@ public class GameOverSequence : MonoBehaviour
     {
         if (winner != null)
         {
-            // Camera glides and zooms to the winner.
             CameraController cam = FindFirstObjectByType<CameraController>();
             if (cam != null)
             {
@@ -114,11 +108,8 @@ public class GameOverSequence : MonoBehaviour
         yield return ShowPanel();
     }
 
-    // ---------------- Winner text ----------------
-
     private void ShowWinnerText(CockroachMovement winner)
     {
-        // Draw on the winner's sorting layer, well above its sprite.
         SpriteRenderer winnerSprite = winner.GetComponent<SpriteRenderer>();
         if (winnerSprite == null)
             winnerSprite = winner.GetComponentInChildren<SpriteRenderer>();
@@ -135,7 +126,6 @@ public class GameOverSequence : MonoBehaviour
         labelShownAt = Time.time;
     }
 
-    // LateUpdate so the text follows the winner AFTER it has moved this frame.
     private void LateUpdate()
     {
         if (winnerLabel == null || winnerTransform == null)
@@ -143,12 +133,10 @@ public class GameOverSequence : MonoBehaviour
 
         float age = Time.time - labelShownAt;
 
-        // Pop in: grows from nothing, with a little overshoot.
         float t = Mathf.Clamp01(age / PopInTime);
         float scale = t < 1f ? 1.2f * Mathf.Sin(t * Mathf.PI * 0.5f) : 1f;
         winnerLabel.Transform.localScale = new Vector3(scale, scale, 1f);
 
-        // Sit above the head and any bars, bobbing in whole font pixels so it stays crisp.
         float halfHeight = PixelNumber.HeightInPixels * 0.5f * textPixelSize;
         float baseY = winnerStack.GetBottomY(OverheadStack.SlotLabel) + textGapAboveHead + halfHeight;
         float bob = Mathf.Round(Mathf.Sin(age * 3f) * bobPixels) * textPixelSize;
@@ -156,13 +144,11 @@ public class GameOverSequence : MonoBehaviour
         winnerLabel.Transform.position = new Vector3(winnerStack.CenterX, baseY + bob, 0f);
     }
 
-    // ---------------- Panel ----------------
-
     private IEnumerator ShowPanel()
     {
         if (panel == null)
         {
-            Debug.LogWarning("GameOverSequence: no Panel is assigned, so there is nothing to show. Duplicate your Pause panel and drag it into the Panel field.");
+            Debug.LogWarning("GameOverSequence: no Panel is assigned.");
             yield break;
         }
 
@@ -177,10 +163,9 @@ public class GameOverSequence : MonoBehaviour
             group = panel.AddComponent<CanvasGroup>();
 
         group.alpha = 0f;
-        group.interactable = false; // not clickable until it has finished appearing
+        group.interactable = false;
         panel.SetActive(true);
 
-        // Fade in and grow from slightly small. Unscaled time, so it works even if the game is paused.
         Vector3 fullScale = panel.transform.localScale;
         float elapsed = 0f;
 
@@ -200,10 +185,6 @@ public class GameOverSequence : MonoBehaviour
         panel.transform.localScale = fullScale;
     }
 
-    /// <summary>
-    /// Gives the button exactly one job. A duplicated Pause button still carries the Pause
-    /// panel's click actions (set up in the Inspector), so those are switched off first.
-    /// </summary>
     private void SetUpButton(Button button, UnityEngine.Events.UnityAction action)
     {
         if (button == null)
