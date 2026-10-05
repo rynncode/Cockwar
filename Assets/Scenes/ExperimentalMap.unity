@@ -428,7 +428,7 @@ MonoBehaviour:
   arrow: {fileID: 977969642}
   distanceText: {fileID: 652734422}
   edgePadding: 60
-  worldUnitsPerDisplayUnit: 10
+  worldUnitsPerDisplayUnit: 1
 --- !u!114 &91881085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1683,8 +1683,8 @@ MonoBehaviour:
   edgeFadeDistance: 50
   edgeLevel: 0.12
   minRegionArea: 200
-  caveAmount: 1
-  caveWidth: 0.178
+  caveAmount: 0.3
+  caveWidth: 0.15
   caveFeatureSize: 50
   caveMinDepth: 50
   grassTiles:
@@ -1708,7 +1708,7 @@ MonoBehaviour:
   grassThickness: 2
   terrainSortingOrder: -10
   turnManager: {fileID: 780781123}
-  spawnDropHeight: 4
+  spawnDropHeight: 2
   spawnFlatHalfWidth: 6
   spawnMaxSlope: 3
   spawnEdgeMargin: 40
@@ -3948,6 +3948,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e80b841ed04347045be88ede11b65936, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverSequence
+  bgmSource: {fileID: 204318162}
   zoom: 30
   smoothTime: 0.8
   winnerText: WINNER
@@ -5090,6 +5091,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pauseMenu: {fileID: 1718553183}
+  bgmSource: {fileID: 204318162}
 --- !u!1 &1753875059
 GameObject:
   m_ObjectHideFlags: 0
