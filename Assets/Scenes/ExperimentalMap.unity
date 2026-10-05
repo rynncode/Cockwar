@@ -825,7 +825,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2032f37612c338a4ca8257dc2de203fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Stamina
-  maxStamina: 100
+  maxStamina: 50
   drainPerSecond: 2
   minJumpCost: 1
   maxJumpCost: 5
@@ -3269,10 +3269,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2032f37612c338a4ca8257dc2de203fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Stamina
-  maxStamina: 100
+  maxStamina: 50
   drainPerSecond: 2
-  minJumpCost: 1
-  maxJumpCost: 5
+  minJumpCost: 5
+  maxJumpCost: 10
 --- !u!114 &777903170
 MonoBehaviour:
   m_ObjectHideFlags: 0
