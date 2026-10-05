@@ -331,7 +331,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPanel
   canvas: {fileID: 0}
   turnManager: {fileID: 0}
-  toggleKey: 113
+  toggleKey: 9
   buttonSize: {x: 260, y: 56}
   margin: {x: 20, y: 20}
   fontSize: 26
@@ -1944,6 +1944,7 @@ MonoBehaviour:
   recenterWhenStill: 1
   recenterDelay: 0.5
   recenterSmoothTime: 0.2
+  shakeIntensity: 1
   zoomSpeed: 10
   minZoom: 20
   maxZoom: 100
@@ -3227,7 +3228,7 @@ MonoBehaviour:
   - {fileID: 777903164}
   turnTimeLimit: 25
   endTurnDelay: 3
-  manualEndTurnKey: 9
+  manualEndTurnKey: 116
   gameOverSequence: {fileID: 0}
   skipHealthCountKey: 13
   toggleCameraViewKey: 32
