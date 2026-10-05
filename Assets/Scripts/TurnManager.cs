@@ -28,6 +28,10 @@ using UnityEngine;
 /// "-10" label and counts the number down one by one. The turn is held until
 /// that has finished, and skipHealthCountKey (the main Enter key) skips it.
 ///
+/// Deaths: a dead cockroach plays a short death sequence (see CockroachDeath). The turn
+/// does not move on until that sequence has finished, and when only one player is left
+/// the GameOverSequence takes over (camera to the winner, "WINNER", then the panel).
+///
 /// Dead players are skipped. When only one player is left alive, turns stop
 /// and a message is logged. Step 14 (Game rules) will replace that message
 /// with a real win screen.
@@ -55,6 +59,10 @@ public class TurnManager : MonoBehaviour
     [Header("Manual End Turn")]
     [Tooltip("Press this key to end the current turn immediately. Stands in for a real End Turn button until step 15 (UI) adds one.")]
     public KeyCode manualEndTurnKey = KeyCode.Return;
+
+    [Header("Game Over")]
+    [Tooltip("Plays the winner camera, the WINNER text and the Retry / Home panel when the match ends. Leave empty to find it in the scene automatically.")]
+    public GameOverSequence gameOverSequence;
 
     [Header("Health Countdown")]
     [Tooltip("Press this key to skip the health counting down after a hit and show the final number straight away. KeyCode.Return is the main Enter key; the numpad Enter is a different key (KeypadEnter), so it does nothing here.")]
@@ -119,6 +127,9 @@ public class TurnManager : MonoBehaviour
     private float turnTimeLeft;
     private float endDelayLeft;
     private bool gameOver;
+
+    // A turn ended while a death sequence was still playing; moving on waits until it is done.
+    private bool advancePending;
 
     // --- Read-only state for other scripts (turn UI in step 15) ---
 
@@ -269,6 +280,18 @@ public class TurnManager : MonoBehaviour
     {
         if (gameOver || currentIndex < 0) return;
 
+        // The turn ended while someone's death sequence was playing: wait for it, then carry on.
+        if (advancePending)
+        {
+            if (!IsAnyDeathSequencePlaying())
+            {
+                advancePending = false;
+                AdvanceToNextPlayer();
+            }
+
+            return;
+        }
+
         // Enter while a health bar is counting down: skip the countdown and do nothing else.
         // Returning here also means this same key press can never end the turn (Enter is
         // also the manual end-turn key). The next press, with nothing counting, ends it as usual.
@@ -283,6 +306,14 @@ public class TurnManager : MonoBehaviour
         {
             // Died before firing: nothing left to wait for.
             if (!IsAlive(current))
+            {
+                EndTurn();
+                return;
+            }
+
+            // Everyone else is gone (for example they fell in the acid) and their death
+            // has finished: the match is over, no need to wait for this turn to run out.
+            if (players.Count > 1 && CountAlivePlayers() <= 1 && !IsAnyDeathSequencePlaying())
             {
                 EndTurn();
                 return;
@@ -476,6 +507,14 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     private void AdvanceToNextPlayer()
     {
+        // Someone is still dying (dizzy, then the explosion): wait until that is over, so the
+        // next turn, or the game-over screen, does not start on top of it. Update retries.
+        if (IsAnyDeathSequencePlaying())
+        {
+            advancePending = true;
+            return;
+        }
+
         // With 2+ players in the match, one survivor means the match is over.
         // (With a single cockroach in the scene we keep going so you can test alone.)
         if (players.Count > 1 && CountAlivePlayers() <= 1)
@@ -543,16 +582,54 @@ public class TurnManager : MonoBehaviour
         gameOver = true;
         currentIndex = -1;
 
+        CockroachMovement winner = null;
+
         foreach (CockroachMovement player in players)
         {
             if (IsAlive(player))
             {
-                Debug.Log("TurnManager: game over. Winner: " + player.name);
-                return;
+                winner = player;
+                break;
             }
         }
 
-        Debug.Log("TurnManager: game over. Nobody survived.");
+        if (winner != null)
+        {
+            Debug.Log("TurnManager: game over. Winner: " + winner.name);
+        }
+        else
+        {
+            Debug.Log("TurnManager: game over. Nobody survived.");
+        }
+
+        // Camera to the winner, "WINNER" text, then the Retry / Home panel.
+        // (winner is null for a draw.)
+        if (gameOverSequence == null)
+        {
+            gameOverSequence = FindFirstObjectByType<GameOverSequence>();
+        }
+
+        if (gameOverSequence != null)
+        {
+            gameOverSequence.Begin(winner);
+        }
+    }
+
+    /// <summary>True while any player is still in its death sequence (dizzy, then the explosion).</summary>
+    private bool IsAnyDeathSequencePlaying()
+    {
+        foreach (CockroachMovement player in players)
+        {
+            if (player == null) continue;
+
+            CockroachDeath death = player.GetComponent<CockroachDeath>();
+            if (death != null && death.IsPlaying)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private int CountAlivePlayers()

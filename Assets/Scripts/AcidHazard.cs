@@ -140,6 +140,11 @@ public class AcidHazard : MonoBehaviour
             body.linearVelocity *= 0.3f;
         }
 
+        // It sank in the acid: it can't stand anywhere, so skip the dizzy "wait for the ground" stage of its death.
+        CockroachDeath death = other.GetComponent<CockroachDeath>();
+        if (death != null)
+            death.SkipDizzyStage = true;
+
         // Kill it through the normal health system, so the death animation, the turn
         // system and the game-over check all react exactly as they do to any other death.
         health.TakeDamage(health.CurrentHealth);
