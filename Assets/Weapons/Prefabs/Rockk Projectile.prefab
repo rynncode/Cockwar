@@ -175,3 +175,12 @@ MonoBehaviour:
   explodeOnImpact: 1
   fuseSeconds: 3
   fuseStartsOnFirstHit: 0
+  showFuseVisuals: 1
+  fusePulseColor: {r: 1, g: 0.15, b: 0.1, a: 1}
+  fuseBadgeSize: 0.06
+  rotation: 1
+  spinSpeedAtReferenceSize: 225
+  referenceSize: 9.6
+  minSpinSpeed: 45
+  maxSpinSpeed: 1440
+  faceVelocityAngleOffset: 0

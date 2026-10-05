@@ -89,6 +89,9 @@ public class CockroachShooting : MonoBehaviour
     /// </summary>
     public event System.Action OnFired;
 
+    /// <summary>Raised when the player cancels a charge with the right mouse button. Nothing was fired.</summary>
+    public event System.Action OnChargeCancelled;
+
     /// <summary>
     /// Raised right after a projectile is launched, carrying the projectile
     /// itself. TurnManager uses this to have the camera follow it in flight.
@@ -176,6 +179,14 @@ public class CockroachShooting : MonoBehaviour
             }
         }
 
+        // Right mouse button cancels a charge in progress: nothing is fired and no ammo is used.
+        // The left button is still held at this point; releasing it later does nothing because
+        // the charge is already over (a new shot needs a fresh click).
+        if (isCharging && Input.GetMouseButtonDown(1))
+        {
+            CancelCharge();
+        }
+
         if (isCharging)
         {
             float heldSeconds = Time.time - chargeStartTime;
@@ -188,6 +199,16 @@ public class CockroachShooting : MonoBehaviour
             isCharging = false;
             ChargeRatio01 = 0f;
         }
+    }
+
+    /// <summary>Stops a charge without firing. Safe to call when not charging.</summary>
+    public void CancelCharge()
+    {
+        if (!isCharging) return;
+
+        isCharging = false;
+        ChargeRatio01 = 0f;
+        OnChargeCancelled?.Invoke();
     }
 
     private void Fire()

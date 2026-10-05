@@ -1,5 +1,18 @@
 using UnityEngine;
 
+/// <summary>How a projectile turns while it flies.</summary>
+public enum ProjectileRotation
+{
+    /// <summary>Does not turn on purpose (physics may still turn it if it bounces).</summary>
+    None,
+
+    /// <summary>Tumbles. Smaller projectiles spin faster, larger ones slower.</summary>
+    Spin,
+
+    /// <summary>Rocket: always points along its direction of travel, so the nose follows the arc.</summary>
+    FaceVelocity
+}
+
 /// <summary>
 /// Step 4: Projectile.
 /// Flies using normal Rigidbody2D physics (gravity pulls it into an arc).
@@ -25,6 +38,33 @@ public class Projectile : MonoBehaviour
     [Tooltip("Off = the fuse starts when thrown. On = the fuse starts the first time it touches something.")]
     public bool fuseStartsOnFirstHit = false;
 
+    [Header("Fuse visuals (grenades)")]
+    [Tooltip("Show a countdown above the projectile and pulse its color while the fuse burns.")]
+    public bool showFuseVisuals = true;
+
+    [Tooltip("Color the projectile pulses toward as the fuse runs down.")]
+    public Color fusePulseColor = new Color(1f, 0.15f, 0.1f, 1f);
+
+    [Tooltip("Size of the countdown badge, as a fraction of the camera's half-height, so it stays readable at any zoom.")]
+    public float fuseBadgeSize = 0.06f;
+
+    [Header("Rotation")]
+    [Tooltip("None = no turning. Spin = tumbles (smaller = faster). FaceVelocity = rocket, points where it is going.")]
+    public ProjectileRotation rotation = ProjectileRotation.None;
+
+    [Tooltip("Spin only. Degrees per second for a projectile of the Reference Size.")]
+    public float spinSpeedAtReferenceSize = 360f;
+
+    [Tooltip("Spin only. Physical size (collider width in world units) that spins at the speed above. Half the size spins twice as fast. The default projectile is 6.")]
+    public float referenceSize = 6f;
+
+    [Tooltip("Spin only. Slowest and fastest spin allowed, in degrees per second.")]
+    public float minSpinSpeed = 45f;
+    public float maxSpinSpeed = 1440f;
+
+    [Tooltip("FaceVelocity only. Extra angle if the art does not point right: 0 = art points right, -90 = art points up, 90 = points down.")]
+    public float faceVelocityAngleOffset = 0f;
+
     /// <summary>
     /// Fires exactly once, right before this projectile is destroyed —
     /// whether that's from hitting something or from maxLifetime running out.
@@ -39,6 +79,12 @@ public class Projectile : MonoBehaviour
     private bool hasNotifiedLanded;
     private bool fuseRunning;
     private float fuseTimer;
+    private float fuseTotal;
+
+    /// <summary>True while a fuse is burning. FuseVisual reads these three.</summary>
+    public bool FuseRunning => fuseRunning;
+    public float FuseTimeLeft => fuseTimer;
+    public float FuseTotal => fuseTotal;
 
     private void Awake()
     {
@@ -58,6 +104,10 @@ public class Projectile : MonoBehaviour
     {
         fuseRunning = true;
         fuseTimer = fuseSeconds;
+        fuseTotal = fuseSeconds;
+
+        // The countdown badge and the color pulse are drawn by a helper component.
+        if (showFuseVisuals && GetComponent<FuseVisual>() == null) gameObject.AddComponent<FuseVisual>();
     }
 
     private void Update()
@@ -86,6 +136,57 @@ public class Projectile : MonoBehaviour
     public void Launch(Vector2 direction, float speed)
     {
         body.linearVelocity = direction * speed;
+        ApplyRotationMode(direction);
+    }
+
+    private void ApplyRotationMode(Vector2 direction)
+    {
+        if (rotation == ProjectileRotation.Spin)
+        {
+            // Smaller projectile = faster spin: speed scales with referenceSize / size.
+            float size = Mathf.Max(0.01f, PhysicalSize());
+            float spin = Mathf.Clamp(spinSpeedAtReferenceSize * referenceSize / size, minSpinSpeed, maxSpinSpeed);
+
+            // Positive angular velocity is counter-clockwise, so spin clockwise when flying right.
+            float turn = direction.x >= 0f ? -1f : 1f;
+
+            body.freezeRotation = false;
+            body.angularVelocity = turn * spin;
+        }
+        else if (rotation == ProjectileRotation.FaceVelocity)
+        {
+            // Physics must not twist the rocket; FixedUpdate sets its angle every step.
+            body.freezeRotation = true;
+            body.angularVelocity = 0f;
+            body.rotation = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + faceVelocityAngleOffset;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (rotation != ProjectileRotation.FaceVelocity || hasHit) return;
+
+        Vector2 velocity = body.linearVelocity;
+        if (velocity.sqrMagnitude < 0.01f) return;   // too slow to have a meaningful direction
+
+        body.rotation = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg + faceVelocityAngleOffset;
+    }
+
+    /// <summary>
+    /// How big the projectile really is, in world units (collider width times scale).
+    /// Computed from the collider's shape because Collider2D.bounds can be empty
+    /// on the very frame a projectile is created.
+    /// </summary>
+    private float PhysicalSize()
+    {
+        Vector3 s = transform.lossyScale;
+        float scale = Mathf.Max(Mathf.Abs(s.x), Mathf.Abs(s.y));
+        Collider2D col = GetComponent<Collider2D>();
+
+        if (col is CircleCollider2D circle) return circle.radius * 2f * scale;
+        if (col is CapsuleCollider2D capsule) return Mathf.Max(capsule.size.x, capsule.size.y) * scale;
+        if (col is BoxCollider2D box) return Mathf.Max(box.size.x, box.size.y) * scale;
+        return scale;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
