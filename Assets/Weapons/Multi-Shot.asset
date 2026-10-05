@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
   m_Name: Multi-Shot
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  displayName: Multi-Shot
+  displayName: Triple T Rocket
   icon: {fileID: 8461174538168114939, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
   projectilePrefab: {fileID: 258008830510017049, guid: 3132cc965485cb442b790d71f6855fe7, type: 3}
   minPower: 10
   maxPower: 70
-  heldSprite: {fileID: -3384824636879892932, guid: e1591d7c19c7b834186e704b0454eab1, type: 3}
+  heldSprite: {fileID: 3672196048842241219, guid: 5270285d2a3965f49994260c542d6ca9, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}
   indicatorDistance: 0
@@ -29,6 +29,6 @@ MonoBehaviour:
   lineWidth: 0.25
   lineMaxLength: 150
   endsTurnOnFire: 1
-  ammo: -1
+  ammo: 3
   multiShotCount: 3
   multiShotSpreadDegrees: 14

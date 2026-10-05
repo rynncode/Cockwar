@@ -17,6 +17,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 258008830510017049, guid: 1c61563c4f13fb744a58dc0f9cf8a1e5, type: 3}
   minPower: 10
   maxPower: 60
+  heldSprite: {fileID: -6830143381277021775, guid: d90a902e18812f94b90f03a9cb468ebd, type: 3}
   aimStyle: 0
   aimIndicatorPrefab: {fileID: 182865699737849725, guid: 79e5e78234fd6ae48884f468cc89b949, type: 3}
   indicatorDistance: 0
@@ -28,4 +29,6 @@ MonoBehaviour:
   lineWidth: 0.25
   lineMaxLength: 150
   endsTurnOnFire: 1
-  ammo: -1
+  ammo: 1
+  multiShotCount: 1
+  multiShotSpreadDegrees: 12

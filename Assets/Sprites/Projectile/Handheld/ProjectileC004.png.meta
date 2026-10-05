@@ -1,22 +1,10 @@
 fileFormatVersion: 2
-guid: ec41fd6c376ff4e46a0d0c7726064800
+guid: 5270285d2a3965f49994260c542d6ca9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3941527200601738835
-    second: Projectileroach-spritesheet_0
-  - first:
-      213: -5959438564636889456
-    second: Projectileroach-spritesheet_1
-  - first:
-      213: 153938813058088207
-    second: Projectileroach-spritesheet_2
-  - first:
-      213: -3740480853085450211
-    second: Projectileroach-spritesheet_3
-  - first:
-      213: 8461174538168114939
-    second: Projectileroach-spritesheet_4
+      213: 3672196048842241219
+    second: ProjectileC004_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -63,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 85
+  spritePixelsToUnits: 24
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -127,111 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Projectileroach-spritesheet_0
+      name: ProjectileC004_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 88
-        width: 27
-        height: 28
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 35e08681b1e13b630800000000000000
-      internalID: 3941527200601738835
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Projectileroach-spritesheet_1
-      rect:
-        serializedVersion: 2
-        x: 33
+        x: 6
         y: 87
-        width: 29
-        height: 27
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 09eed0e2332db4da0800000000000000
-      internalID: -5959438564636889456
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Projectileroach-spritesheet_2
-      rect:
-        serializedVersion: 2
-        x: 66
-        y: 87
-        width: 28
+        width: 25
         height: 33
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f0df87de886e22200800000000000000
-      internalID: 153938813058088207
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Projectileroach-spritesheet_3
-      rect:
-        serializedVersion: 2
-        x: 102
-        y: 87
-        width: 22
-        height: 29
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d1011b66b74271cc0800000000000000
-      internalID: -3740480853085450211
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Projectileroach-spritesheet_4
-      rect:
-        serializedVersion: 2
-        x: 130
-        y: 87
-        width: 27
-        height: 33
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bfe171ac9612c6570800000000000000
-      internalID: 8461174538168114939
+      spriteID: 3c4b5dca9d246f230800000000000000
+      internalID: 3672196048842241219
       vertices: []
       indices: 
       edges: []
@@ -240,7 +140,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 47c07f2c9aefac94ab3587158fee7c44
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -250,11 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Projectileroach-spritesheet_0: 3941527200601738835
-      Projectileroach-spritesheet_1: -5959438564636889456
-      Projectileroach-spritesheet_2: 153938813058088207
-      Projectileroach-spritesheet_3: -3740480853085450211
-      Projectileroach-spritesheet_4: 8461174538168114939
+      ProjectileC004_0: 3672196048842241219
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

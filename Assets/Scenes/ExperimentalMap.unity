@@ -757,7 +757,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CockroachAim
   crosshair: {fileID: 427621462}
   crosshairDistance: 15
-  aimOriginOffset: {x: 0, y: 0.5}
+  aimOriginOffset: {x: 0, y: 0.7}
 --- !u!114 &96414074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2840,7 +2840,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CockroachAim
   crosshair: {fileID: 1493460882}
   crosshairDistance: 15
-  aimOriginOffset: {x: 0, y: 0.5}
+  aimOriginOffset: {x: 0, y: 0.7}
 --- !u!114 &777903162
 MonoBehaviour:
   m_ObjectHideFlags: 0
