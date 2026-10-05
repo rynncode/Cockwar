@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    /// <summary>
+    /// Lets Explosion (and anything else) find the one camera in the scene
+    /// without a search, the same way TerrainGenerator.Instance works.
+    /// </summary>
+    public static CameraController Instance { get; private set; }
+
     Transform target;
     Vector3 velocity = Vector3.zero;
 
@@ -30,6 +36,10 @@ public class CameraController : MonoBehaviour
 
     [Tooltip("How long the re-centring takes. Bigger = slower, gentler.")]
     public float recenterSmoothTime = 0.6f;
+
+    [Header("Screen Shake")]
+    [Tooltip("Overall multiplier for how strong every shake feels. 0 turns shake off entirely.")]
+    public float shakeIntensity = 1f;
 
     [Header("Zoom")]
     [Tooltip("How much each scroll notch changes the zoom. Higher = faster zoom.")]
@@ -67,8 +77,22 @@ public class CameraController : MonoBehaviour
     private bool introActive;
     private float introSmoothTime;
 
+    // The smoothed pan position, BEFORE shake is added. SmoothDamp needs to
+    // track this clean value rather than transform.position directly — if it
+    // read transform.position (which includes last frame's shake jitter),
+    // the smoothing would chase its own shake and the camera would judder.
+    private Vector3 smoothedPosition;
+
+    // Shake: strength decays linearly to 0 over shakeTotalDuration.
+    private float shakeMagnitude;
+    private float shakeTimeLeft;
+    private float shakeTotalDuration;
+
     private void Awake()
     {
+        Instance = this;
+        smoothedPosition = transform.position;
+
         // Fallback only, in case nothing has called SetTarget yet
         // (e.g. testing this scene without a TurnManager in it).
         GameObject fallback = GameObject.FindGameObjectWithTag("Player");
@@ -111,13 +135,53 @@ public class CameraController : MonoBehaviour
             cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetZoom, ref zoomVelocity, zoomSmooth);
         }
 
-        if (target == null) return;
+        Vector3 shakeOffset = Vector3.zero;
+        if (shakeTimeLeft > 0f)
+        {
+            shakeTimeLeft -= Time.deltaTime;
+
+            // 1 at the start of the shake, 0 once it's over — a straight linear fade.
+            float remaining = shakeTotalDuration > 0f ? Mathf.Clamp01(shakeTimeLeft / shakeTotalDuration) : 0f;
+            float currentMagnitude = shakeMagnitude * remaining;
+            shakeOffset = (Vector3)(Random.insideUnitCircle * currentMagnitude);
+        }
+
+        if (target == null)
+        {
+            transform.position = smoothedPosition + shakeOffset;
+            return;
+        }
 
         UpdateFocusPoint();
 
         Vector3 targetPosition = new Vector3(focusPoint.x, focusPoint.y, target.position.z) + positionffset;
         float panSmooth = introActive ? introSmoothTime : smoothTime;
-        transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, panSmooth);
+        smoothedPosition = Vector3.SmoothDamp(smoothedPosition, targetPosition, ref velocity, panSmooth);
+
+        transform.position = smoothedPosition + shakeOffset;
+    }
+
+    /// <summary>
+    /// Shakes the screen. If a shake is already running, a new one only
+    /// takes over when it's actually stronger than how much the current one
+    /// has already faded — so a small explosion right after a big one
+    /// doesn't cut the big shake short.
+    /// </summary>
+    public void Shake(float magnitude, float duration)
+    {
+        magnitude *= shakeIntensity;
+        if (magnitude <= 0f) return;
+
+        float currentRemainingMagnitude = shakeTotalDuration > 0f
+            ? shakeMagnitude * Mathf.Clamp01(shakeTimeLeft / shakeTotalDuration)
+            : 0f;
+
+        if (magnitude >= currentRemainingMagnitude)
+        {
+            shakeMagnitude = magnitude;
+            shakeTimeLeft = duration;
+            shakeTotalDuration = duration;
+        }
     }
 
     /// <summary>
