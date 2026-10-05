@@ -170,5 +170,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a786e5d6afb31bb48999e801f0e4ce4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  maxLifetime: 10
+  maxLifetime: 20
   explosionPrefab: {fileID: 3412598755270650874, guid: ff3b1c2ec0418f745a7038aaee789b0a, type: 3}
+  explodeOnImpact: 0
+  fuseSeconds: 5
+  fuseStartsOnFirstHit: 1

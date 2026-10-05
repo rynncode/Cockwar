@@ -10,7 +10,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     [Tooltip("Destroys the projectile automatically if it never hits anything, so stray shots don't fly forever.")]
-    public float maxLifetime = 10f;
+    public float maxLifetime = 20f;
 
     [Tooltip("Explosion prefab to spawn at the impact point. Leave empty to just disappear silently, like before step 5.")]
     public GameObject explosionPrefab;

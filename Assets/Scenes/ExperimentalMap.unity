@@ -428,7 +428,7 @@ MonoBehaviour:
   arrow: {fileID: 977969642}
   distanceText: {fileID: 652734422}
   edgePadding: 60
-  worldUnitsPerDisplayUnit: 20
+  worldUnitsPerDisplayUnit: 10
 --- !u!114 &91881085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -802,7 +802,7 @@ MonoBehaviour:
   - {fileID: -1274003553, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
   - {fileID: -1986291300, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
   dizzyFramesPerSecond: 10
-  dizzyDuration: 2
+  dizzyDuration: 3
   settleStillTime: 0.3
   stillSpeed: 0.3
   maxSettleWait: 6
@@ -2775,9 +2775,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachDeath
   deathAnimationDuration: 4
-  dizzyFrames: []
+  dizzyFrames:
+  - {fileID: 7038783864510557576, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 84575763, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -1019203958, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 1184779177, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -162576947, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 399256942, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -617444127, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 45276215, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -1488851308, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -864971171, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 519014240, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 1925964819, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: 962388688, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -777827565, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -1274003553, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
+  - {fileID: -1986291300, guid: 75181a0821399cb48a904014fc5f5745, type: 3}
   dizzyFramesPerSecond: 10
-  dizzyDuration: 1.6
+  dizzyDuration: 3
   settleStillTime: 0.3
   stillSpeed: 0.3
   maxSettleWait: 6
@@ -3268,7 +3284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DistanceHud
   turnManager: {fileID: 0}
-  unitsPerMeter: 10
+  unitsPerMeter: 1
   showDirectionArrows: 1
   fontSize: 36
   topMargin: 30
