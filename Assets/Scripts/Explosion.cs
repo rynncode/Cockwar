@@ -33,6 +33,20 @@ public class Explosion : MonoBehaviour
     [Tooltip("Step 12: radius of the crater carved into the ground. Leave at 0 to just reuse Blast Radius.")]
     public float craterRadius = 0f;
 
+    [Header("Camera Shake")]
+    [Tooltip("How strongly this explosion shakes the screen, as a multiplier on Max Knockback — so a bigger weapon automatically shakes harder with no extra tuning. 0 = no shake from this explosion.")]
+    public float shakeMultiplier = 0.03f;
+
+    [Tooltip("How long the screen shake lasts, in seconds.")]
+    public float shakeDuration = 0.35f;
+
+    [Header("Debris")]
+    [Tooltip("Optional. A Particle System PREFAB (not a child of this object) that bursts dirt debris outward — make one standalone prefab and drag the same one into every weapon's Explosion prefab, rather than building a separate one each time. Leave empty to skip.")]
+    public ParticleSystem debrisParticles;
+
+    [Tooltip("Debris particle count per point of Max Knockback, so a bigger weapon throws more debris automatically.")]
+    public float debrisCountPerKnockback = 0.5f;
+
     /// <summary>
     /// Everything the blast found, filled in once at spawn time.
     /// Damage (step 6) and knockback (step 7) will read this list.
@@ -43,7 +57,46 @@ public class Explosion : MonoBehaviour
     {
         DetectHits();
         CarveTerrain();
+        ShakeCamera();
+        PlayDebris();
         Destroy(gameObject, effectDuration);
+    }
+
+    /// <summary>
+    /// Shakes the screen, scaled by this explosion's own Max Knockback so a
+    /// bigger weapon automatically shakes harder with no per-weapon tuning.
+    /// Does nothing if there is no CameraController in the scene.
+    /// </summary>
+    private void ShakeCamera()
+    {
+        if (CameraController.Instance == null) return;
+
+        float magnitude = maxKnockback * shakeMultiplier;
+        CameraController.Instance.Shake(magnitude, shakeDuration);
+    }
+
+    /// <summary>
+    /// Instantiates the optional debris Particle System prefab at the blast
+    /// position and bursts it, scaled the same way as the shake. Instantiated
+    /// fresh rather than carried as a child, so the SAME debris prefab can be
+    /// shared across every weapon's Explosion prefab instead of needing a
+    /// separate copy built inside each one. The instance outlives this
+    /// Explosion object on its own (effectDuration is usually much shorter
+    /// than how long debris takes to fall and settle) — in the debris
+    /// prefab's own Inspector, set Stop Action to Destroy so it cleans
+    /// itself up once every particle has finished.
+    /// </summary>
+    private void PlayDebris()
+    {
+        if (debrisParticles == null) return;
+
+        ParticleSystem instance = Instantiate(debrisParticles, transform.position, Quaternion.identity);
+
+        ParticleSystem.EmissionModule emission = instance.emission;
+        int count = Mathf.Max(1, Mathf.RoundToInt(maxKnockback * debrisCountPerKnockback));
+        emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, (short)count) });
+
+        instance.Play();
     }
 
     /// <summary>

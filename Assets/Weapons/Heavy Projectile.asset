@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Heavy Projectile
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Heavy Projectile
-  icon: {fileID: 0}
+  icon: {fileID: -5959438564636889456, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
   projectilePrefab: {fileID: 258008830510017049, guid: 09c5565e024191d4587a11dfa7351ef4, type: 3}
   minPower: 10
   maxPower: 55
+  heldSprite: {fileID: -5959438564636889456, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}
   indicatorDistance: 0

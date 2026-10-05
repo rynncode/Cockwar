@@ -136,3 +136,7 @@ MonoBehaviour:
   maxKnockback: 100
   effectDuration: 1.7
   craterRadius: 30
+  shakeMultiplier: 0.03
+  shakeDuration: 0.35
+  debrisParticles: {fileID: 7461608072757855242, guid: 33735d80d196e3b4fb0b925f926fb3d4, type: 3}
+  debrisCountPerKnockback: 0.5
