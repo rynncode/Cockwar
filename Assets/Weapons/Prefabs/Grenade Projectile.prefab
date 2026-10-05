@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6518029360645401782, guid: 8114665b872bf73499001b2d78769499, type: 3}
+  m_Sprite: {fileID: 153938813058088207, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -110,7 +110,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1.6
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   maxLifetime: 10
-  explosionPrefab: {fileID: 5379489956093211821, guid: 599f1c7cff333ea409d423d3960b448b, type: 3}
-  explodeOnImpact: 1
+  explosionPrefab: {fileID: 5379489956093211821, guid: 4c42d8a7e41e0d1478d2c4b83839b2b4, type: 3}
+  explodeOnImpact: 0
   fuseSeconds: 3
   fuseStartsOnFirstHit: 0
