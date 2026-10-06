@@ -5896,6 +5896,13 @@ MonoBehaviour:
   staggerTime: 0.4
   holdTime: 0.5
   wobbleDegrees: 10
+  splatSfx: {fileID: 8300000, guid: 636d0057e40e93841aff06a261b44a25, type: 3}
+  swarmInSfx: {fileID: 8300000, guid: 266881cc9cd7b304c8a97b8838be8198, type: 3}
+  swarmOutSfx: {fileID: 8300000, guid: 266881cc9cd7b304c8a97b8838be8198, type: 3}
+  sfxMixerGroup: {fileID: 0}
+  sfxVolume: 1
+  swarmSfxCutoff: 0.6
+  sfxTailFade: 0.25
   onCovered:
     m_PersistentCalls:
       m_Calls:
