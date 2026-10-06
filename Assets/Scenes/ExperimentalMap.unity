@@ -964,7 +964,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 50f805c944b7a9e409eb5b58bbbaa3f3, type: 3}
   - {fileID: 8300000, guid: 701aebd0eb031864b8bee3d2688b00c1, type: 3}
   jumpVolume: 0.7
-  landSounds: []
+  landSounds:
+  - {fileID: 8300000, guid: e91b28bc08a0b7b488092f9b48b964dd, type: 3}
+  - {fileID: 8300000, guid: b397beb6ec24ab74bb8ea87e022478af, type: 3}
   landVolume: 0.6
   minAirTimeForLand: 0.15
   hurtSounds:
@@ -3448,9 +3450,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e91b28bc08a0b7b488092f9b48b964dd, type: 3}
   footstepVolume: 0.7
   footstepInterval: 0.67
-  jumpSounds: []
+  jumpSounds:
+  - {fileID: 8300000, guid: 50f805c944b7a9e409eb5b58bbbaa3f3, type: 3}
+  - {fileID: 8300000, guid: 701aebd0eb031864b8bee3d2688b00c1, type: 3}
   jumpVolume: 0.7
-  landSounds: []
+  landSounds:
+  - {fileID: 8300000, guid: b397beb6ec24ab74bb8ea87e022478af, type: 3}
+  - {fileID: 8300000, guid: e91b28bc08a0b7b488092f9b48b964dd, type: 3}
   landVolume: 0.6
   minAirTimeForLand: 0.15
   hurtSounds:
