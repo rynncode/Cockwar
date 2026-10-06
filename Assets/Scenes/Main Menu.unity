@@ -5882,10 +5882,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachSwarmTransition
   swarmRoot: {fileID: 1252311068}
-  roachSprite: {fileID: -352294251984327948, guid: 6c4eaa096cacbb442b0c61c6e61b448d, type: 3}
+  roachSprite: {fileID: -1764693192818211631, guid: 6ea5cab600ef26f499dcd328a74b4588, type: 3}
   backdrop: {fileID: 423767598}
   backdropColor: {r: 0, g: 0, b: 0, a: 1}
-  splatSprite: {fileID: 5888780168923847985, guid: 7f7c3a043caf1694a95b2c51311a4cc5, type: 3}
+  splatSprite: {fileID: 5888780168923847985, guid: 3bedafbe08c679c4487307ec33b2c9d5, type: 3}
   splatScreenFraction: 1.6
   splatTime: 0.25
   splatHold: 0.6
@@ -5896,9 +5896,9 @@ MonoBehaviour:
   staggerTime: 0.4
   holdTime: 0.5
   wobbleDegrees: 10
-  splatSfx: {fileID: 8300000, guid: 636d0057e40e93841aff06a261b44a25, type: 3}
-  swarmInSfx: {fileID: 8300000, guid: 266881cc9cd7b304c8a97b8838be8198, type: 3}
-  swarmOutSfx: {fileID: 8300000, guid: 266881cc9cd7b304c8a97b8838be8198, type: 3}
+  splatSfx: {fileID: 8300000, guid: 250ae5e264ddae0479c893da72abd0d8, type: 3}
+  swarmInSfx: {fileID: 8300000, guid: 083a35cd715978c4dad775e0e0a9785d, type: 3}
+  swarmOutSfx: {fileID: 8300000, guid: 083a35cd715978c4dad775e0e0a9785d, type: 3}
   sfxMixerGroup: {fileID: 0}
   sfxVolume: 1
   swarmSfxCutoff: 0.6
