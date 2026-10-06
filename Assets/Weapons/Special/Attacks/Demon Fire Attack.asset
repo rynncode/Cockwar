@@ -14,4 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
-
+  damagePerTick: 5
+  ticks: 6
+  tickInterval: 1
+  hurtsCaller: 1
+  wholeMap: 1
+  areaHalfWidth: 120
+  burnHeight: 8
+  flameSpacing: 12
+  flameSize: 30
+  pitchforkSize: 30
+  spreadSpeed: 400
+  flameTint: {r: 0.6132076, g: 0.12612657, b: 0.08388218, a: 1}
+  flameFrames: []
+  summonSound: {fileID: 8300000, guid: 4c70959822821654aba968b680323ff4, type: 3}
+  fireLoop: {fileID: 8300000, guid: f65ddec7906bdb443b4161c1864aef44, type: 3}
+  burnTickSound: {fileID: 8300000, guid: 88c9c3882d93fb744927d2e6ad558163, type: 3}
+  volume: 0.8

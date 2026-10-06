@@ -14,4 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
+  rocketCount: 40
+  damagePerRocket: 40
+  edgeDamageFraction: 0.5
+  blastRadius: 12
+  craterRadius: 11
+  knockback: 45
   explosionPrefab: {fileID: 5379489956093211821, guid: 73554bde830900045a94a39973f783f8, type: 3}
+  aimedAtPlayersShare: 0.323
+  scatter: 2
+  planeSpeed: 110
+  planeHeightAboveGround: 45
+  planeSize: 34
+  rocketSize: 6
+  rocketGravity: 70
+  buttonSeconds: 0.9
+  planeSprite: {fileID: 0}
+  rocketSprite: {fileID: 0}
+  buttonSound: {fileID: 8300000, guid: 2d5528dda1049f2419a9f121d3e220bc, type: 3}
+  planeSound: {fileID: 8300000, guid: d9aa75a841c028d45a73c2142daed7ba, type: 3}
+  rocketLaunchSound: {fileID: 8300000, guid: 525fdf0e6640b544ea0c6ea4c96cc37f, type: 3}
+  volume: 0.8

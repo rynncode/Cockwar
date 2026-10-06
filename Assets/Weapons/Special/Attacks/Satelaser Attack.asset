@@ -14,4 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
+  damage: 50
+  beamWidth: 20
+  beamDepth: 10
+  holeRadius: 20
   impactExplosionPrefab: {fileID: 5379489956093211821, guid: 73554bde830900045a94a39973f783f8, type: 3}
+  impactKnockback: 30
+  hoverHeight: 45
+  ufoSize: 28
+  entrySeconds: 3
+  chargeSeconds: 3
+  beamSeconds: 1.3
+  ufoSprite: {fileID: 0}
+  targetSprite: {fileID: 0}
+  beamGlow: {r: 0.35, g: 0.75, b: 1, a: 0.35}
+  beamCore: {r: 0.9, g: 1, b: 0.9, a: 1}
+  arriveSound: {fileID: 8300000, guid: 6e464523515418f4f98766d0ecafc79f, type: 3}
+  chargeSound: {fileID: 8300000, guid: 83ba88c1a0e124d4798d7136a03b937a, type: 3}
+  laserSound: {fileID: 8300000, guid: bac97d272450d6c449501fee8ba7ea46, type: 3}
+  volume: 0.8

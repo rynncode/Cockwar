@@ -14,4 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
+  ballSize: 3
+  ballGravity: 3
+  ballSprite: {fileID: 0}
+  warningSeconds: 0.7
+  spawnHeight: 300
+  fallSpeed: 70
+  fallAcceleration: 160
+  meteorSize: 50
+  meteorSprite: {fileID: 0}
+  fallSound: {fileID: 8300000, guid: ecc9493ee14d593419089b1b08655a94, type: 3}
+  fallVolume: 0.821
   explosionPrefab: {fileID: 5379489956093211821, guid: a8f5808353efb1143aa08157c744f7a7, type: 3}
+  damage: 40
+  edgeDamageFraction: 0.706
+  blastRadius: 50
+  craterRadius: 50
+  knockback: 80

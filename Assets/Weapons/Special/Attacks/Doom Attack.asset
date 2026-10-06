@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
-  nukeChance: 0.15
+  nukeChance: 0.2
   countdownSeconds: 10
   damage: 100000
   craterRadius: 320
@@ -22,12 +22,12 @@ MonoBehaviour:
   cloudWidth: 560
   explosionScale: 7
   aftermathSeconds: 3
-  bombSize: 16
+  bombSize: 100
   landingOffset: 12
   bombSprite: {fileID: 0}
   landSound: {fileID: 0}
-  tickSound: {fileID: 0}
-  alarmLoop: {fileID: 0}
-  boomSound: {fileID: 0}
-  dudSound: {fileID: 0}
+  tickSound: {fileID: 8300000, guid: 88c9c3882d93fb744927d2e6ad558163, type: 3}
+  alarmLoop: {fileID: 8300000, guid: 89950d356674d6041808e6934ef93ca5, type: 3}
+  boomSound: {fileID: 8300000, guid: 40361c5053889ee4998faeb6780d58f1, type: 3}
+  dudSound: {fileID: 8300000, guid: 48d34afad4b80394c9171a775fd9acb8, type: 3}
   volume: 1
