@@ -1667,8 +1667,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 206166461f55d4f4c879df020a7de555, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainGenerator
-  mapWidth: 800
-  mapHeight: 400
+  mapWidth: 1200
+  mapHeight: 500
   pixelsPerUnit: 3
   randomSeedEachGame: 1
   seed: 12345
@@ -2129,7 +2129,7 @@ MonoBehaviour:
   shakeIntensity: 1
   zoomSpeed: 10
   minZoom: 20
-  maxZoom: 100
+  maxZoom: 300
   zoomSmoothTime: 0.3
 --- !u!1 &531462975
 GameObject:

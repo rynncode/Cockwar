@@ -13,6 +13,16 @@ public enum AimStyle
     Line
 }
 
+/// <summary>Which row of the weapon panel a weapon sits in. Rows appear in this order, empty rows are left out.</summary>
+public enum WeaponCategory
+{
+    Launchers,
+    Grenades,
+    Explosives,
+    Special,
+    Utilities
+}
+
 /// <summary>
 /// Step 13: one weapon. Create one asset per weapon with
 /// Assets > Create > Cockwar > Weapon, then drag the assets into the
@@ -27,6 +37,17 @@ public class WeaponData : ScriptableObject
 
     [Tooltip("Optional. Shown next to the name in the panel.")]
     public Sprite icon;
+
+    [Header("Weapon Panel")]
+    [Tooltip("Which row of the weapon panel this weapon is in. The row's number key selects it.")]
+    public WeaponCategory category = WeaponCategory.Launchers;
+
+    [Tooltip("One or two short sentences shown in the weapon panel when the weapon is pointed at.")]
+    [TextArea(2, 4)]
+    public string description = "";
+
+    [Tooltip("Rounds at the start of the match this weapon is locked for (a round = everyone has had a turn). 0 = usable from the first turn.")]
+    public int roundDelay = 0;
 
     [Tooltip("Prefab that has the Projectile script on it.")]
     public GameObject projectilePrefab;

@@ -38,6 +38,7 @@ public class DistanceHud : MonoBehaviour
 
     private GameObject canvasObject;
     private TextMeshProUGUI text;
+    private RectTransform textRect;
     private readonly StringBuilder builder = new StringBuilder();
     private string lastText = null;
     private float updateTimer;
@@ -80,6 +81,7 @@ public class DistanceHud : MonoBehaviour
 
         // Anchored to the top-centre of the screen.
         RectTransform rect = text.rectTransform;
+        textRect = rect;
         rect.anchorMin = new Vector2(0.5f, 1f);
         rect.anchorMax = new Vector2(0.5f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
@@ -101,6 +103,9 @@ public class DistanceHud : MonoBehaviour
 
     private void Refresh()
     {
+        // Sit below the turn timer, which also lives at the top middle.
+        textRect.anchoredPosition = new Vector2(0f, -(topMargin + TurnTimerHud.ReservedTopSpace));
+
         CockroachMovement current = turnManager != null ? turnManager.CurrentPlayer : null;
 
         // No turn running (intro, or game over): show nothing.

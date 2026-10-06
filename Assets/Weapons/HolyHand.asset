@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Holy Hand Grenade
   icon: {fileID: -6830143381277021775, guid: 41f9f9805c89a564f90bf0b8e898c55d, type: 3}
+  category: 1
+  description: Bounces like a grenade, then delivers a massive blast that blows a crater in the ground.
+  roundDelay: 0
   projectilePrefab: {fileID: 258008830510017049, guid: 1c61563c4f13fb744a58dc0f9cf8a1e5, type: 3}
-  minPower: 10
-  maxPower: 60
+  minPower: 17
+  maxPower: 104
   heldSprite: {fileID: -6830143381277021775, guid: d90a902e18812f94b90f03a9cb468ebd, type: 3}
   aimStyle: 0
   aimIndicatorPrefab: {fileID: 182865699737849725, guid: 79e5e78234fd6ae48884f468cc89b949, type: 3}

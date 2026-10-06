@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Caca
   icon: {fileID: -6518029360645401782, guid: 8114665b872bf73499001b2d78769499, type: 3}
+  category: 0
+  description: The trusty standby. Lob it in an arc and it bursts the moment it touches anything.
+  roundDelay: 0
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
-  minPower: 10
-  maxPower: 70
+  minPower: 17
+  maxPower: 121
   aimStyle: 0
   aimIndicatorPrefab: {fileID: 7147743676298992325, guid: 0fcd2100b48169b409c4cef2074f0132, type: 3}
   indicatorDistance: 0

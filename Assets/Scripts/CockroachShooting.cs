@@ -79,6 +79,26 @@ public class CockroachShooting : MonoBehaviour
         return ammoLeft[index];
     }
 
+    /// <summary>
+    /// The round the match is in (1 = everyone's first turn). TurnManager keeps this up to date;
+    /// a weapon with a Round Delay unlocks once enough rounds have passed.
+    /// </summary>
+    public int Round { get; set; } = 1;
+
+    /// <summary>Rounds until the weapon at this index unlocks. 0 = usable now.</summary>
+    public int RoundsUntilAvailable(int index)
+    {
+        if (weapons == null || index < 0 || index >= weapons.Count || weapons[index] == null) return 0;
+        return Mathf.Max(0, weapons[index].roundDelay + 1 - Round);
+    }
+
+    /// <summary>True if the weapon at this index exists, has ammo left and is not locked by its round delay.</summary>
+    public bool IsWeaponReady(int index)
+    {
+        if (weapons == null || index < 0 || index >= weapons.Count || weapons[index] == null) return false;
+        return GetAmmo(index) != 0 && RoundsUntilAvailable(index) == 0;
+    }
+
     /// <summary>Raised when the selected weapon changes (the panel listens to this).</summary>
     public event System.Action OnWeaponChanged;
 
@@ -132,7 +152,8 @@ public class CockroachShooting : MonoBehaviour
     }
 
     /// <summary>
-    /// Selects the next weapon in the list, wrapping back to the start.
+    /// Selects the next usable weapon in the list, wrapping back to the start
+    /// (empty and still-locked weapons are skipped).
     /// Reuses SelectWeapon, so this is blocked while charging and still
     /// raises OnWeaponChanged for the panel to refresh.
     /// </summary>
@@ -140,15 +161,26 @@ public class CockroachShooting : MonoBehaviour
     {
         if (weapons == null || weapons.Count <= 1) return;
 
-        int nextIndex = (currentWeaponIndex + 1) % weapons.Count;
-        SelectWeapon(nextIndex);
+        int next = FindReadyWeaponAfter(currentWeaponIndex);
+        if (next >= 0) SelectWeapon(next);
     }
 
-    private bool HasAmmo()
+    /// <summary>First usable weapon after the given index, wrapping around. -1 if there is none.</summary>
+    private int FindReadyWeaponAfter(int index)
+    {
+        for (int step = 1; step <= weapons.Count; step++)
+        {
+            int candidate = (index + step) % weapons.Count;
+            if (candidate != index && IsWeaponReady(candidate)) return candidate;
+        }
+
+        return -1;
+    }
+
+    private bool CanFireCurrentWeapon()
     {
         if (CurrentWeapon == null) return true;
-        int left = GetAmmo(currentWeaponIndex);
-        return left < 0 || left > 0;
+        return IsWeaponReady(currentWeaponIndex);
     }
 
     private void Update()
@@ -172,7 +204,7 @@ public class CockroachShooting : MonoBehaviour
             // A click on UI (the Weapons button, the panel) must not start a shot.
             bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
-            if (!overUI && HasAmmo())
+            if (!overUI && CanFireCurrentWeapon())
             {
                 isCharging = true;
                 chargeStartTime = Time.time;
@@ -195,8 +227,9 @@ public class CockroachShooting : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0) && isCharging)
         {
-            Fire();
+            // No longer charging before Fire runs, so Fire can switch weapon if this one runs out.
             isCharging = false;
+            Fire();
             ChargeRatio01 = 0f;
         }
     }
@@ -294,6 +327,13 @@ public class CockroachShooting : MonoBehaviour
         {
             ammoLeft[currentWeaponIndex]--;
             OnWeaponChanged?.Invoke();
+
+            // Just used the last one: have something usable in hand next turn.
+            if (ammoLeft[currentWeaponIndex] == 0)
+            {
+                int next = FindReadyWeaponAfter(currentWeaponIndex);
+                if (next >= 0) SelectWeapon(next);
+            }
         }
 
         // One firing action, even if it launched several projectiles.
