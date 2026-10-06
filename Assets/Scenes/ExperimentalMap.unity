@@ -330,7 +330,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPanel
   turnManager: {fileID: 0}
-  toggleKey: 9
   rightClickOpens: 1
   numberKeysSelectRow: 1
   tileSize: 76
@@ -491,6 +490,7 @@ GameObject:
   - component: {fileID: 96414079}
   - component: {fileID: 96414081}
   - component: {fileID: 96414082}
+  - component: {fileID: 96414083}
   m_Layer: 0
   m_Name: Cockroach
   m_TagString: Player
@@ -587,7 +587,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachMovement
   walkSpeed: 20
-  jumpKey: 32
   minJumpPower: 20
   maxJumpPower: 45
   maxChargeTime: 1
@@ -740,7 +739,6 @@ MonoBehaviour:
   maxPower: 70
   maxChargeTime: 3
   singleWeaponEndsTurn: 1
-  cycleWeaponKey: 9
 --- !u!114 &96414073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -945,6 +943,51 @@ MonoBehaviour:
   gunDistance: 0.4
   gunScale: 1
   faceAimWhileCharging: 1
+--- !u!114 &96414083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96414064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9efb1beb8a2535f49b608a10636dc1c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CockroachSfx
+  footstepSounds:
+  - {fileID: 8300000, guid: b397beb6ec24ab74bb8ea87e022478af, type: 3}
+  - {fileID: 8300000, guid: e91b28bc08a0b7b488092f9b48b964dd, type: 3}
+  footstepVolume: 0.7
+  footstepInterval: 0.67
+  jumpSounds:
+  - {fileID: 8300000, guid: 50f805c944b7a9e409eb5b58bbbaa3f3, type: 3}
+  - {fileID: 8300000, guid: 701aebd0eb031864b8bee3d2688b00c1, type: 3}
+  jumpVolume: 0.7
+  landSounds: []
+  landVolume: 0.6
+  minAirTimeForLand: 0.15
+  hurtSounds:
+  - {fileID: 8300000, guid: fe97754b3880cae49ad90f5d28714262, type: 3}
+  - {fileID: 8300000, guid: 4c20c887de90d4f4fbef3b363cd7f170, type: 3}
+  - {fileID: 8300000, guid: 07f570607f7030949846be8e042059f7, type: 3}
+  - {fileID: 8300000, guid: 7b7b4da05f303cc409c587779fa0a4ff, type: 3}
+  - {fileID: 8300000, guid: 0aecfbd5361f6e94fb47b812484efb78, type: 3}
+  - {fileID: 8300000, guid: 2f0598642973c6545aeee4ab1ecefbfc, type: 3}
+  hurtVolume: 0.683
+  deathSounds:
+  - {fileID: 8300000, guid: 2fcd7451b2841c44a88244b4c7092272, type: 3}
+  - {fileID: 8300000, guid: 2fcd7451b2841c44a88244b4c7092272, type: 3}
+  deathVolume: 1
+  defaultFireSound: {fileID: 0}
+  fireVolume: 0.8
+  chargeLoop: {fileID: 8300000, guid: 9dfa8b4ca87ab8040827efa63a2ddcce, type: 3}
+  chargeVolume: 0.4
+  chargePitchMin: 0.8
+  chargePitchMax: 1.6
+  chargeCancelSound: {fileID: 0}
+  weaponSwitchSound: {fileID: 8300000, guid: 35dd70797827719499992ba8c5e411e7, type: 3}
+  uiVolume: 0.6
 --- !u!1 &124028373
 GameObject:
   m_ObjectHideFlags: 0
@@ -2935,6 +2978,7 @@ GameObject:
   - component: {fileID: 777903172}
   - component: {fileID: 777903174}
   - component: {fileID: 777903175}
+  - component: {fileID: 777903176}
   m_Layer: 0
   m_Name: Cockroach (P2)
   m_TagString: Player
@@ -3021,7 +3065,6 @@ MonoBehaviour:
   maxPower: 70
   maxChargeTime: 3
   singleWeaponEndsTurn: 1
-  cycleWeaponKey: 9
 --- !u!114 &777903161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3084,7 +3127,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CockroachMovement
   walkSpeed: 20
-  jumpKey: 32
   minJumpPower: 20
   maxJumpPower: 45
   maxChargeTime: 1
@@ -3389,6 +3431,49 @@ MonoBehaviour:
   gunDistance: 0.5
   gunScale: 1
   faceAimWhileCharging: 1
+--- !u!114 &777903176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777903157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9efb1beb8a2535f49b608a10636dc1c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CockroachSfx
+  footstepSounds:
+  - {fileID: 8300000, guid: b397beb6ec24ab74bb8ea87e022478af, type: 3}
+  - {fileID: 8300000, guid: e91b28bc08a0b7b488092f9b48b964dd, type: 3}
+  footstepVolume: 0.7
+  footstepInterval: 0.67
+  jumpSounds: []
+  jumpVolume: 0.7
+  landSounds: []
+  landVolume: 0.6
+  minAirTimeForLand: 0.15
+  hurtSounds:
+  - {fileID: 8300000, guid: 0aecfbd5361f6e94fb47b812484efb78, type: 3}
+  - {fileID: 8300000, guid: 7b7b4da05f303cc409c587779fa0a4ff, type: 3}
+  - {fileID: 8300000, guid: 07f570607f7030949846be8e042059f7, type: 3}
+  - {fileID: 8300000, guid: 4c20c887de90d4f4fbef3b363cd7f170, type: 3}
+  - {fileID: 8300000, guid: fe97754b3880cae49ad90f5d28714262, type: 3}
+  - {fileID: 8300000, guid: 2f0598642973c6545aeee4ab1ecefbfc, type: 3}
+  hurtVolume: 0.8
+  deathSounds:
+  - {fileID: 8300000, guid: 2fcd7451b2841c44a88244b4c7092272, type: 3}
+  - {fileID: 8300000, guid: 2fcd7451b2841c44a88244b4c7092272, type: 3}
+  deathVolume: 0.701
+  defaultFireSound: {fileID: 0}
+  fireVolume: 0.8
+  chargeLoop: {fileID: 8300000, guid: 9dfa8b4ca87ab8040827efa63a2ddcce, type: 3}
+  chargeVolume: 0.4
+  chargePitchMin: 0.8
+  chargePitchMax: 1.6
+  chargeCancelSound: {fileID: 0}
+  weaponSwitchSound: {fileID: 8300000, guid: 35dd70797827719499992ba8c5e411e7, type: 3}
+  uiVolume: 0.6
 --- !u!1 &780781122
 GameObject:
   m_ObjectHideFlags: 0
@@ -3424,7 +3509,6 @@ MonoBehaviour:
   - {fileID: 777903164}
   turnTimeLimit: 25
   endTurnDelay: 3
-  manualEndTurnKey: 116
   gameOverSequence: {fileID: 0}
   skipHealthCountKey: 13
   toggleCameraViewKey: 32
