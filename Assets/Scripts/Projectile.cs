@@ -48,6 +48,15 @@ public class Projectile : MonoBehaviour
     [Tooltip("Size of the countdown badge, as a fraction of the camera's half-height, so it stays readable at any zoom.")]
     public float fuseBadgeSize = 0.06f;
 
+    [Header("Sound (thrown)")]
+    [Tooltip("Played the moment this projectile is thrown, e.g. the Holy Hand Grenade's hallelujah. Leave empty for none.")]
+    public AudioClip thrownSound;
+
+    [Range(0f, 1f)] public float thrownVolume = 1f;
+
+    [Tooltip("On = the sound is cut off when the projectile explodes. Off = it plays to the end even after the explosion.")]
+    public bool cutThrownSoundOnExplosion = true;
+
     [Header("Sound (grenades)")]
     [Tooltip("Played when a fused projectile bounces off something. One is picked at random. Leave empty for silent bounces.")]
     public AudioClip[] bounceSounds;
@@ -107,6 +116,28 @@ public class Projectile : MonoBehaviour
         Destroy(gameObject, life);
 
         if (!explodeOnImpact && !fuseStartsOnFirstHit) StartFuse();
+
+        PlayThrownSound();
+    }
+
+    private void PlayThrownSound()
+    {
+        if (thrownSound == null) return;
+
+        if (!cutThrownSoundOnExplosion)
+        {
+            // Independent of this object, so it keeps playing after the projectile is gone.
+            Sfx.Play(thrownSound, thrownVolume);
+            return;
+        }
+
+        // Lives on the projectile, so it follows the throw and ends when the projectile is destroyed.
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.clip = thrownSound;
+        source.spatialBlend = 0f;
+        source.volume = thrownVolume * GameSettings.SfxVolume;
+        source.outputAudioMixerGroup = Sfx.Output;
+        source.Play();
     }
 
     private void StartFuse()
