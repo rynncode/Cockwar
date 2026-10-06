@@ -39,6 +39,17 @@ public class CockroachSwarmTransition : MonoBehaviour
     public float holdTime = 0.25f;
     public float wobbleDegrees = 10f;
 
+    [Header("Loading Screen (optional, used by LoadSceneWithSwarm)")]
+    [Tooltip("Your LoadingScreenObject (text, spinner, progress bar). Shown on top of the swarm while the scene loads.")]
+    public GameObject loadingScreenObject;
+    public Slider progressBar;
+    [Tooltip("Optional: rotated while loading.")]
+    public RectTransform spinner;
+    [Tooltip("Minimum seconds the loading screen stays up, so it never just flashes.")]
+    public float minLoadingTime = 1f;
+    [Tooltip("How fast the bar fills (units per second). Lower = slower, smoother fill.")]
+    public float barFillSpeed = 1.5f;
+
     [Header("Audio (all optional)")]
     public AudioClip splatSfx;       // plays when the food hits the screen
     public AudioClip swarmInSfx;     // plays when the roaches start rushing in
@@ -54,6 +65,8 @@ public class CockroachSwarmTransition : MonoBehaviour
     [Header("Events")]
     [Tooltip("Fires while covered (used by Play()). Swap panels here.")]
     public UnityEvent onCovered;
+    [Tooltip("Fires while covered for PlaySwarmOnly() (swarm with no splat). Use for Back buttons.")]
+    public UnityEvent onCoveredSwarmOnly;
     public UnityEvent onFinished;
 
     class Roach
@@ -76,7 +89,15 @@ public class CockroachSwarmTransition : MonoBehaviour
     {
         Debug.Log("[SwarmTransition] Play() called");
         if (running || !Validate()) return;
-        StartCoroutine(PanelRoutine());
+        StartCoroutine(PanelRoutine(onCovered, true));
+    }
+
+    /// <summary>Swarm only, no food splat. Fires onCoveredSwarmOnly. Use for Back buttons.</summary>
+    public void PlaySwarmOnly()
+    {
+        Debug.Log("[SwarmTransition] PlaySwarmOnly() called");
+        if (running || !Validate()) return;
+        StartCoroutine(PanelRoutine(onCoveredSwarmOnly, false));
     }
 
     /// <summary>Cover -> load scene -> uncover. Use from a level button's OnClick.</summary>
@@ -105,11 +126,11 @@ public class CockroachSwarmTransition : MonoBehaviour
 
     // ---------- Routines ----------
 
-    IEnumerator PanelRoutine()
+    IEnumerator PanelRoutine(UnityEvent covered, bool withSplat)
     {
         running = true;
-        yield return Cover();
-        onCovered?.Invoke();
+        yield return Cover(withSplat);
+        covered?.Invoke();
         yield return new WaitForSecondsRealtime(holdTime);
         yield return Uncover();
         onFinished?.Invoke();
@@ -120,8 +141,42 @@ public class CockroachSwarmTransition : MonoBehaviour
     {
         yield return Cover();
 
+        // Show the loading screen on top of the swarm
+        if (loadingScreenObject)
+        {
+            loadingScreenObject.transform.SetParent(swarmRoot, false);
+            loadingScreenObject.transform.SetAsLastSibling();
+            loadingScreenObject.SetActive(true);
+        }
+        if (progressBar) progressBar.value = progressBar.minValue;
+
+        // Load in the background, but hold the new scene until the bar is full
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
-        while (op != null && !op.isDone) yield return null;
+        if (op != null)
+        {
+            op.allowSceneActivation = false;
+            float shown = 0f;
+            float start = Time.unscaledTime;
+            float minTime = loadingScreenObject ? minLoadingTime : 0f;
+
+            while (true)
+            {
+                float target = Mathf.Clamp01(op.progress / 0.9f); // Unity reports 0..0.9 until activation
+                shown = Mathf.MoveTowards(shown, target, Time.unscaledDeltaTime * barFillSpeed);
+                if (progressBar)
+                    progressBar.value = Mathf.Lerp(progressBar.minValue, progressBar.maxValue, shown);
+                if (spinner) spinner.Rotate(0f, 0f, -360f * Time.unscaledDeltaTime);
+
+                if (op.progress >= 0.9f && shown >= 0.999f && Time.unscaledTime - start >= minTime)
+                    break;
+                yield return null;
+            }
+
+            op.allowSceneActivation = true;
+            while (!op.isDone) yield return null;
+        }
+
+        if (loadingScreenObject) loadingScreenObject.SetActive(false);
         yield return null; // let the new scene start up
         yield return new WaitForSecondsRealtime(holdTime);
 
@@ -129,8 +184,11 @@ public class CockroachSwarmTransition : MonoBehaviour
         Destroy(host); // also removes SwarmRoot
     }
 
-    IEnumerator Cover()
+    bool splatActive;
+
+    IEnumerator Cover(bool withSplat = true)
     {
+        splatActive = withSplat && splatSprite;
         swarmRoot.gameObject.SetActive(true);
         Stretch(swarmRoot);
         swarmRoot.SetAsLastSibling();
@@ -144,7 +202,7 @@ public class CockroachSwarmTransition : MonoBehaviour
         Canvas.ForceUpdateCanvases();
         ClearAll();
 
-        if (splatSprite) yield return SplatIn();   // 1) food splats on screen
+        if (splatActive) yield return SplatIn();   // 1) food splats on screen
         Build();                                   // roaches spawn off-screen, above the splat
         yield return Animate(true);                // 2) roaches swarm onto it
         ClearSplat();
@@ -224,7 +282,7 @@ public class CockroachSwarmTransition : MonoBehaviour
                     target = cell + jitter,
                     offscreen = dir * outDist,
                     // roaches near the splat arrive first, the swarm spreads outward from it
-                    delay = splatSprite
+                    delay = splatActive
                         ? (Mathf.Clamp01(cell.magnitude / maxDist) * 0.7f + Random.value * 0.3f) * staggerTime
                         : Random.value * staggerTime,
                     seed = Random.value * 100f

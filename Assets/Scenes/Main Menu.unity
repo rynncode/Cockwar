@@ -299,22 +299,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1902975828}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 1998017935}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 342253546}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: Play
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -323,9 +311,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 342253546}
-        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
-        m_MethodName: Play
+      - m_Target: {fileID: 2047644556}
+        m_TargetAssemblyTypeName: CockroachSwarmTransition, Assembly-CSharp
+        m_MethodName: PlaySwarmOnly
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -477,6 +465,30 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
         m_MethodName: Play
         m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1813671172}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1902975828}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2003,7 +2015,7 @@ RectTransform:
   m_Father: {fileID: 1233826953}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.06, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: -17.17688, y: 16.492}
   m_SizeDelta: {x: 36.1925, y: -16.492}
   m_Pivot: {x: 0, y: 0}
@@ -3370,13 +3382,14 @@ GameObject:
   - component: {fileID: 1084315449}
   - component: {fileID: 1084315451}
   - component: {fileID: 1084315450}
+  - component: {fileID: 1084315452}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1084315449
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3434,6 +3447,126 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1084315448}
   m_CullTransparentMesh: 1
+--- !u!114 &1084315452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084315448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17883a500177f1a49a3aba82d1ac473e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CreditsScroller
+  gameTitle: COCKWARS
+  subtitle: A Game By
+  studio: UM STUDENTS :)))
+  sections:
+  - heading: GAME DEVELOPMENT
+    entries:
+    - role: Game Designer
+      names:
+      - Neilsen Ilaga
+      - Jhustine Caballero
+    - role: Programmer
+      names:
+      - Jhustine Caballero
+      - Neilsen Ilaga
+  - heading: ART & ANIMATION
+    entries:
+    - role: Character Artist
+      names:
+      - Neilsen Ilaga
+    - role: Environment Artist
+      names:
+      - Khent Orongan
+    - role: UI / UX Designer
+      names:
+      - Neilsen Ilaga
+      - Isabel Francisco
+  - heading: AUDIO & MUSIC
+    entries:
+    - role: Background Music
+      names:
+      - Aaron Lindo
+    - role: Sound Effects (SFX)
+      names:
+      - Neilsen Ilaga
+      - Jhustine Caballero
+  - heading: QUALITY ASSURANCE
+    entries:
+    - role: Lead Playtester
+      names:
+      - Kim Mendoza
+    - role: Playtesters
+      names:
+      - Isabel Francisco
+      - Aaron Lindo
+      - Khent Orongan
+  - heading: TOOLS & THIRD-PARTY ASSETS
+    entries:
+    - role: Game Engine
+      names:
+      - Unity
+    - role: Sprite Editor
+      names:
+      - Aseprite
+    - role: BackGround Music
+      names:
+      - opengameart.org
+  - heading: SPECIAL THANKS
+    entries:
+    - role: 
+      names:
+      - Maam. Marife Macanlay
+      - Sir. Nickler Sarana
+      - Jenny Aredondua
+  closingMessage: To everyone who played and supported our game!
+  footer: "\xA9 2026 Cockroach Wars\nAll Rights Reserved."
+  scrollSpeed: 90
+  stopFraction: 0.5
+  endHoldTime: 2.5
+  skipGrace: 0.4
+  widthFraction: 0.8
+  skipHint: Press any key to skip
+  fillParent: 1
+  applyBackdropColor: 1
+  backdropColor: {r: 0.02, g: 0.05, b: 0.04, a: 0.92}
+  pixelFont: {fileID: 12800000, guid: 7a2d09f29e5947e47a972a3f96191840, type: 3}
+  font: {fileID: 0}
+  textScale: 0.75
+  titleColor: {r: 0.54901963, g: 0.9019608, b: 0.27450982, a: 1}
+  headingColor: {r: 0.54901963, g: 0.9019608, b: 0.27450982, a: 1}
+  roleColor: {r: 0.7254902, g: 0.78431374, b: 0.74509805, a: 1}
+  nameColor: {r: 1, g: 1, b: 1, a: 1}
+  onFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1813671172}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1902975828}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!1 &1119773458
 GameObject:
   m_ObjectHideFlags: 0
@@ -5198,7 +5331,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1813671173
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5214,10 +5347,10 @@ RectTransform:
   - {fileID: 1084315449}
   m_Father: {fileID: 2047644555}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1860815760
 GameObject:
@@ -5884,6 +6017,11 @@ MonoBehaviour:
   staggerTime: 0.4
   holdTime: 0.5
   wobbleDegrees: 10
+  loadingScreenObject: {fileID: 0}
+  progressBar: {fileID: 0}
+  spinner: {fileID: 0}
+  minLoadingTime: 1
+  barFillSpeed: 1.5
   splatSfx: {fileID: 8300000, guid: 250ae5e264ddae0479c893da72abd0d8, type: 3}
   swarmInSfx: {fileID: 8300000, guid: 083a35cd715978c4dad775e0e0a9785d, type: 3}
   swarmOutSfx: {fileID: 8300000, guid: 083a35cd715978c4dad775e0e0a9785d, type: 3}
@@ -5907,6 +6045,33 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1998017935}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  onCoveredSwarmOnly:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1998017935}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1902975828}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6
@@ -5965,8 +6130,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 897216030}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.06, y: 0}
-  m_AnchorMax: {x: 0.06, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
