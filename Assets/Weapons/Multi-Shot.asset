@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Triple T Rocket
   icon: {fileID: 8461174538168114939, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
+  category: 0
+  description: Fires three rockets in a fan. Each hits lighter, but together they cover a wide area.
+  roundDelay: 0
   projectilePrefab: {fileID: 258008830510017049, guid: 3132cc965485cb442b790d71f6855fe7, type: 3}
-  minPower: 10
-  maxPower: 70
+  minPower: 17
+  maxPower: 121
   heldSprite: {fileID: 3672196048842241219, guid: 5270285d2a3965f49994260c542d6ca9, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}

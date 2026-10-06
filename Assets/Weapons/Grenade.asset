@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Grenade
   icon: {fileID: 153938813058088207, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
+  category: 1
+  description: Bounces and rolls. The fuse starts the first time it lands, so bank it off walls.
+  roundDelay: 0
   projectilePrefab: {fileID: 258008830510017049, guid: 3e9a44f9e88a1c04b8da9f2d552a052c, type: 3}
-  minPower: 10
-  maxPower: 70
+  minPower: 17
+  maxPower: 121
   heldSprite: {fileID: -3924415546635975449, guid: c4a47bc227a6ae3448e70959f97409f2, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}

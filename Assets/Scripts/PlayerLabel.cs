@@ -66,6 +66,9 @@ public class PlayerLabel : MonoBehaviour
         }
     }
 
+    /// <summary>True while the label is on screen (including its fade-out).</summary>
+    public bool IsShowing => showing;
+
     private void Awake()
     {
         movement = GetComponent<CockroachMovement>();

@@ -99,6 +99,13 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Press this key to skip the intro and start playing straight away.")]
     public KeyCode skipIntroKey = KeyCode.Tab;
 
+    [Header("HUD")]
+    [Tooltip("Adds the turn timer (top middle of the screen) when the match starts, unless the scene already has a TurnTimerHud.")]
+    public bool autoAddTurnTimer = true;
+
+    [Tooltip("Adds the P1 / P2 bubbles over the players' heads when the match starts, unless the scene already has a PlayerBubbles.")]
+    public bool autoAddPlayerBubbles = true;
+
     // Seconds into each player's focus before their label appears (camera has mostly arrived).
     private const float IntroLabelDelay = 0.5f;
 
@@ -126,6 +133,9 @@ public class TurnManager : MonoBehaviour
 
     private float turnTimeLeft;
     private float endDelayLeft;
+
+    // 1 during everyone's first turn, 2 once play comes back round to the first player, and so on.
+    private int roundNumber;
     private bool gameOver;
 
     // A turn ended while a death sequence was still playing; moving on waits until it is done.
@@ -142,6 +152,26 @@ public class TurnManager : MonoBehaviour
 
     /// <summary>Seconds left in the current turn (only counts down before a shot).</summary>
     public float TurnTimeLeft => turnTimeLeft;
+
+    /// <summary>The current round: 1 while everyone has their first turn, then 2, and so on.</summary>
+    public int RoundNumber => roundNumber;
+
+    /// <summary>True while the turn clock is ticking: a turn is on and the player has not fired yet.</summary>
+    public bool IsTurnClockRunning =>
+        !gameOver && !advancePending && currentIndex >= 0 && !shotFired && turnTimeLimit > 0f;
+
+    /// <summary>Fires when a player's turn begins, with that player.</summary>
+    public event System.Action<CockroachMovement> OnTurnStarted;
+
+    private void Awake()
+    {
+        // The HUD pieces build themselves; add them to this object (or anywhere) yourself to tune them.
+        if (autoAddTurnTimer && FindFirstObjectByType<TurnTimerHud>() == null)
+            gameObject.AddComponent<TurnTimerHud>();
+
+        if (autoAddPlayerBubbles && FindFirstObjectByType<PlayerBubbles>() == null)
+            gameObject.AddComponent<PlayerBubbles>();
+    }
 
     private void Start()
     {
@@ -540,6 +570,19 @@ public class TurnManager : MonoBehaviour
 
     private void StartTurn(int index)
     {
+        // Wrapping back to (or past) the start of the list begins a new round.
+        if (currentIndex < 0 || index <= currentIndex)
+        {
+            roundNumber++;
+
+            // Weapons with a round delay unlock from the round number.
+            foreach (CockroachMovement player in players)
+            {
+                CockroachShooting playerShooting = player != null ? player.GetComponent<CockroachShooting>() : null;
+                if (playerShooting != null) playerShooting.Round = roundNumber;
+            }
+        }
+
         currentIndex = index;
         shotFired = false;
         turnTimeLeft = turnTimeLimit;
@@ -575,6 +618,8 @@ public class TurnManager : MonoBehaviour
             opponentIndicator.SetTarget(opponent.transform, players[index].transform);
         }
         Debug.Log("TurnManager: it is now " + players[index].name + "'s turn.");
+
+        OnTurnStarted?.Invoke(players[index]);
     }
 
     private void EndGame()

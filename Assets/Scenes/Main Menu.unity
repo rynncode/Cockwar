@@ -1067,7 +1067,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.AspectRatioFitter
   m_AspectMode: 0
-  m_AspectRatio: 1.8186296
+  m_AspectRatio: 1.6861575
 --- !u!1 &316087837
 GameObject:
   m_ObjectHideFlags: 0
@@ -5087,7 +5087,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   musicSource: {fileID: 801505088}
   SFXSource: {fileID: 1568261668}
-  background: {fileID: 8300000, guid: 2d6e3cf3fa6196f4f9a65d72f0ac5b11, type: 3}
+  background: {fileID: 8300000, guid: c567130a95434364c813e5dbb323d902, type: 3}
   hoverButton: {fileID: 8300000, guid: eb9cb20addb6f4c4585752f246fc44ad, type: 3}
   onClickButton: {fileID: 8300000, guid: 41805d5d70b3dc6498250cf0fe1d63cf, type: 3}
   levelhoverMusic1: {fileID: 8300000, guid: 1acd5a21a6f56064599e6d67f93fe91f, type: 3}

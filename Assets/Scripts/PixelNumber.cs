@@ -44,6 +44,10 @@ public class PixelNumber
         return count == 0 ? 0 : width - 1 + OutlineSize * 2;
     }
 
+    /// <summary>The 5-row pattern of a character (letters as capitals), for code that draws the font itself.</summary>
+    public static bool TryGetPattern(char c, out string[] pattern) =>
+        Patterns.TryGetValue(char.ToUpperInvariant(c), out pattern);
+
     // 5 rows per glyph, top to bottom. 1 = filled pixel. Width = length of a row.
     // Most letters are 3 wide; M, N and W are 5 wide so they stay readable.
     private static readonly Dictionary<char, string[]> Patterns = new Dictionary<char, string[]>
@@ -61,6 +65,7 @@ public class PixelNumber
         { '-', new[] { "000", "000", "111", "000", "000" } },
         { ' ', new[] { "00", "00", "00", "00", "00" } },
         { '!', new[] { "1", "1", "1", "0", "1" } },
+        { '∞', new[] { "00000", "01010", "10101", "01010", "00000" } },
         { 'A', new[] { "010", "101", "111", "101", "101" } },
         { 'B', new[] { "110", "101", "110", "101", "110" } },
         { 'C', new[] { "011", "100", "100", "100", "011" } },

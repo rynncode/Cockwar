@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   displayName: Dynamite
   icon: {fileID: -3740480853085450211, guid: ec41fd6c376ff4e46a0d0c7726064800, type: 3}
+  category: 2
+  description: A heavy stick that drops fast and goes off on contact. Best thrown short and close.
+  roundDelay: 0
   projectilePrefab: {fileID: 258008830510017049, guid: 75f1ffd9f624ece449ac5bb894e0900b, type: 3}
-  minPower: 10
-  maxPower: 55
+  minPower: 17
+  maxPower: 95
   heldSprite: {fileID: -4112571937107785391, guid: 031e08fe8423ae74199107199914ee50, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}

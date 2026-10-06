@@ -48,6 +48,9 @@ public class OverheadStack : MonoBehaviour
     /// <summary>World Y of the top of the cockroach's collider.</summary>
     public float TopY => bodyCollider != null ? bodyCollider.bounds.max.y : transform.position.y;
 
+    /// <summary>World Y just above the topmost visible item (or above the head if nothing is showing).</summary>
+    public float TopOfStackY => GetBottomY(SlotCount);
+
     /// <summary>An item tells the stack if it is showing and how tall it is (world units).</summary>
     public void Report(int slot, bool isVisible, float height)
     {
