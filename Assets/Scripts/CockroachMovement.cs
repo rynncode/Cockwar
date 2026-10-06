@@ -17,8 +17,6 @@ public class CockroachMovement : MonoBehaviour
     public float walkSpeed = 3f;
 
     [Header("Jumping")]
-    [Tooltip("Key that charges and releases the jump.")]
-    public KeyCode jumpKey = KeyCode.Space;
 
     [Tooltip("Upward speed of the SMALLEST jump (a quick tap). Jump power can never go below this.")]
     public float minJumpPower = 10f;
@@ -204,6 +202,9 @@ public class CockroachMovement : MonoBehaviour
     /// </summary>
     public event System.Action<Vector2> OnKnockedBack;
 
+    /// <summary>Raised the moment a jump launches. CockroachSfx listens to this.</summary>
+    public event System.Action OnJumped;
+
     /// <summary>True while the jump key is held and a jump is charging.</summary>
     public bool IsChargingJump => isChargingJump;
 
@@ -229,6 +230,13 @@ public class CockroachMovement : MonoBehaviour
 
     private void Update()
     {
+        // Paused: drop any jump charge so releasing the key in the menu can't leave it stuck.
+        if (GameMenu.IsPaused)
+        {
+            CancelJumpCharge();
+            return;
+        }
+
         // Read input in Update so key presses are not missed.
         if (!isMyTurn)
         {
@@ -240,10 +248,11 @@ public class CockroachMovement : MonoBehaviour
 
         moveDirection = 0f;
 
-        if (Input.GetKey(KeyCode.A))
+        // Keys come from the settings menu (GameSettings), so players can rebind them.
+        if (Input.GetKey(GameSettings.Key(GameAction.MoveLeft)))
             moveDirection = -1f;
 
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(GameSettings.Key(GameAction.MoveRight)))
             moveDirection = 1f;
 
         UpdateJumpTimers();
@@ -532,6 +541,7 @@ public class CockroachMovement : MonoBehaviour
     private void HandleJumpInput()
     {
         bool canJump = CanJump();
+        KeyCode jumpKey = GameSettings.Key(GameAction.Jump);
 
         if (Input.GetKeyDown(jumpKey))
         {
@@ -635,6 +645,8 @@ public class CockroachMovement : MonoBehaviour
         Vector2 velocity = body.linearVelocity;
         velocity.y = power;
         body.linearVelocity = velocity;
+
+        OnJumped?.Invoke();
     }
 
     /// <summary>

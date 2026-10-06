@@ -41,10 +41,6 @@ public class CockroachShooting : MonoBehaviour
     [Tooltip("Whether firing ends the turn. (Single-weapon mode only. With weapons, each weapon has its own setting.)")]
     public bool singleWeaponEndsTurn = true;
 
-    [Header("Optional: Keyboard")]
-    [Tooltip("Optional. Press this key to cycle to the next weapon in the list, without opening the panel. Set to None to disable.")]
-    public KeyCode cycleWeaponKey = KeyCode.Tab;
-
     private CockroachAim aim;
     private CockroachMovement movement;
     private Collider2D ownCollider;
@@ -111,6 +107,12 @@ public class CockroachShooting : MonoBehaviour
 
     /// <summary>Raised when the player cancels a charge with the right mouse button. Nothing was fired.</summary>
     public event System.Action OnChargeCancelled;
+
+    /// <summary>
+    /// Raised once per firing action with the weapon that fired (null in single-weapon mode).
+    /// Raised before an emptied weapon is swapped out, so listeners see the weapon actually used.
+    /// </summary>
+    public event System.Action<WeaponData> OnWeaponFired;
 
     /// <summary>
     /// Raised right after a projectile is launched, carrying the projectile
@@ -185,6 +187,13 @@ public class CockroachShooting : MonoBehaviour
 
     private void Update()
     {
+        // Paused: drop the charge. The mouse release would happen in the menu and never reach us.
+        if (GameMenu.IsPaused)
+        {
+            CancelCharge();
+            return;
+        }
+
         if (!movement.isMyTurn)
         {
             // Also reset the charge, so a turn that ends mid-charge
@@ -194,7 +203,8 @@ public class CockroachShooting : MonoBehaviour
             return;
         }
 
-        if (cycleWeaponKey != KeyCode.None && Input.GetKeyDown(cycleWeaponKey) && !isCharging)
+        // Next Weapon key (set in the settings menu) cycles without opening the panel.
+        if (Input.GetKeyDown(GameSettings.Key(GameAction.NextWeapon)) && !isCharging)
         {
             CycleWeapon();
         }
@@ -321,6 +331,8 @@ public class CockroachShooting : MonoBehaviour
                 OnProjectileLaunched?.Invoke(projectile);
             }
         }
+
+        OnWeaponFired?.Invoke(weapon);
 
         // Use up one shot of limited ammo, and let the panel refresh.
         if (weapon != null && ammoLeft[currentWeaponIndex] > 0)

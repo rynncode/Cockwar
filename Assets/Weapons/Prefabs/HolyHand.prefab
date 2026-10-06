@@ -178,6 +178,10 @@ MonoBehaviour:
   showFuseVisuals: 1
   fusePulseColor: {r: 1, g: 0.15, b: 0.1, a: 1}
   fuseBadgeSize: 0.06
+  bounceSounds:
+  - {fileID: 0}
+  bounceVolume: 0.6
+  minBounceSoundSpeed: 3
   rotation: 1
   spinSpeedAtReferenceSize: 360
   referenceSize: 6

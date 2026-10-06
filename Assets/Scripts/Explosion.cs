@@ -47,6 +47,15 @@ public class Explosion : MonoBehaviour
     [Tooltip("Debris particle count per point of Max Knockback, so a bigger weapon throws more debris automatically.")]
     public float debrisCountPerKnockback = 0.5f;
 
+    [Header("Sound")]
+    [Tooltip("Explosion sounds. One is picked at random each time. Leave empty for a silent explosion.")]
+    public AudioClip[] explosionSounds;
+
+    [Range(0f, 1f)] public float explosionVolume = 1f;
+
+    [Tooltip("Random pitch range around normal (0.1 = 0.9 to 1.1), so repeated blasts don't sound identical.")]
+    [Range(0f, 0.5f)] public float explosionPitchVariation = 0.08f;
+
     /// <summary>
     /// Everything the blast found, filled in once at spawn time.
     /// Damage (step 6) and knockback (step 7) will read this list.
@@ -59,6 +68,7 @@ public class Explosion : MonoBehaviour
         CarveTerrain();
         ShakeCamera();
         PlayDebris();
+        Sfx.PlayRandom(explosionSounds, explosionVolume, explosionPitchVariation);
         Destroy(gameObject, effectDuration);
     }
 

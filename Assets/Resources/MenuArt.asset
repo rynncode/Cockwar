@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5b3b5253981d198a3bcc8398cd24c57, type: 3}
+  m_Name: MenuArt
+  m_EditorClassIdentifier: 
+  pauseButton: {fileID: 7186031182119188430, guid: 54d147f7e93a33e46ae3ad6aca3dfd5b, type: 3}
+  pauseTitle: {fileID: 3562866462879562994, guid: f6b4a6783de02e04687000c3dc728aa9, type: 3}
+  resumeIcon: {fileID: -8209426292232836754, guid: 54d147f7e93a33e46ae3ad6aca3dfd5b, type: 3}
+  restartIcon: {fileID: 6986215221366592183, guid: 54d147f7e93a33e46ae3ad6aca3dfd5b, type: 3}
+  homeIcon: {fileID: 822233797358155326, guid: 54d147f7e93a33e46ae3ad6aca3dfd5b, type: 3}
+  musicOnIcon: {fileID: -5911882506679098627, guid: 54d147f7e93a33e46ae3ad6aca3dfd5b, type: 3}
+  musicOffIcon: {fileID: -5340504981501562568, guid: 54d147f7e93a33e46ae3ad6aca3dfd5b, type: 3}
+  settingsPanel: {fileID: 4217477556904441105, guid: 57b9a533392609e4baf4829ce4fc56b3, type: 3}
+  closeButton: {fileID: 4132530502097677813, guid: 57b9a533392609e4baf4829ce4fc56b3, type: 3}
+  sliderTrack: {fileID: 2771995841487360424, guid: c0a2cdd147b36c24ebeb854081d9d7bf, type: 3}
+  sliderHandle: {fileID: 4532333548471440373, guid: c0a2cdd147b36c24ebeb854081d9d7bf, type: 3}

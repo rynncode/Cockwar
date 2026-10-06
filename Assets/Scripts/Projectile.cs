@@ -48,6 +48,15 @@ public class Projectile : MonoBehaviour
     [Tooltip("Size of the countdown badge, as a fraction of the camera's half-height, so it stays readable at any zoom.")]
     public float fuseBadgeSize = 0.06f;
 
+    [Header("Sound (grenades)")]
+    [Tooltip("Played when a fused projectile bounces off something. One is picked at random. Leave empty for silent bounces.")]
+    public AudioClip[] bounceSounds;
+
+    [Range(0f, 1f)] public float bounceVolume = 0.6f;
+
+    [Tooltip("Hits slower than this (units per second) make no sound, so a rolling grenade doesn't rattle constantly.")]
+    public float minBounceSoundSpeed = 3f;
+
     [Header("Rotation")]
     [Tooltip("None = no turning. Spin = tumbles (smaller = faster). FaceVelocity = rocket, points where it is going.")]
     public ProjectileRotation rotation = ProjectileRotation.None;
@@ -195,6 +204,9 @@ public class Projectile : MonoBehaviour
         if (!explodeOnImpact)
         {
             if (fuseStartsOnFirstHit && !fuseRunning) StartFuse();
+
+            if (collision.relativeVelocity.magnitude >= minBounceSoundSpeed)
+                Sfx.PlayRandom(bounceSounds, bounceVolume, 0.1f);
             return;
         }
 

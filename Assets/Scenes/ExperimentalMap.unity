@@ -329,16 +329,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9395f85b43102604e9a2bd822817c869, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPanel
-  canvas: {fileID: 0}
   turnManager: {fileID: 0}
   toggleKey: 9
-  buttonSize: {x: 260, y: 56}
-  margin: {x: 20, y: 20}
+  rightClickOpens: 1
+  numberKeysSelectRow: 1
+  tileSize: 76
+  tileGap: 8
   fontSize: 26
-  buttonColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.9}
-  lockedColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.45}
-  currentColor: {r: 0.25, g: 0.55, b: 0.25, a: 0.95}
-  emptyColor: {r: 0.45, g: 0.2, b: 0.2, a: 0.9}
+  canvasSortingOrder: 60
 --- !u!4 &67884322
 Transform:
   m_ObjectHideFlags: 0
@@ -1871,7 +1869,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   musicSource: {fileID: 204318162}
   SFXSource: {fileID: 0}
-  background: {fileID: 8300000, guid: d6d1522a72a78294a934ddcc6179f382, type: 3}
+  background: {fileID: 8300000, guid: b2322bca0babc9742a33c9ac62d3756f, type: 3}
   hoverButton: {fileID: 0}
   onClickButton: {fileID: 0}
   levelhoverMusic1: {fileID: 0}
@@ -3438,6 +3436,8 @@ MonoBehaviour:
   introZoom: 30
   introSmoothTime: 0.8
   skipIntroKey: 32
+  autoAddTurnTimer: 1
+  autoAddPlayerBubbles: 1
 --- !u!4 &780781124
 Transform:
   m_ObjectHideFlags: 0

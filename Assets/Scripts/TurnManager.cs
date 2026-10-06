@@ -9,7 +9,7 @@ using UnityEngine;
 /// CockroachShooting already check isMyTurn).
 ///
 /// A turn ends when any of the following happens:
-///  - the player manually ends it (manualEndTurnKey for now; a real button
+///  - the player manually ends it (the End Turn key from the settings menu; a real button
 ///    arrives in step 15), or
 ///  - the active player's Stamina (optional component) runs out, or
 ///  - the active player fires a weapon that has endsTurnOnFire = true, THEN
@@ -56,9 +56,7 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Seconds to wait after a shot before passing to the next player. Gives the explosion and any knockback time to finish. Increase it if players are still flying when the next turn starts.")]
     public float endTurnDelay = 4f;
 
-    [Header("Manual End Turn")]
-    [Tooltip("Press this key to end the current turn immediately. Stands in for a real End Turn button until step 15 (UI) adds one.")]
-    public KeyCode manualEndTurnKey = KeyCode.Return;
+    // Manual End Turn: the End Turn key is set in the settings menu (GameSettings).
 
     [Header("Game Over")]
     [Tooltip("Plays the winner camera, the WINNER text and the Retry / Home panel when the match ends. Leave empty to find it in the scene automatically.")]
@@ -309,6 +307,7 @@ public class TurnManager : MonoBehaviour
     private void Update()
     {
         if (gameOver || currentIndex < 0) return;
+        if (GameMenu.IsPaused) return; // keys pressed in the menu must not end the turn
 
         // The turn ended while someone's death sequence was playing: wait for it, then carry on.
         if (advancePending)
@@ -349,7 +348,7 @@ public class TurnManager : MonoBehaviour
                 return;
             }
 
-            if (Input.GetKeyDown(manualEndTurnKey))
+            if (Input.GetKeyDown(GameSettings.Key(GameAction.EndTurn)))
             {
                 EndTurn();
                 return;

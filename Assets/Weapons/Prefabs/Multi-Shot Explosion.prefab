@@ -140,3 +140,8 @@ MonoBehaviour:
   shakeDuration: 0.35
   debrisParticles: {fileID: 7461608072757855242, guid: e0f81d2d04655ca44bcf8d39c4ea6795, type: 3}
   debrisCountPerKnockback: 0.5
+  explosionSounds:
+  - {fileID: 8300000, guid: 6fe149f22c06d3547acbca419235f24c, type: 3}
+  - {fileID: 8300000, guid: 3bde0cd18bea36a4197a7496077fe482, type: 3}
+  explosionVolume: 1
+  explosionPitchVariation: 0.08

@@ -62,6 +62,9 @@ public class GameOverSequence : MonoBehaviour
 
     private bool started;
 
+    /// <summary>True once the match has ended and the winner sequence is playing. GameMenu hides the pause button then.</summary>
+    public bool HasStarted => started;
+
     private PixelNumber winnerLabel;
     private Transform winnerTransform;
     private OverheadStack winnerStack;
