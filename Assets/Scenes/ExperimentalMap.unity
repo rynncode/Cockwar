@@ -1155,7 +1155,7 @@ MonoBehaviour:
   killDepth: 0
   sinkDrag: 3
   pixelSize: 0.4
-  acidColor: {r: 1, g: 0.7115499, b: 0.3254717, a: 1}
+  acidColor: {r: 0.23423074, g: 0.9811321, b: 0.17123532, a: 1}
   opacity: 0.88
   waveSpeed: 4
   sortingOrder: 50
