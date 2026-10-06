@@ -329,16 +329,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9395f85b43102604e9a2bd822817c869, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPanel
-  canvas: {fileID: 0}
   turnManager: {fileID: 0}
   toggleKey: 9
-  buttonSize: {x: 260, y: 56}
-  margin: {x: 20, y: 20}
+  rightClickOpens: 1
+  numberKeysSelectRow: 1
+  tileSize: 76
+  tileGap: 8
   fontSize: 26
-  buttonColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.9}
-  lockedColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.45}
-  currentColor: {r: 0.25, g: 0.55, b: 0.25, a: 0.95}
-  emptyColor: {r: 0.45, g: 0.2, b: 0.2, a: 0.9}
+  canvasSortingOrder: 60
 --- !u!4 &67884322
 Transform:
   m_ObjectHideFlags: 0
@@ -392,7 +390,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 855.4, y: -44.299995}
+  m_AnchoredPosition: {x: 856.9, y: -137.2}
   m_SizeDelta: {x: 26.2025, y: 25.4677}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &91881083
@@ -428,7 +426,7 @@ MonoBehaviour:
   arrow: {fileID: 977969642}
   distanceText: {fileID: 652734422}
   edgePadding: 60
-  worldUnitsPerDisplayUnit: 1
+  worldUnitsPerDisplayUnit: 10
 --- !u!114 &91881085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1114,7 +1112,7 @@ MonoBehaviour:
   killDepth: 0
   sinkDrag: 3
   pixelSize: 0.4
-  acidColor: {r: 0.45, g: 0.95, b: 0.2, a: 1}
+  acidColor: {r: 1, g: 0.7115499, b: 0.3254717, a: 1}
   opacity: 0.88
   waveSpeed: 4
   sortingOrder: 50
@@ -2814,7 +2812,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -921, y: 490}
+  m_AnchoredPosition: {x: -1821, y: 471}
   m_SizeDelta: {x: 140, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &732361936
@@ -3438,6 +3436,8 @@ MonoBehaviour:
   introZoom: 30
   introSmoothTime: 0.8
   skipIntroKey: 32
+  autoAddTurnTimer: 1
+  autoAddPlayerBubbles: 1
 --- !u!4 &780781124
 Transform:
   m_ObjectHideFlags: 0
