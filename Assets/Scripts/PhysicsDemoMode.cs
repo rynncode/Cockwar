@@ -29,7 +29,7 @@ public class PhysicsDemoMode : MonoBehaviour
 
     [Header("Units")]
     [Tooltip("How many world units make 1 metre in the readouts. 1 matches the physics engine (gravity 9.81 units/s^2 = 9.81 m/s^2). Your distance HUD uses 10, which would not match the physics.")]
-    public float unitsPerMeter = 10f;
+    public float unitsPerMeter = 1f;
 
     [Header("Panel")]
     [Tooltip("Distance of the panel from the top-left corner of the screen, in pixels.")]

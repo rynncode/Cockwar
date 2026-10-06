@@ -1708,7 +1708,7 @@ MonoBehaviour:
   grassThickness: 2
   terrainSortingOrder: -10
   turnManager: {fileID: 780781123}
-  spawnDropHeight: 2
+  spawnDropHeight: 4
   spawnFlatHalfWidth: 6
   spawnMaxSlope: 3
   spawnEdgeMargin: 40
