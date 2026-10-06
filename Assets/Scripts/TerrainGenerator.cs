@@ -23,20 +23,22 @@ using UnityEngine;
 ///     ONLY on the original top surface (the first ground met from the sky in
 ///     each column, remembered in grassDepthMap). Craters, cave floors and
 ///     overhang undersides are plain dirt, and stay dirt after being carved.
-///  6. A PolygonCollider2D is built from a hidden "mask" sprite of just the solid
-///     pixels, so decorations like grass blades never affect collisions.
+///  6. The collider is built from a hidden "mask" of just the solid pixels, split into
+///     vertical strips (one child PolygonCollider2D each), so grass blades never collide.
 ///  7. Every cockroach in the TurnManager's list is placed on flat open ground.
 ///
 /// How a crater is carved (step 12):
 ///  1. CarveCircle flips solid pixels to false inside a circle. Only removes
 ///     ground, never adds it back.
-///  2. Only the columns the circle actually touched are repainted (not the
+///     The repaint below waits until LateUpdate, so all of one frame's craters
+///     (an airstrike, the Satelaser beam) share a single repaint and rebuild.
+///  2. Only the columns the circles touched are repainted (not the
 ///     whole map), using the same tile-picking logic as the full build, kept
 ///     around as cached fields so it does not need to re-read your tiles.
-///  3. The hidden mask sprite is recreated from the updated pixels — Unity
-///     bakes a sprite's physics outline in at creation time, so just
+///  3. Only the collider strips those columns fall in get a new mask sprite —
+///     Unity bakes a sprite's physics outline in at creation time, so just
 ///     re-applying texture pixels does NOT update the collider by itself.
-///  4. The PolygonCollider2D is rebuilt from that new mask sprite.
+///  4. Each of those strips' PolygonCollider2D is rebuilt from its new mask sprite.
 ///
 /// Keep this object's Scale at (1,1,1) and Rotation at 0. The collider and
 /// the spawn maths both assume that.
@@ -157,6 +159,10 @@ public class TerrainGenerator : MonoBehaviour
     [Tooltip("Sorting order of the terrain sprite. Keep it below your cockroaches so they draw in front.")]
     public int terrainSortingOrder = -10;
 
+    [Header("Performance")]
+    [Tooltip("The ground's collider is split into this many vertical strips, and an explosion only rebuilds the strips its crater touches. More strips = cheaper explosions. 8 suits a 500-wide map; 1 = the old single collider.")]
+    [Range(1, 32)] public int colliderStrips = 8;
+
     [Header("Player Spawning")]
     [Tooltip("The TurnManager whose Players list should be placed on the map.")]
     public TurnManager turnManager;
@@ -199,10 +205,32 @@ public class TerrainGenerator : MonoBehaviour
     private Texture2D texture;
     private Sprite sprite;
 
-    // Hidden black-and-white version of the map (opaque = solid). The collider is
-    // built from this, not from the painted texture, so grass blades don't collide.
-    private Texture2D maskTexture;
-    private Sprite maskSprite;
+    // The collider, split into vertical strips. Each strip has its own hidden
+    // black-and-white mask texture (opaque = solid) cut from maskPixels, and a
+    // PolygonCollider2D on a child object built from that mask's outline. A crater
+    // only rebuilds the strips it touched, instead of tracing the whole map again.
+    // The mask is used instead of the painted texture so grass blades don't collide.
+    private class ColliderStrip
+    {
+        public int x0;              // first pixel column (strips overlap their neighbours a little)
+        public int width;           // in pixels
+        public Color32[] buffer;    // this strip's part of maskPixels
+        public Texture2D mask;
+        public Sprite sprite;
+        public PolygonCollider2D collider;
+    }
+
+    private readonly List<ColliderStrip> strips = new List<ColliderStrip>();
+
+    // Strips overlap by this many pixels on each side, so the outline traced at a
+    // strip's edge can never leave a gap at the seam.
+    private const int StripOverlapPx = 3;
+
+    // Columns carved since the last repaint. CarveCircle only edits the solid grid and
+    // widens this range; LateUpdate repaints and rebuilds once, so several craters in
+    // the same frame (airstrike rockets, the Satelaser beam) cost a single rebuild.
+    private int dirtyMinX = int.MaxValue;
+    private int dirtyMaxX = -1;
 
     // Size of one art tile in pixels. All tiles must match; set by LoadTiles.
     private int tileW;
@@ -283,6 +311,8 @@ public class TerrainGenerator : MonoBehaviour
         widthPx = Mathf.RoundToInt(mapWidth * pixelsPerUnit);
         heightPx = Mathf.RoundToInt(mapHeight * pixelsPerUnit);
         solid = new bool[widthPx * heightPx];
+        dirtyMinX = int.MaxValue;   // a fresh map has no pending craters
+        dirtyMaxX = -1;
 
         Debug.Log("TerrainGenerator: seed " + seed + ", " + widthPx + "x" + heightPx + " pixels.");
 
@@ -534,10 +564,9 @@ public class TerrainGenerator : MonoBehaviour
         }
 
         // Throw away last map's textures/sprites (only ones we made ourselves).
+        // The collider strips are rebuilt from scratch by BuildCollider.
         if (sprite != null) Destroy(sprite);
         if (texture != null) Destroy(texture);
-        if (maskSprite != null) Destroy(maskSprite);
-        if (maskTexture != null) Destroy(maskTexture);
 
         Rect fullRect = new Rect(0, 0, widthPx, heightPx);
 
@@ -553,15 +582,6 @@ public class TerrainGenerator : MonoBehaviour
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = sprite;
         spriteRenderer.sortingOrder = terrainSortingOrder;
-
-        // Hidden mask: never drawn. The last argument asks Unity to generate a
-        // physics outline from it, which BuildCollider reads.
-        maskTexture = new Texture2D(widthPx, heightPx, TextureFormat.RGBA32, false);
-        maskTexture.wrapMode = TextureWrapMode.Clamp;
-        maskTexture.SetPixels32(maskPixels);
-        maskTexture.Apply();
-
-        maskSprite = Sprite.Create(maskTexture, fullRect, new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.Tight, Vector4.zero, true);
     }
 
     /// <summary>
@@ -799,20 +819,29 @@ public class TerrainGenerator : MonoBehaviour
         texture.SetPixels32(pixels);
         texture.Apply();
 
-        maskTexture.SetPixels32(maskPixels);
-        maskTexture.Apply();
+        // Only the collider strips overlapping the repainted columns change.
+        foreach (ColliderStrip strip in strips)
+        {
+            if (strip.x0 + strip.width - 1 < xStart || strip.x0 > xEnd) continue;
+            RebuildStrip(strip);
+        }
+    }
 
-        // A sprite's physics outline is baked in when the sprite is created,
-        // so re-applying the texture above does NOT update the collider by
-        // itself. The mask sprite has to be recreated for BuildCollider to
-        // see the new shape. The visible sprite does not need this, since it
-        // has no physics shape.
-        if (maskSprite != null) Destroy(maskSprite);
+    /// <summary>
+    /// Applies every crater carved since the last frame in one go: one repaint, one
+    /// texture upload, and one rebuild of each touched collider strip. LateUpdate, so
+    /// all of this frame's explosions are in, and physics sees the new shape next step.
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (dirtyMaxX < 0) return;
 
-        Rect fullRect = new Rect(0, 0, widthPx, heightPx);
-        maskSprite = Sprite.Create(maskTexture, fullRect, new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.Tight, Vector4.zero, true);
+        int xStart = dirtyMinX;
+        int xEnd = dirtyMaxX;
+        dirtyMinX = int.MaxValue;
+        dirtyMaxX = -1;
 
-        BuildCollider();
+        RepaintColumns(xStart, xEnd);
     }
 
     /// <summary>
@@ -858,7 +887,10 @@ public class TerrainGenerator : MonoBehaviour
         // Blast landed entirely in open air, or entirely off the map: nothing to repaint.
         if (!anyChanged) return;
 
-        RepaintColumns(minX, maxX);
+        // The solid grid is already updated (so surface checks see the crater straight
+        // away); the expensive repaint and collider rebuild happen once, in LateUpdate.
+        dirtyMinX = Mathf.Min(dirtyMinX, minX);
+        dirtyMaxX = Mathf.Max(dirtyMaxX, maxX);
     }
 
     /// <summary>
@@ -948,32 +980,105 @@ public class TerrainGenerator : MonoBehaviour
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// Copies the hidden mask sprite's physics outline into the PolygonCollider2D.
-    /// Islands and cave holes each become their own path.
+    /// Builds the whole collider: splits the map into colliderStrips vertical strips, each a
+    /// child object ("Terrain Collider 1", 2...) on the same layer as this one, with its own
+    /// PolygonCollider2D. The PolygonCollider2D on this object is switched off; the strips
+    /// replace it. Islands and cave holes each become their own path in their strip.
     /// </summary>
     private void BuildCollider()
     {
-        PolygonCollider2D polygonCollider = GetComponent<PolygonCollider2D>();
+        DestroyStrips();
 
-        int shapeCount = maskSprite.GetPhysicsShapeCount();
-        if (shapeCount == 0)
+        PolygonCollider2D rootCollider = GetComponent<PolygonCollider2D>();
+        rootCollider.pathCount = 0;
+        rootCollider.enabled = false;
+
+        int count = Mathf.Clamp(colliderStrips, 1, widthPx);
+        int stripWidth = Mathf.CeilToInt(widthPx / (float)count);
+        int totalPaths = 0;
+
+        for (int i = 0; i < count; i++)
         {
-            Debug.LogError("TerrainGenerator: the mask sprite has no physics outline, so there is no collider. Cockroaches will fall through the map.");
-            polygonCollider.pathCount = 0;
-            return;
+            int start = Mathf.Max(0, i * stripWidth - StripOverlapPx);
+            int end = Mathf.Min(widthPx, (i + 1) * stripWidth + StripOverlapPx);
+            if (end <= start) continue;
+
+            ColliderStrip strip = new ColliderStrip { x0 = start, width = end - start };
+            strip.buffer = new Color32[strip.width * heightPx];
+            strip.mask = new Texture2D(strip.width, heightPx, TextureFormat.RGBA32, false);
+            strip.mask.wrapMode = TextureWrapMode.Clamp;
+
+            // Child object centred on its strip, so the outline (traced around the strip's
+            // own centre) lines up with the map.
+            GameObject stripObject = new GameObject("Terrain Collider " + (i + 1));
+            stripObject.layer = gameObject.layer;
+            stripObject.tag = gameObject.tag;
+            stripObject.transform.SetParent(transform, false);
+            stripObject.transform.localPosition = new Vector3((start + strip.width * 0.5f - widthPx * 0.5f) / pixelsPerUnit, 0f, 0f);
+
+            strip.collider = stripObject.AddComponent<PolygonCollider2D>();
+            strip.collider.sharedMaterial = rootCollider.sharedMaterial;
+
+            strips.Add(strip);
+            totalPaths += RebuildStrip(strip);
         }
 
-        polygonCollider.pathCount = shapeCount;
+        if (totalPaths == 0)
+            Debug.LogError("TerrainGenerator: the mask has no physics outline, so there is no collider. Cockroaches will fall through the map.");
+        else
+            Debug.Log("TerrainGenerator: collider built from " + totalPaths + " outline shape(s) in " + strips.Count + " strip(s).");
+    }
 
-        List<Vector2> points = new List<Vector2>();
+    /// <summary>
+    /// Re-traces one strip from maskPixels and refills its collider. Returns how many
+    /// outline paths it has (0 = no ground in this strip, which is fine).
+    /// </summary>
+    private int RebuildStrip(ColliderStrip strip)
+    {
+        // Copy this strip's columns out of the full-map mask.
+        for (int y = 0; y < heightPx; y++)
+            System.Array.Copy(maskPixels, y * widthPx + strip.x0, strip.buffer, y * strip.width, strip.width);
+
+        strip.mask.SetPixels32(strip.buffer);
+        strip.mask.Apply();
+
+        // A sprite's physics outline is baked in when the sprite is created, so the
+        // sprite has to be remade for the new shape. FullRect: this sprite is never
+        // drawn, so the detailed render mesh "Tight" would build is wasted work.
+        if (strip.sprite != null) Destroy(strip.sprite);
+        strip.sprite = Sprite.Create(strip.mask, new Rect(0, 0, strip.width, heightPx), new Vector2(0.5f, 0.5f),
+                                     pixelsPerUnit, 0, SpriteMeshType.FullRect, Vector4.zero, true);
+
+        int shapeCount = strip.sprite.GetPhysicsShapeCount();
+        strip.collider.pathCount = shapeCount;
+
         for (int i = 0; i < shapeCount; i++)
         {
-            points.Clear();
-            maskSprite.GetPhysicsShape(i, points);
-            polygonCollider.SetPath(i, points);
+            stripPoints.Clear();
+            strip.sprite.GetPhysicsShape(i, stripPoints);
+            strip.collider.SetPath(i, stripPoints);
         }
 
-        Debug.Log("TerrainGenerator: collider built from " + shapeCount + " outline shape(s).");
+        return shapeCount;
+    }
+
+    private readonly List<Vector2> stripPoints = new List<Vector2>();
+
+    private void DestroyStrips()
+    {
+        foreach (ColliderStrip strip in strips)
+        {
+            if (strip.sprite != null) Destroy(strip.sprite);
+            if (strip.mask != null) Destroy(strip.mask);
+            if (strip.collider != null) Destroy(strip.collider.gameObject);
+        }
+
+        strips.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        DestroyStrips();
     }
 
     // ------------------------------------------------------------------
