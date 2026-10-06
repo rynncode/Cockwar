@@ -20,6 +20,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 258008830510017049, guid: 03f19c8e9c23c0d44b8cb33f2646a3c8, type: 3}
   minPower: 17
   maxPower: 121
+  fireSound: {fileID: 8300000, guid: 9ef76235466185442a1887c1d66a5570, type: 3}
   heldSprite: {fileID: -4922576250652504822, guid: 7be12aaefc1ef754589fdb90064b2d19, type: 3}
   aimStyle: 1
   aimIndicatorPrefab: {fileID: 0}
