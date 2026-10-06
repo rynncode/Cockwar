@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a059c1b78ba448d5b9027e15e962a279, type: 3}
+  m_Name: CrateSettings
+  m_EditorClassIdentifier: 
+  loot:
+  - weapon: {fileID: 11400000, guid: 93a9617b2b3225045a9a439f23053698, type: 2}
+    enabled: 1
+    weight: 30
+    ammo: 1
+    chance: 24%
+  - weapon: {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
+    enabled: 1
+    weight: 24
+    ammo: 1
+    chance: 19.2%
+  - weapon: {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
+    enabled: 1
+    weight: 20
+    ammo: 1
+    chance: 16%
+  - weapon: {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
+    enabled: 1
+    weight: 12
+    ammo: 1
+    chance: 9.6%
+  - weapon: {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
+    enabled: 1
+    weight: 5
+    ammo: 1
+    chance: 4%
+  - weapon: {fileID: 11400000, guid: ae93b4b84c65462db578f738319b30aa, type: 2}
+    enabled: 1
+    weight: 10
+    ammo: 1
+    chance: 8%
+  - weapon: {fileID: 11400000, guid: d29bb6ed33b847bcbbb57f6c1c4da600, type: 2}
+    enabled: 1
+    weight: 8
+    ammo: 1
+    chance: 6.4%
+  - weapon: {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
+    enabled: 1
+    weight: 8
+    ammo: 1
+    chance: 6.4%
+  - weapon: {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}
+    enabled: 1
+    weight: 6
+    ammo: 1
+    chance: 4.8%
+  - weapon: {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
+    enabled: 1
+    weight: 2
+    ammo: 1
+    chance: 1.6%
+  minStartingCrates: 2
+  maxStartingCrates: 4
+  minimumCrateDistance: 40
+  minimumPlayerDistance: 25
+  edgeMargin: 30
+  flatHalfWidth: 3
+  maxSlope: 3
+  minHeightAboveAcid: 6
+  dropChance: 0.5
+  maxCratesOnMap: 6
+  rememberRecentDrops: 3
+  turnOrderFairness: 0.5
+  dropRandomness: 60
+  aircraftSpeed: 90
+  aircraftHeightAboveGround: 35
+  aircraftApproachDistance: 140
+  delayBeforeAircraft: 0.4
+  delayAfterDrop: 2
+  maxDropSeconds: 12
+  cameraFollowsDrop: 1
+  crateSize: 6
+  parachuteFallSpeed: 18
+  crateLifetimeTurns: 0
+  showPickupText: 1
+  pickupTextPixelSize: 0.4
+  pingSeconds: 4
+  crateSprite: {fileID: 0}
+  parachuteSprite: {fileID: 0}
+  aircraftSprite: {fileID: 0}
+  aircraftSound: {fileID: 0}
+  aircraftVolume: 0.6
+  dropSound: {fileID: 0}
+  landSound: {fileID: 0}
+  pickupSound: {fileID: 0}
+  crateVolume: 0.8
+  showEmptyAtStart:
+  - {fileID: 11400000, guid: ae93b4b84c65462db578f738319b30aa, type: 2}
+  - {fileID: 11400000, guid: d29bb6ed33b847bcbbb57f6c1c4da600, type: 2}
+  - {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
+  - {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}
+  - {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
+  giveEveryPlayerAtStart:
+  - {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
+  - {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}
+  - {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
+  - {fileID: 11400000, guid: ae93b4b84c65462db578f738319b30aa, type: 2}
+  - {fileID: 11400000, guid: d29bb6ed33b847bcbbb57f6c1c4da600, type: 2}

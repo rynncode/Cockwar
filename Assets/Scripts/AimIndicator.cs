@@ -60,7 +60,9 @@ public class AimIndicator : MonoBehaviour
             current = aim.crosshair;
         }
 
-        bool visible = movement.isMyTurn;
+        // Targeted and right-click special weapons (Satelaser, Airstrike...) don't aim along a line,
+        // so the crosshair is hidden for them (Satelaser shows its own target marker instead).
+        bool visible = movement.isMyTurn && !SpecialAttack.HidesCrosshair(weapon);
 
         // Show only the current crosshair; hide the rest, including the fallback one.
         foreach (Transform t in spawned.Values) SetVisible(t, visible && t == current);

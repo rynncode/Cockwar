@@ -127,6 +127,7 @@ public class WeaponPanel : MonoBehaviour
     private readonly List<Row> rows = new List<Row>();
     private readonly Dictionary<WeaponData, string> statsCache = new Dictionary<WeaponData, string>();
     private CockroachShooting shootingShown;
+    private int weaponCountShown;
     private Color playerColor = Color.white;
     private Tile hovered;
     private bool isOpen;
@@ -434,10 +435,10 @@ public class WeaponPanel : MonoBehaviour
         Stretch(tile.background.rectTransform);
         tile.background.raycastTarget = true;
 
-        tile.icon = NewImage("Icon", tile.rect, tile.weapon.icon, Color.white);
+        tile.icon = NewImage("Icon", tile.rect, IconOf(tile.weapon), Color.white);
         tile.icon.preserveAspect = true;
         Stretch(tile.icon.rectTransform, 10f);
-        if (tile.weapon.icon == null)
+        if (IconOf(tile.weapon) == null)
         {
             // No art: show the first letters of the name in the pixel font instead.
             string initials = tile.weapon.displayName.Length > 2 ? tile.weapon.displayName.Substring(0, 2) : tile.weapon.displayName;
@@ -562,10 +563,13 @@ public class WeaponPanel : MonoBehaviour
         bool hasWeapons = shooting != null && shooting.weapons != null && shooting.weapons.Count > 0;
 
         // New player (or no player): their weapon list may differ, so rebuild.
-        if (shooting != shootingShown)
+        // A crate can also add a new weapon to the list mid-turn.
+        int weaponCount = hasWeapons ? shooting.weapons.Count : 0;
+        if (shooting != shootingShown || weaponCount != weaponCountShown)
         {
             Close();
             shootingShown = shooting;
+            weaponCountShown = weaponCount;
             RebuildTiles(hasWeapons ? shooting : null);
             lastWeaponIndex = -1;
             lastAmmo = int.MinValue;
@@ -584,7 +588,8 @@ public class WeaponPanel : MonoBehaviour
             if (toggleKey != KeyCode.None && Input.GetKeyDown(toggleKey)) Toggle();
 
             // Right-click also cancels a charge; never open the panel on that same click.
-            if (rightClickOpens && Input.GetMouseButtonDown(1) && !wasCharging) Toggle();
+            // Right-click weapons (Airstrike, Demon Fire, Doom) use the right button themselves.
+            if (rightClickOpens && Input.GetMouseButtonDown(1) && !wasCharging && !SpecialAttack.UsesRightClick(shooting.CurrentWeapon)) Toggle();
 
             if (numberKeysSelectRow)
             {
@@ -625,7 +630,7 @@ public class WeaponPanel : MonoBehaviour
             lastCardRounds = rounds;
 
             cardName.text = weapon != null ? weapon.displayName : "";
-            cardIcon.sprite = weapon != null ? weapon.icon : null;
+            cardIcon.sprite = IconOf(weapon);
             cardIcon.enabled = cardIcon.sprite != null;
             SetPixelText(cardAmmo, rounds > 0 ? "LOCKED" : AmmoText(ammo), 4f);
         }
@@ -843,6 +848,15 @@ public class WeaponPanel : MonoBehaviour
     }
 
     /// <summary>Shows pixel-font text on an Image at its natural size (one font pixel = pixelSize UI units).</summary>
+    /// <summary>The weapon's icon, or its special attack's built-in pixel icon, or null.</summary>
+    private static Sprite IconOf(WeaponData weapon)
+    {
+        if (weapon == null) return null;
+        if (weapon.icon != null) return weapon.icon;
+        SpecialAttack special = SpecialAttack.Of(weapon);
+        return special != null ? special.Icon : null;
+    }
+
     private static void SetPixelText(Image image, string text, float pixelSize)
     {
         Sprite sprite = PixelSprites.Text(text);

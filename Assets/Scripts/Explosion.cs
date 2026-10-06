@@ -21,6 +21,9 @@ public class Explosion : MonoBehaviour
     [Tooltip("Damage dealt to something at the exact center of the blast. Falls off linearly to 0 at the edge of blastRadius.")]
     public int maxDamage = 50;
 
+    [Tooltip("Damage at the very edge of the blast, as a fraction of Max Damage. 0 = falls off to nothing (the original behaviour); 1 = full damage anywhere in the blast.")]
+    [Range(0f, 1f)] public float minDamageFraction = 0f;
+
     [Header("Knockback")]
     [Tooltip("Push strength at the exact center of the blast. Falls off to 0 at the edge, same as damage.")]
     public float maxKnockback = 40f;
@@ -171,8 +174,43 @@ public class Explosion : MonoBehaviour
         // 1 at the very center, 0 at the edge of blastRadius, clamped so it never goes negative.
         float falloff = 1f - Mathf.Clamp01(distance / blastRadius);
 
-        int damage = Mathf.RoundToInt(maxDamage * falloff);
+        int damage = Mathf.RoundToInt(maxDamage * Mathf.Lerp(minDamageFraction, 1f, falloff));
         health.TakeDamage(damage);
+    }
+
+    /// <summary>
+    /// Spawns an explosion prefab with different numbers than the ones saved in it (special weapons
+    /// reuse the existing explosion art and sounds with their own damage and size). The prefab is
+    /// created under an inactive parent so its Awake (which applies the blast) waits until the
+    /// values are set. With no prefab, a plain invisible blast is used (damage, crater, shake only).
+    /// </summary>
+    public static Explosion Spawn(GameObject prefab, Vector2 position, System.Action<Explosion> configure)
+    {
+        GameObject holder = new GameObject("Explosion Setup");
+        holder.SetActive(false);
+
+        Explosion explosion;
+        if (prefab != null)
+        {
+            GameObject instance = Instantiate(prefab, position, Quaternion.identity, holder.transform);
+            explosion = instance.GetComponent<Explosion>();
+            if (explosion == null) explosion = instance.AddComponent<Explosion>();
+        }
+        else
+        {
+            GameObject instance = new GameObject("Explosion");
+            instance.transform.SetParent(holder.transform, false);
+            instance.transform.position = position;
+            explosion = instance.AddComponent<Explosion>();
+            explosion.affectedLayers = ~0;
+        }
+
+        configure?.Invoke(explosion);
+
+        // Leaving the inactive parent wakes it up: Awake runs now, with the new values.
+        explosion.transform.SetParent(null, true);
+        Destroy(holder);
+        return explosion;
     }
 
     /// <summary>

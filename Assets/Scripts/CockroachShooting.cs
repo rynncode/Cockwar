@@ -85,7 +85,37 @@ public class CockroachShooting : MonoBehaviour
     public int RoundsUntilAvailable(int index)
     {
         if (weapons == null || index < 0 || index >= weapons.Count || weapons[index] == null) return 0;
+        if (unlockedByCrate.Contains(weapons[index])) return 0;
         return Mathf.Max(0, weapons[index].roundDelay + 1 - Round);
+    }
+
+    // Weapons picked up from a crate are usable straight away, even if their Round Delay has not passed.
+    private readonly HashSet<WeaponData> unlockedByCrate = new HashSet<WeaponData>();
+
+    /// <summary>
+    /// Adds shots of a weapon, e.g. from a supply crate. A weapon already in the list gets
+    /// the extra ammo; a new one is added to the end of the list (and to the weapon panel).
+    /// An amount of 0 only adds the weapon to the panel with no ammo. A weapon with unlimited ammo stays unlimited. Returns false if nothing could be given
+    /// (no weapon, or this cockroach uses the old single-weapon mode with an empty list).
+    /// </summary>
+    public bool GiveWeapon(WeaponData weapon, int amount)
+    {
+        if (weapon == null || weapons == null || weapons.Count == 0 || amount < 0) return false;
+
+        int index = weapons.IndexOf(weapon);
+        if (index < 0)
+        {
+            weapons.Add(weapon);
+            System.Array.Resize(ref ammoLeft, weapons.Count);
+            index = weapons.Count - 1;
+            ammoLeft[index] = 0;
+        }
+
+        if (ammoLeft[index] >= 0) ammoLeft[index] += amount;
+        if (amount > 0) unlockedByCrate.Add(weapon);
+
+        OnWeaponChanged?.Invoke();
+        return true;
     }
 
     /// <summary>True if the weapon at this index exists, has ammo left and is not locked by its round delay.</summary>
@@ -181,8 +211,58 @@ public class CockroachShooting : MonoBehaviour
 
     private bool CanFireCurrentWeapon()
     {
+        // Never start a second attack while a meteor, UFO, airstrike... from the last one is still going.
+        if (AttackRunner.AnyActive) return false;
         if (CurrentWeapon == null) return true;
         return IsWeaponReady(currentWeaponIndex);
+    }
+
+    private void HandleSpecialInput(SpecialAttack special)
+    {
+        bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+
+        if (special.Activation == SpecialActivation.ClickTarget)
+        {
+            Vector2 mouse = WeaponFx.MouseWorld();
+            TargetMarker.ShowAt(special.TargetMarker, mouse, special.TargetMarkerSize);
+
+            if (Input.GetMouseButtonDown(0) && !overUI && CanFireCurrentWeapon())
+                FireSpecial(special, mouse, 0f);
+        }
+        else if (special.Activation == SpecialActivation.RightClick)
+        {
+            if (Input.GetMouseButtonDown(1) && CanFireCurrentWeapon())
+                FireSpecial(special, transform.position, 0f);
+        }
+    }
+
+    /// <summary>
+    /// Runs a special attack, then uses ammo and raises the same events as a normal shot, so the
+    /// sounds, the weapon panel and the TurnManager treat it like any other weapon.
+    /// </summary>
+    private void FireSpecial(SpecialAttack special, Vector2 target, float power)
+    {
+        AttackContext context = new AttackContext
+        {
+            shooter = this,
+            weapon = CurrentWeapon,
+            origin = aim.AimOrigin,
+            direction = aim.AimDirection,
+            power = power,
+            target = target
+        };
+
+        Projectile tracked = special.Begin(context);
+
+        // Ignore the shooter, the same as a normal shot does.
+        if (tracked != null)
+        {
+            Collider2D shotCollider = tracked.GetComponent<Collider2D>();
+            if (shotCollider != null && ownCollider != null) Physics2D.IgnoreCollision(shotCollider, ownCollider, true);
+            OnProjectileLaunched?.Invoke(tracked);
+        }
+
+        FinishFiring(CurrentWeapon);
     }
 
     private void Update()
@@ -207,6 +287,18 @@ public class CockroachShooting : MonoBehaviour
         if (Input.GetKeyDown(GameSettings.Key(GameAction.NextWeapon)) && !isCharging)
         {
             CycleWeapon();
+        }
+
+        // Special weapons that are not charged (Satelaser: click a target; Airstrike, Demon Fire,
+        // Doom: right-click) have their own input. Charged ones (Reneitor) fall through to the
+        // normal hold-and-release below.
+        SpecialAttack special = SpecialAttack.Of(CurrentWeapon);
+        if (special != null && special.Activation != SpecialActivation.ChargeShot)
+        {
+            isCharging = false;
+            ChargeRatio01 = 0f;
+            HandleSpecialInput(special);
+            return;
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -260,6 +352,14 @@ public class CockroachShooting : MonoBehaviour
         GameObject prefab = weapon != null ? weapon.projectilePrefab : projectilePrefab;
         float low = weapon != null ? weapon.minPower : minPower;
         float high = weapon != null ? weapon.maxPower : maxPower;
+
+        // A charged special attack (Reneitor) launches its own projectile with this power.
+        SpecialAttack special = SpecialAttack.Of(weapon);
+        if (special != null)
+        {
+            FireSpecial(special, aim.AimOrigin + aim.AimDirection, Mathf.Lerp(low, high, ChargeRatio01));
+            return;
+        }
 
         if (prefab == null)
         {
@@ -332,6 +432,12 @@ public class CockroachShooting : MonoBehaviour
             }
         }
 
+        FinishFiring(weapon);
+    }
+
+    /// <summary>After any firing action: the fire sound event, one ammo used, then OnFired for the TurnManager.</summary>
+    private void FinishFiring(WeaponData weapon)
+    {
         OnWeaponFired?.Invoke(weapon);
 
         // Use up one shot of limited ammo, and let the panel refresh.

@@ -53,6 +53,11 @@ public class AimGun : MonoBehaviour
     {
         WeaponData weapon = shooting.CurrentWeapon;
         Sprite sprite = weapon != null ? weapon.heldSprite : null;
+        SpecialAttack special = SpecialAttack.Of(weapon);
+        if (sprite == null && special != null) sprite = special.HeldSprite;
+
+        // Targeted and right-click specials have no charge, so they are held the whole turn instead.
+        bool holding = shooting.IsCharging || (special != null && special.Activation != SpecialActivation.ChargeShot);
 
         // Only while actively charging, standing on the ground, and alive.
         // shooting.enabled is false once CockroachDeath starts, which covers the death animation;
@@ -61,7 +66,7 @@ public class AimGun : MonoBehaviour
         bool show = sprite != null
                     && !dead
                     && movement.isMyTurn
-                    && shooting.IsCharging
+                    && holding
                     && movement.IsGrounded;
 
         if (!show)
@@ -81,7 +86,7 @@ public class AimGun : MonoBehaviour
         }
 
         // Match the cockroach's pixel size, so the gun looks like it belongs to it.
-        float size = Mathf.Abs(transform.lossyScale.y) * gunScale;
+        float size = Mathf.Abs(transform.lossyScale.y) * gunScale * (weapon != null ? weapon.heldScale : 1f);
 
         gun.sprite = sprite;
         gun.transform.localScale = new Vector3(size, size, 1f);

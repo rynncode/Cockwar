@@ -57,7 +57,9 @@ public class CockroachAim : MonoBehaviour
         // Hide the crosshair and ignore the mouse when it is not this player's turn.
         if (crosshair != null && !indicatorSystemPresent)
         {
-            crosshair.gameObject.SetActive(movement.isMyTurn);
+            CockroachShooting shooting = GetComponent<CockroachShooting>();
+            bool hide = shooting != null && SpecialAttack.HidesCrosshair(shooting.CurrentWeapon);
+            crosshair.gameObject.SetActive(movement.isMyTurn && !hide);
         }
 
         if (!movement.isMyTurn || mainCamera == null) return;
