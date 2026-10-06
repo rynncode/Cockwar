@@ -92,6 +92,12 @@ public class Projectile : MonoBehaviour
     /// </summary>
     public event System.Action<Vector2> OnLanded;
 
+    /// <summary>
+    /// Impact projectiles only: fires once when it hits something, with what it hit and where,
+    /// just before it explodes. The Reneitor uses this to see whether its basketball hit a player.
+    /// </summary>
+    public event System.Action<Collider2D, Vector2> OnImpact;
+
     private Rigidbody2D body;
     private bool hasHit;
     private bool hasNotifiedLanded;
@@ -241,6 +247,7 @@ public class Projectile : MonoBehaviour
             return;
         }
 
+        if (!hasHit) OnImpact?.Invoke(collision.collider, collision.GetContact(0).point);
         Explode(collision.GetContact(0).point);
     }
 

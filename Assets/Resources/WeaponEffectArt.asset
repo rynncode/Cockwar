@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c50ab3ae984769a90054ad427ce284, type: 3}
+  m_Name: WeaponEffectArt
+  m_EditorClassIdentifier: 
+  fire:
+  - {fileID: 21300000, guid: 6df054a41ea7d504c92feacc79393a4b, type: 3}
+  - {fileID: 21300000, guid: 4bcdd85cf0cd6b4478d1cd642682a9bf, type: 3}
+  - {fileID: 21300000, guid: 1680920ceaaa4eb468c7fb1639de71db, type: 3}
+  - {fileID: 21300000, guid: 0e0ea515ff5435042b3c99ad084a1643, type: 3}
+  - {fileID: 21300000, guid: 76cca32f9430044448d6e7fb1d16db43, type: 3}
+  - {fileID: 21300000, guid: fc5e8f9fa240bc44a941c0e5fd339068, type: 3}
+  smoke:
+  - {fileID: 21300000, guid: f14535922844fca4b951de3109298180, type: 3}
+  - {fileID: 21300000, guid: 3215d5ea36a95b0418e5a4be3a9ce891, type: 3}
+  - {fileID: 21300000, guid: d6fd7048dbd3c6049af10bee0cfd87a4, type: 3}
+  - {fileID: 21300000, guid: fc24ce846508faa4a9ff5f3bbf461df9, type: 3}
+  - {fileID: 21300000, guid: c6ba575dff83f684b92508042555910e, type: 3}
+  - {fileID: 21300000, guid: 95dde29fe748cf7479214d187dd64360, type: 3}
+  meteorImpact:
+  - {fileID: 21300000, guid: 2a650f3884ef8c444a1c39ee68b674f0, type: 3}
+  - {fileID: 21300000, guid: 15d0a49ee3157284f86a472d5cb9c7f4, type: 3}
+  - {fileID: 21300000, guid: a3fd38c3495c0a946ab41d3c2a27ea3e, type: 3}
+  - {fileID: 21300000, guid: d8961017981160f45814f363d5a245ca, type: 3}
+  - {fileID: 21300000, guid: 10b5e6d5c38ec1d41a9db2edb5d81867, type: 3}
+  - {fileID: 21300000, guid: c7ac5425acbbc4044b6cfb1fb2bc3986, type: 3}
+  - {fileID: 21300000, guid: 5c08d5ba025cbf24fa3e6d0a0c3ac5a2, type: 3}
+  - {fileID: 21300000, guid: c657f2ee01ff8e54c8e0bbb03c3704cb, type: 3}
+  - {fileID: 21300000, guid: 903611ab9745d6447b989933e5563d4a, type: 3}
+  - {fileID: 21300000, guid: cec5bc3e8e647e94984f3f0881cdc38c, type: 3}
+  beamStrike:
+  - {fileID: 21300000, guid: 982f7234d63699542991247e22089e75, type: 3}
+  - {fileID: 21300000, guid: 02a396992a978d64e882c4dd61cf804e, type: 3}
+  - {fileID: 21300000, guid: 5e5a7439ec2b4f140ba302725598f766, type: 3}
+  - {fileID: 21300000, guid: 046ceb23a25a9f34dab6108fef179f37, type: 3}
+  - {fileID: 21300000, guid: 05b8cbbea434bbc409955a20804bf766, type: 3}
+  beamLoop:
+  - {fileID: 21300000, guid: e8d2b41ff0f51c546b639cb4114abad7, type: 3}
+  - {fileID: 21300000, guid: f3c442644cb444c4698608c9cef3bfab, type: 3}
+  - {fileID: 21300000, guid: 1000c56e77df43f4097efbbfb45a82d7, type: 3}
+  - {fileID: 21300000, guid: a68fc86019fbca341b6c1105444886c3, type: 3}
+  - {fileID: 21300000, guid: 479401a50b7167349bb6931b36384f38, type: 3}
+  - {fileID: 21300000, guid: 06eec9e24819f6b4a8affce75060a72f, type: 3}
+  beamEnd:
+  - {fileID: 21300000, guid: 9c399a6dd0813434fa17e1929016e67b, type: 3}
+  - {fileID: 21300000, guid: 93d40a7dda9512e4394d50d4ffce6e74, type: 3}
+  - {fileID: 21300000, guid: 210253c6b0b6b0f4d9397204c8db4897, type: 3}
+  beamSpark:
+  - {fileID: 21300000, guid: ffe2ca6905c6bc94b8a0de8db9b4ed9d, type: 3}
+  - {fileID: 21300000, guid: 190981a379fd5934788d26ad4758c076, type: 3}
+  - {fileID: 21300000, guid: e492403f3f018d64183e1031e46239ed, type: 3}
+  - {fileID: 21300000, guid: cc381588c0fb23740a0f59d1b2d83425, type: 3}
+  laserImpact:
+  - {fileID: 21300000, guid: e6cea901e74d5f8438f2bf32a96a3fe2, type: 3}
+  - {fileID: 21300000, guid: 6c85f9247e099534eaea7bf05c42ceb7, type: 3}
+  - {fileID: 21300000, guid: 22a54add0b93ca1458da4418f5793858, type: 3}
+  - {fileID: 21300000, guid: 4ce6fb0871aa1434390fea9e47611f6e, type: 3}
+  - {fileID: 21300000, guid: 838535d28964e2f4194cf9fe9608084c, type: 3}
+  - {fileID: 21300000, guid: c9d0302c842efcc4ca930e98d8536ec2, type: 3}
+  - {fileID: 21300000, guid: 92df067f922170645835242330d4ce85, type: 3}
+  - {fileID: 21300000, guid: 663e4e4f3fc9e4343ac438eb8e2144d7, type: 3}
+  - {fileID: 21300000, guid: 8ac8efc0c0675944082c7a55c6adb30f, type: 3}
+  - {fileID: 21300000, guid: b16574fef8004074c8315b243407d599, type: 3}
+  rocketBlast:
+  - {fileID: 21300000, guid: 43cfd10b41d536a4d858521156d77496, type: 3}
+  - {fileID: 21300000, guid: 013fe40d8d981944098095e1eaf87787, type: 3}
+  - {fileID: 21300000, guid: 91f21dfc222fdef4891e7238654e79f2, type: 3}
+  - {fileID: 21300000, guid: 4cbc8c4377c832b46837de7c614b4cc9, type: 3}
+  - {fileID: 21300000, guid: 485596ceda7c28640886116a15810e6d, type: 3}
+  - {fileID: 21300000, guid: df49244eed775cd4bb7da41ef14a3898, type: 3}
+  - {fileID: 21300000, guid: cce2a6d137c73c44eb6065d199cc65db, type: 3}
+  - {fileID: 21300000, guid: cdf6a3bb3e8a70a49968bfe4c5835246, type: 3}
+  - {fileID: 21300000, guid: a4788f39dd9b85d458621ce84b631b90, type: 3}
+  - {fileID: 21300000, guid: 6c32e37bafba18e4f95119918f97ae9e, type: 3}
+  nukeCloud:
+  - {fileID: 21300000, guid: 455698a5048601240b8c242feb158ec4, type: 3}
+  - {fileID: 21300000, guid: 1d256b91338f0d44085f25fdeb5602c3, type: 3}
+  - {fileID: 21300000, guid: 33506314daf87b84f8b163e55d4ce1d5, type: 3}
+  - {fileID: 21300000, guid: 49cb10d1c039edf42a6a5c6e3228e084, type: 3}
+  - {fileID: 21300000, guid: 7598fc7bc2203ed4fad1513609ad810a, type: 3}
+  - {fileID: 21300000, guid: 7c17e41e7bda805419a58f6471b0f76a, type: 3}
+  - {fileID: 21300000, guid: aadceea05df12d9429492054449abe88, type: 3}
+  - {fileID: 21300000, guid: 6461c8af7eb7be449b4c1896f4192c55, type: 3}
+  - {fileID: 21300000, guid: e22d6059d3310a34c9fa8707abc507f3, type: 3}
+  - {fileID: 21300000, guid: f0faf0959d93d1a43a13e9d96aebbf7e, type: 3}

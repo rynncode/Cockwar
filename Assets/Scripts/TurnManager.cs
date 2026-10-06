@@ -56,6 +56,9 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Seconds to wait after a shot before passing to the next player. Gives the explosion and any knockback time to finish. Increase it if players are still flying when the next turn starts.")]
     public float endTurnDelay = 4f;
 
+    [Tooltip("Seconds to wait after a special weapon's effect (meteor, laser, airstrike, demon fire, nuke) has finished before passing to the next player.")]
+    public float settleAfterSpecialAttack = 1.5f;
+
     // Manual End Turn: the End Turn key is set in the settings menu (GameSettings).
 
     [Header("Game Over")]
@@ -104,6 +107,13 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Adds the P1 / P2 bubbles over the players' heads when the match starts, unless the scene already has a PlayerBubbles.")]
     public bool autoAddPlayerBubbles = true;
 
+    [Header("Supply Crates")]
+    [Tooltip("Adds the supply crate system (starting crates, plane drops between turns) when the match starts, unless the scene already has a CrateDropManager. Its settings live in Assets/Resources/CrateSettings.")]
+    public bool autoAddCrateDrops = true;
+
+    [Tooltip("Runs the between-turns crate drop. Leave empty to find it in the scene automatically.")]
+    public CrateDropManager crateDrops;
+
     // Seconds into each player's focus before their label appears (camera has mostly arrived).
     private const float IntroLabelDelay = 0.5f;
 
@@ -139,6 +149,12 @@ public class TurnManager : MonoBehaviour
     // A turn ended while a death sequence was still playing; moving on waits until it is done.
     private bool advancePending;
 
+    // A supply plane is dropping a crate between two turns; the next turn waits for it.
+    private bool betweenTurns;
+
+    // The crate roll for the turn that just ended has been made, so it never happens twice.
+    private bool crateRollDone;
+
     // --- Read-only state for other scripts (turn UI in step 15) ---
 
     /// <summary>True while a turn-ending shot is in flight. The weapon panel uses this to lock itself.</summary>
@@ -156,7 +172,10 @@ public class TurnManager : MonoBehaviour
 
     /// <summary>True while the turn clock is ticking: a turn is on and the player has not fired yet.</summary>
     public bool IsTurnClockRunning =>
-        !gameOver && !advancePending && currentIndex >= 0 && !shotFired && turnTimeLimit > 0f;
+        !gameOver && !advancePending && !betweenTurns && currentIndex >= 0 && !shotFired && turnTimeLimit > 0f;
+
+    /// <summary>True while a supply plane is dropping a crate between two turns.</summary>
+    public bool IsBetweenTurns => betweenTurns;
 
     /// <summary>Fires when a player's turn begins, with that player.</summary>
     public event System.Action<CockroachMovement> OnTurnStarted;
@@ -169,6 +188,9 @@ public class TurnManager : MonoBehaviour
 
         if (autoAddPlayerBubbles && FindFirstObjectByType<PlayerBubbles>() == null)
             gameObject.AddComponent<PlayerBubbles>();
+
+        if (crateDrops == null) crateDrops = FindFirstObjectByType<CrateDropManager>();
+        if (crateDrops == null && autoAddCrateDrops) crateDrops = gameObject.AddComponent<CrateDropManager>();
     }
 
     private void Start()
@@ -308,6 +330,7 @@ public class TurnManager : MonoBehaviour
     {
         if (gameOver || currentIndex < 0) return;
         if (GameMenu.IsPaused) return; // keys pressed in the menu must not end the turn
+        if (betweenTurns) return;      // a crate drop is playing; HandleCrateDropFinished moves on
 
         // The turn ended while someone's death sequence was playing: wait for it, then carry on.
         if (advancePending)
@@ -385,6 +408,14 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
+        // A special attack is still playing (meteor falling, UFO firing, nuke counting down...):
+        // hold the turn, and give it a short settle time once it has finished.
+        if (AttackRunner.AnyActive)
+        {
+            endDelayLeft = Mathf.Max(endDelayLeft, settleAfterSpecialAttack);
+            return;
+        }
+
         // Landed: wait for the explosion and knockback to settle.
         endDelayLeft -= Time.deltaTime;
         if (endDelayLeft <= 0f)
@@ -456,7 +487,12 @@ public class TurnManager : MonoBehaviour
         if (shooting != null && !shooting.EndsTurnOnFire) return;
 
         shotFired = true;
-        waitingForImpact = true;
+
+        // A normal shot reports its projectile just before this, so we wait for it to land.
+        // Special attacks without a projectile (Satelaser, Airstrike, Doom...) go straight to the
+        // settle phase, which waits for their effects (AttackRunner) to finish.
+        waitingForImpact = activeProjectile != null;
+        if (!waitingForImpact) endDelayLeft = endTurnDelay;
 
         // Lock the shooter out right away: one shot per turn, no walking while waiting.
         current.isMyTurn = false;
@@ -552,6 +588,19 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
+        // Supply crates: once per finished turn (never before the first turn), roll for a plane
+        // drop. If one happens, the next turn waits until the crate has landed.
+        if (!crateRollDone && currentIndex >= 0 && crateDrops != null && crateDrops.isActiveAndEnabled)
+        {
+            crateRollDone = true;
+
+            if (crateDrops.TryStartTurnEndDrop(HandleCrateDropFinished))
+            {
+                betweenTurns = true;
+                return;
+            }
+        }
+
         for (int i = 1; i <= players.Count; i++)
         {
             int candidate = (currentIndex + i) % players.Count;
@@ -584,6 +633,7 @@ public class TurnManager : MonoBehaviour
 
         currentIndex = index;
         shotFired = false;
+        crateRollDone = false;
         turnTimeLeft = turnTimeLimit;
 
         // Defensive cleanup: a fresh turn should never start still watching an
@@ -619,6 +669,19 @@ public class TurnManager : MonoBehaviour
         Debug.Log("TurnManager: it is now " + players[index].name + "'s turn.");
 
         OnTurnStarted?.Invoke(players[index]);
+    }
+
+    /// <summary>
+    /// Called by CrateDropManager when the between-turns crate has landed (or the drop gave up).
+    /// Runs the normal advance again, so a death or game over during the drop is still handled;
+    /// crateRollDone stops it from rolling a second crate for the same turn.
+    /// </summary>
+    private void HandleCrateDropFinished()
+    {
+        if (!betweenTurns) return;
+        betweenTurns = false;
+
+        if (!gameOver) AdvanceToNextPlayer();
     }
 
     private void EndGame()

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Draws text in the world with a tiny built-in pixel font (digits, A-Z, minus, space and "!"),
+/// Draws text in the world with a tiny built-in pixel font (digits, A-Z, minus, plus, space and "!"),
 /// matching the pixelated P1 / P2 labels. Used for the health number on the health bar,
 /// the floating "-10" damage labels and the "WINNER" text.
 /// (The name is from when it only did numbers.)
@@ -65,6 +65,7 @@ public class PixelNumber
         { '-', new[] { "000", "000", "111", "000", "000" } },
         { ' ', new[] { "00", "00", "00", "00", "00" } },
         { '!', new[] { "1", "1", "1", "0", "1" } },
+        { '+', new[] { "000", "010", "111", "010", "000" } },
         { '∞', new[] { "00000", "01010", "10101", "01010", "00000" } },
         { 'A', new[] { "010", "101", "111", "101", "101" } },
         { 'B', new[] { "110", "101", "110", "101", "110" } },

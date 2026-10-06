@@ -1073,11 +1073,73 @@ public class TerrainGenerator : MonoBehaviour
     /// </summary>
     private bool IsGoodSpawnColumn(int px, out int surfaceY)
     {
+        return IsFlatColumn(px, spawnFlatHalfWidth, spawnMaxSlope, out surfaceY);
+    }
+
+    // ------------------------------------------------------------------
+    // Queries for other scripts (supply crates)
+    // ------------------------------------------------------------------
+
+    /// <summary>The map's area in world space (left, bottom, width, height).</summary>
+    public Rect WorldBounds => new Rect(
+        transform.position.x - mapWidth * 0.5f,
+        transform.position.y - mapHeight * 0.5f,
+        mapWidth, mapHeight);
+
+    /// <summary>
+    /// Finds the top surface at a world x: the first ground met coming down from the sky, so it
+    /// always has open sky above it (never inside a cave or under an overhang). The ground must be
+    /// flat for flatHalfWidth world units to each side, within maxSlope. Returns false if the
+    /// column is off the map, has no ground, or is too steep.
+    /// </summary>
+    public bool TryFindSurface(float worldX, float flatHalfWidth, float maxSlope, out Vector2 surfacePoint)
+    {
+        surfacePoint = Vector2.zero;
+        if (solid == null) return false;
+
+        int px = Mathf.RoundToInt((worldX - transform.position.x) * pixelsPerUnit + widthPx * 0.5f);
+        if (px < 0 || px >= widthPx) return false;
+        if (!IsFlatColumn(px, flatHalfWidth, maxSlope, out int surfaceY)) return false;
+
+        surfacePoint = PixelToWorld(px, surfaceY + 1);
+        return true;
+    }
+
+    /// <summary>True if this world point is inside solid ground.</summary>
+    public bool IsSolidAt(Vector2 worldPoint)
+    {
+        if (solid == null) return false;
+
+        int px = Mathf.FloorToInt((worldPoint.x - transform.position.x) * pixelsPerUnit + widthPx * 0.5f);
+        int py = Mathf.FloorToInt((worldPoint.y - transform.position.y) * pixelsPerUnit + heightPx * 0.5f);
+        if (px < 0 || px >= widthPx || py < 0 || py >= heightPx) return false;
+        return solid[py * widthPx + px];
+    }
+
+    /// <summary>Highest ground anywhere on the map, in world y. Used to fly the supply plane above everything.</summary>
+    public float HighestGroundY()
+    {
+        if (solid == null) return transform.position.y;
+
+        for (int y = heightPx - 1; y >= 0; y--)
+        {
+            int row = y * widthPx;
+            for (int x = 0; x < widthPx; x++)
+            {
+                if (solid[row + x]) return PixelToWorld(x, y + 1).y;
+            }
+        }
+
+        return transform.position.y - mapHeight * 0.5f;
+    }
+
+    private bool IsFlatColumn(int px, float flatHalfWidth, float maxSlope, out int surfaceY)
+    {
         surfaceY = FindSurfaceY(px, heightPx - 1);
         if (surfaceY < 0) return false;
 
-        int halfWidthPx = Mathf.RoundToInt(spawnFlatHalfWidth * pixelsPerUnit);
-        int slopePx = Mathf.RoundToInt(spawnMaxSlope * pixelsPerUnit);
+        int halfWidthPx = Mathf.RoundToInt(flatHalfWidth * pixelsPerUnit);
+        int slopePx = Mathf.RoundToInt(maxSlope * pixelsPerUnit);
 
         for (int dx = -halfWidthPx; dx <= halfWidthPx; dx++)
         {

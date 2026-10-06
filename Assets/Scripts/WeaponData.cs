@@ -49,8 +49,11 @@ public class WeaponData : ScriptableObject
     [Tooltip("Rounds at the start of the match this weapon is locked for (a round = everyone has had a turn). 0 = usable from the first turn.")]
     public int roundDelay = 0;
 
-    [Tooltip("Prefab that has the Projectile script on it.")]
+    [Tooltip("Prefab that has the Projectile script on it. Not needed when a Special Attack is set.")]
     public GameObject projectilePrefab;
+
+    [Tooltip("Optional. A special attack asset (Assets/Weapons/Special/Attacks) such as the Satelaser or Doom. When set, firing runs it instead of the Projectile Prefab, and it decides how the weapon is triggered (charge, click a target, or right-click).")]
+    public SpecialAttack specialAttack;
 
     [Header("Power")]
     [Tooltip("Launch speed on an instant click-and-release.")]
@@ -66,6 +69,9 @@ public class WeaponData : ScriptableObject
     [Header("Held Weapon")]
     [Tooltip("Optional. Sprite drawn in front of the cockroach, rotating to point at the crosshair (needs the AimGun component on the cockroach). The art should point right.")]
     public Sprite heldSprite;
+
+    [Tooltip("Size of the held sprite for this weapon, multiplied with the cockroach's Gun Scale (on its Aim Gun component). 1 = unchanged, 2 = double.")]
+    [Min(0.05f)] public float heldScale = 1f;
 
     [Header("Aim Indicator")]
     [Tooltip("How this weapon shows its aim: crosshair only, a charge cone, or a straight line.")]
