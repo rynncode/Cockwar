@@ -59,6 +59,13 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Seconds to wait after a special weapon's effect (meteor, laser, airstrike, demon fire, nuke) has finished before passing to the next player.")]
     public float settleAfterSpecialAttack = 1.5f;
 
+    [Header("Retreat")]
+    [Tooltip("After throwing a fused weapon (grenade, dynamite, holy hand grenade, sticky bomb), the player can keep walking and jumping until it explodes. They cannot fire again.")]
+    public bool retreatAfterFusedShots = true;
+
+    [Tooltip("During a retreat, the camera follows the throw for at most this many seconds (less if it sticks or settles sooner), then goes back to the player.")]
+    public float retreatCameraSeconds = 1.5f;
+
     // Manual End Turn: the End Turn key is set in the settings menu (GameSettings).
 
     [Header("Game Over")]
@@ -154,6 +161,12 @@ public class TurnManager : MonoBehaviour
 
     // The crate roll for the turn that just ended has been made, so it never happens twice.
     private bool crateRollDone;
+
+    // After a fused shot: the shooter can still move until it goes off.
+    private bool retreating;
+    private float retreatTime;
+    private float retreatSlowTime;
+    private bool retreatCameraOnPlayer;
 
     // --- Read-only state for other scripts (turn UI in step 15) ---
 
@@ -394,7 +407,13 @@ public class TurnManager : MonoBehaviour
             // Still in the air. HandleProjectileLanded (via Projectile.OnLanded)
             // is what moves things forward from here — not a timer — so a long
             // shot is never cut off before it actually lands.
-            if (activeProjectile != null && Input.GetKeyDown(toggleCameraViewKey))
+            if (retreating) UpdateRetreatCamera(current);
+
+            // While retreating, the toggle is off if it shares a key with Jump (Space by default),
+            // or every jump would flip the camera.
+            bool toggleAllowed = !retreating || toggleCameraViewKey != GameSettings.Key(GameAction.Jump);
+
+            if (activeProjectile != null && toggleAllowed && Input.GetKeyDown(toggleCameraViewKey))
             {
                 followingProjectile = !followingProjectile;
 
@@ -484,7 +503,7 @@ public class TurnManager : MonoBehaviour
 
         // Some weapons (step 13) will not end the turn when fired — a utility
         // item, say. If this one doesn't, leave the turn running as normal.
-        if (shooting != null && !shooting.EndsTurnOnFire) return;
+        if (shooting != null && !shooting.LastShotEndsTurn) return;
 
         shotFired = true;
 
@@ -494,8 +513,45 @@ public class TurnManager : MonoBehaviour
         waitingForImpact = activeProjectile != null;
         if (!waitingForImpact) endDelayLeft = endTurnDelay;
 
-        // Lock the shooter out right away: one shot per turn, no walking while waiting.
-        current.isMyTurn = false;
+        // A fused shot (grenade, dynamite, sticky bomb...) leaves time to run: the shooter keeps
+        // walking and jumping until it goes off, but cannot fire again. Anything else locks the
+        // shooter out right away: one shot per turn, no walking while waiting.
+        bool fused = activeProjectile != null && (!activeProjectile.explodeOnImpact || activeProjectile.stickOnImpact);
+        if (fused && retreatAfterFusedShots && shooting != null)
+        {
+            retreating = true;
+            retreatTime = 0f;
+            retreatSlowTime = 0f;
+            retreatCameraOnPlayer = false;
+            shooting.FiringLocked = true;
+        }
+        else
+        {
+            current.isMyTurn = false;
+        }
+    }
+
+    /// <summary>
+    /// During a retreat the camera follows the throw, then comes back to the running player once
+    /// the bomb has stuck, settled, or been flying for a while.
+    /// </summary>
+    private void UpdateRetreatCamera(CockroachMovement current)
+    {
+        if (retreatCameraOnPlayer || cameraController == null) return;
+
+        retreatTime += Time.deltaTime;
+
+        Rigidbody2D bombBody = activeProjectile != null ? activeProjectile.GetComponent<Rigidbody2D>() : null;
+        bool slow = bombBody == null || !bombBody.simulated || bombBody.linearVelocity.magnitude < 2.5f;
+        retreatSlowTime = slow ? retreatSlowTime + Time.deltaTime : 0f;
+
+        bool settled = activeProjectile == null || activeProjectile.IsStuck || retreatSlowTime > 0.35f;
+        if (settled || retreatTime > retreatCameraSeconds)
+        {
+            retreatCameraOnPlayer = true;
+            followingProjectile = false;
+            cameraController.SetTarget(current.transform);
+        }
     }
 
     /// <summary>
@@ -536,6 +592,13 @@ public class TurnManager : MonoBehaviour
         followingProjectile = false;
         waitingForImpact = false;
         endDelayLeft = endTurnDelay;
+
+        // The fused shot went off: the retreat is over, so stop the shooter now.
+        if (retreating)
+        {
+            retreating = false;
+            if (currentIndex >= 0 && players[currentIndex] != null) players[currentIndex].isMyTurn = false;
+        }
 
         if (cameraController != null)
         {
@@ -646,6 +709,14 @@ public class TurnManager : MonoBehaviour
         }
         waitingForImpact = false;
         followingProjectile = false;
+        retreating = false;
+
+        // Every cockroach may fire again on its own turn (a fused shot locks firing during the retreat).
+        foreach (CockroachMovement player in players)
+        {
+            CockroachShooting playerShooting = player != null ? player.GetComponent<CockroachShooting>() : null;
+            if (playerShooting != null) playerShooting.FiringLocked = false;
+        }
 
         players[index].isMyTurn = true;
 

@@ -251,6 +251,30 @@ public static class WeaponArt
         ".RRRR..........",
     }, true));
 
+    /// <summary>Grapple gun: dark barrel with a claw on the front and a wooden grip, pointing right.</summary>
+    public static Sprite GrappleGun() => Get("grappleGun", () => FromRows(new[]
+    {
+        "...........G.G",
+        "gggggggggg.GG.",
+        "gGGGGGGGGGGGGG",
+        "gggggggggg.GG.",
+        "..gb.......G.G",
+        "..gb..........",
+        "..bb..........",
+    }, true));
+
+    /// <summary>The grappling claw where the rope bites into the ground. Pivot in the middle.</summary>
+    public static Sprite GrappleClaw() => Get("grappleClaw", () => FromRows(new[]
+    {
+        "G.....G",
+        "GG...GG",
+        ".GG.GG.",
+        "..GGG..",
+        "...G...",
+        "...G...",
+        "...G...",
+    }, true));
+
     // ---------------- Shared ----------------
 
     /// <summary>Soft round blob for smoke and sparks (white, tint it). No outline.</summary>

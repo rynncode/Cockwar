@@ -57,7 +57,7 @@ public class AimGun : MonoBehaviour
         if (sprite == null && special != null) sprite = special.HeldSprite;
 
         // Targeted and right-click specials have no charge, so they are held the whole turn instead.
-        bool holding = shooting.IsCharging || (special != null && special.Activation != SpecialActivation.ChargeShot);
+        bool holding = shooting.IsCharging || (special != null && special.Activation != SpecialActivation.ChargeShot && !shooting.FiringLocked);
 
         // Only while actively charging, standing on the ground, and alive.
         // shooting.enabled is false once CockroachDeath starts, which covers the death animation;

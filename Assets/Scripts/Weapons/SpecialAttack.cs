@@ -68,6 +68,15 @@ public abstract class SpecialAttack : ScriptableObject
     /// </summary>
     public virtual bool IsValidTarget(Vector2 target, CockroachShooting shooter) => true;
 
+    /// <summary>
+    /// Called every frame while this weapon is selected and can be used, so it can draw a preview of
+    /// what it will do (the Blowtorch shows its tunnel). Does nothing by default.
+    /// </summary>
+    public virtual void ShowAimPreview(CockroachShooting shooter, Vector2 aimOrigin, Vector2 aimDirection) { }
+
+    /// <summary>Distance from the cockroach at which the crosshair sits, for weapons that keep it. 0 = the normal distance.</summary>
+    public virtual float CrosshairDistance => 0f;
+
     /// <summary>True for a weapon that is aimed even though it is not charged (the Blowtorch), so the crosshair stays.</summary>
     public virtual bool ShowsCrosshair => false;
 

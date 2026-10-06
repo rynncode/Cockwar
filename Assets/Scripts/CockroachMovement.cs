@@ -238,7 +238,8 @@ public class CockroachMovement : MonoBehaviour
         }
 
         // Read input in Update so key presses are not missed.
-        if (!isMyTurn)
+        // On a rope (ExternalControl) the rope reads the keys itself.
+        if (!isMyTurn || ExternalControl)
         {
             moveDirection = 0f;
             CancelJumpCharge(); // turn ended mid-charge: throw the charge away
@@ -262,6 +263,15 @@ public class CockroachMovement : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGrounded();
+
+        // Something else (the grappling hook) is moving the body: plain physics, normal gravity.
+        if (ExternalControl)
+        {
+            body.gravityScale = defaultGravityScale;
+            isOnSlope = false;
+            wasOnSlope = false;
+            return;
+        }
 
         if (physicsMovementActive)
         {
@@ -365,6 +375,27 @@ public class CockroachMovement : MonoBehaviour
         body.AddForce(impulse, ForceMode2D.Impulse);
 
         OnKnockedBack?.Invoke(impulse);
+    }
+
+    /// <summary>
+    /// True while something else moves this cockroach (the grappling hook): walking, jumping and
+    /// slope handling all stop, and the body is left to physics.
+    /// </summary>
+    public bool ExternalControl { get; set; }
+
+    /// <summary>
+    /// Lets the body fly freely, keeping its current speed, until it lands. Like knockback, but
+    /// with no push and no knockback animation. Used when letting go of the grappling hook.
+    /// </summary>
+    public void BeginFreeFall()
+    {
+        if (!physicsMovementUntilGrounded) return;
+
+        physicsMovementActive = true;
+        physicsMovementElapsed = 0f;
+        groundedStreak = 0f;
+        bounceCount = maxBounces;   // a rope landing should not bounce
+        lastAirborneVerticalSpeed = body.linearVelocity.y;
     }
 
     /// <summary>

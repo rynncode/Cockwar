@@ -38,27 +38,32 @@ MonoBehaviour:
     enabled: 1
     weight: 30
     ammo: 1
-    chance: 33%
+    chance: 27.5%
   - weapon: {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
     enabled: 1
     weight: 24
     ammo: 1
-    chance: 26.4%
+    chance: 22%
   - weapon: {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
     enabled: 1
     weight: 20
     ammo: 1
-    chance: 22%
+    chance: 18.3%
   - weapon: {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
     enabled: 1
     weight: 12
     ammo: 1
-    chance: 13.2%
+    chance: 11%
   - weapon: {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
     enabled: 1
     weight: 5
     ammo: 1
-    chance: 5.5%
+    chance: 4.6%
+  - weapon: {fileID: 11400000, guid: be40dbf57c79486f88e06efd68a81bab, type: 2}
+    enabled: 1
+    weight: 18
+    ammo: 1
+    chance: 16.5%
   specialLoot:
   - weapon: {fileID: 11400000, guid: ae93b4b84c65462db578f738319b30aa, type: 2}
     enabled: 1
@@ -88,14 +93,19 @@ MonoBehaviour:
   toolLoot:
   - weapon: {fileID: 11400000, guid: 1dd03874fc9b4fee83777c5f7b755f0a, type: 2}
     enabled: 1
-    weight: 60
-    ammo: 1
-    chance: 60%
-  - weapon: {fileID: 11400000, guid: a0f85996407e46f8949a20108452d72f, type: 2}
-    enabled: 1
     weight: 40
     ammo: 1
     chance: 40%
+  - weapon: {fileID: 11400000, guid: a0f85996407e46f8949a20108452d72f, type: 2}
+    enabled: 1
+    weight: 30
+    ammo: 1
+    chance: 30%
+  - weapon: {fileID: 11400000, guid: a0e6f18707a94b359d8f384a1315124d, type: 2}
+    enabled: 1
+    weight: 30
+    ammo: 2
+    chance: 30%
   healMin: 25
   healMax: 40
   shieldMin: 25
@@ -148,9 +158,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
   - {fileID: 11400000, guid: 1dd03874fc9b4fee83777c5f7b755f0a, type: 2}
   - {fileID: 11400000, guid: a0f85996407e46f8949a20108452d72f, type: 2}
+  - {fileID: 11400000, guid: a0e6f18707a94b359d8f384a1315124d, type: 2}
   giveEveryPlayerAtStart:
   - {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
   - {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}
   - {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
   - {fileID: 11400000, guid: ae93b4b84c65462db578f738319b30aa, type: 2}
   - {fileID: 11400000, guid: d29bb6ed33b847bcbbb57f6c1c4da600, type: 2}
+  - {fileID: 11400000, guid: a0f85996407e46f8949a20108452d72f, type: 2}
+  - {fileID: 11400000, guid: 1dd03874fc9b4fee83777c5f7b755f0a, type: 2}

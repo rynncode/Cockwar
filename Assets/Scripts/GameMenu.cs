@@ -10,6 +10,8 @@ using UnityEngine.UI;
 /// In-game pause button, pause menu and settings menu, built entirely in code like the
 /// other HUDs, on a canvas drawn above all of them (so the turn timer can't cover it).
 /// It adds itself to any scene that has a TurnManager, so there is nothing to set up.
+/// In the Main Menu (no TurnManager) it is created by the Settings button (Mainmenu.OpenSettings)
+/// and shows only the settings panel: no pause button or pause menu, and nothing is frozen.
 ///
 ///  - Pause button in the top-left corner, or ESC.
 ///  - Pause menu: Resume, Restart, Main Menu, Mute, Settings.
@@ -46,6 +48,10 @@ public class GameMenu : MonoBehaviour
     private MenuArt art;
     private GameOverSequence gameOver;
 
+    // True in a scene without a match (the Main Menu): only the settings panel, opened by the
+    // scene's Settings button. No pause button, no pause menu, and nothing is ever frozen.
+    private bool menuMode;
+
     private GameObject pauseButton;
     private GameObject pauseRoot;
     private GameObject settingsRoot;
@@ -80,18 +86,29 @@ public class GameMenu : MonoBehaviour
         new GameObject("GameMenu").AddComponent<GameMenu>();
     }
 
+    /// <summary>
+    /// Opens the settings panel in a scene without a match (the Main Menu's Settings button calls
+    /// this through Mainmenu.OpenSettings). Creates the menu the first time.
+    /// </summary>
+    public static void OpenSettings()
+    {
+        if (Instance == null) new GameObject("GameMenu").AddComponent<GameMenu>();
+        Instance.ShowSettings();
+    }
+
     private void Awake()
     {
         Instance = this;
         art = MenuArt.Load();
         gameOver = FindAnyObjectByType<GameOverSequence>();
+        menuMode = FindAnyObjectByType<TurnManager>() == null;
 
         // Buttons need an EventSystem; the scene normally has one already.
         if (FindAnyObjectByType<EventSystem>() == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
         Build();
-        HideOldPauseButtons();
+        if (!menuMode) HideOldPauseButtons();
     }
 
     private void OnDestroy()
@@ -152,7 +169,7 @@ public class GameMenu : MonoBehaviour
         Time.timeScale = timeScaleBeforePause;
         AudioListener.pause = false;
 
-        pauseRoot.SetActive(false);
+        if (pauseRoot != null) pauseRoot.SetActive(false);
         settingsRoot.SetActive(false);
     }
 
@@ -171,16 +188,29 @@ public class GameMenu : MonoBehaviour
     private void ShowPauseMenu()
     {
         rebinding = -1;
-        pauseRoot.SetActive(true);
+        if (pauseRoot != null) pauseRoot.SetActive(true);
         settingsRoot.SetActive(false);
         RefreshMute();
     }
 
-    private void ShowSettings()
+    public void ShowSettings()
     {
-        pauseRoot.SetActive(false);
+        if (pauseRoot != null) pauseRoot.SetActive(false);
         settingsRoot.SetActive(true);
         RefreshKeyLabels();
+    }
+
+    /// <summary>The settings panel's X (and ESC): back to the pause menu in a match, or just closed in the Main Menu.</summary>
+    private void CloseSettings()
+    {
+        if (!menuMode)
+        {
+            ShowPauseMenu();
+            return;
+        }
+
+        rebinding = -1;
+        settingsRoot.SetActive(false);
     }
 
     private void ToggleMute()
@@ -206,7 +236,7 @@ public class GameMenu : MonoBehaviour
         ClearSelection();
 
         bool matchOver = gameOver != null && gameOver.HasStarted;
-        pauseButton.SetActive(!IsPaused && !matchOver);
+        if (pauseButton != null) pauseButton.SetActive(!IsPaused && !matchOver);
 
         if (rebinding >= 0)
         {
@@ -215,6 +245,13 @@ public class GameMenu : MonoBehaviour
         }
 
         if (!Input.GetKeyDown(KeyCode.Escape)) return;
+
+        // Main Menu: ESC only closes the settings panel.
+        if (menuMode)
+        {
+            if (settingsRoot.activeSelf) CloseSettings();
+            return;
+        }
 
         if (settingsRoot.activeSelf) ShowPauseMenu();
         else if (IsPaused) Resume();
@@ -303,11 +340,15 @@ public class GameMenu : MonoBehaviour
 
         RectTransform root = (RectTransform)canvasObject.transform;
 
-        BuildPauseButton(root);
-        BuildPauseMenu(root);
-        BuildSettings(root);
+        // The Main Menu only gets the settings panel.
+        if (!menuMode)
+        {
+            BuildPauseButton(root);
+            BuildPauseMenu(root);
+            pauseRoot.SetActive(false);
+        }
 
-        pauseRoot.SetActive(false);
+        BuildSettings(root);
         settingsRoot.SetActive(false);
     }
 
@@ -409,7 +450,7 @@ public class GameMenu : MonoBehaviour
         RectTransform closeRect = (RectTransform)close.transform;
         closeRect.anchorMin = closeRect.anchorMax = new Vector2(1f, 1f);
         closeRect.anchoredPosition = new Vector2(-62f, -58f);
-        close.onClick.AddListener(ShowPauseMenu);
+        close.onClick.AddListener(CloseSettings);
 
         // Rows are laid out top to bottom from just under the header.
         const float left = 75f;

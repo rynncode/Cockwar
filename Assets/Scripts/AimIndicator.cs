@@ -62,7 +62,7 @@ public class AimIndicator : MonoBehaviour
 
         // Targeted and right-click special weapons (Satelaser, Airstrike...) don't aim along a line,
         // so the crosshair is hidden for them (Satelaser shows its own target marker instead).
-        bool visible = movement.isMyTurn && !SpecialAttack.HidesCrosshair(weapon);
+        bool visible = movement.isMyTurn && (shooting == null || !shooting.FiringLocked) && !SpecialAttack.HidesCrosshair(weapon);
 
         // Show only the current crosshair; hide the rest, including the fallback one.
         foreach (Transform t in spawned.Values) SetVisible(t, visible && t == current);
@@ -77,6 +77,10 @@ public class AimIndicator : MonoBehaviour
         Vector2 origin = aim.AimOrigin;
         Vector2 direction = aim.AimDirection;
         float distance = (weapon != null && weapon.indicatorDistance > 0f) ? weapon.indicatorDistance : aim.crosshairDistance;
+
+        // A special weapon can park the crosshair where its effect ends (the Blowtorch: the far end of the tunnel).
+        SpecialAttack special = SpecialAttack.Of(weapon);
+        if (special != null && special.CrosshairDistance > 0f) distance = special.CrosshairDistance;
         Vector2 crosshairPosition = origin + direction * distance;
 
         AimStyle style = weapon != null ? weapon.aimStyle : AimStyle.CrosshairOnly;

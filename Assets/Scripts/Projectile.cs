@@ -38,6 +38,15 @@ public class Projectile : MonoBehaviour
     [Tooltip("Off = the fuse starts when thrown. On = the fuse starts the first time it touches something.")]
     public bool fuseStartsOnFirstHit = false;
 
+    [Header("Sticky (sticky bomb)")]
+    [Tooltip("On = it glues itself to the first thing it touches (the ground, a cockroach, a crate) and rides along with it until the fuse runs out. The fuse starts when it sticks, if it was not already burning.")]
+    public bool stickOnImpact = false;
+
+    [Tooltip("Played when it sticks (a wet splat). One is picked at random. Leave empty for silence.")]
+    public AudioClip[] stickSounds;
+
+    [Range(0f, 1f)] public float stickVolume = 0.7f;
+
     [Header("Fuse visuals (grenades)")]
     [Tooltip("Show a countdown above the projectile and pulse its color while the fuse burns.")]
     public bool showFuseVisuals = true;
@@ -104,6 +113,14 @@ public class Projectile : MonoBehaviour
     private bool fuseRunning;
     private float fuseTimer;
     private float fuseTotal;
+
+    // Sticky: once stuck it stops simulating and, if it hit something that moves, follows it.
+    private bool stuck;
+    private Transform stuckTo;
+    private Vector2 stuckOffset;
+
+    /// <summary>True once a sticky projectile has glued itself to something.</summary>
+    public bool IsStuck => stuck;
 
     /// <summary>True while a fuse is burning. FuseVisual reads these three.</summary>
     public bool FuseRunning => fuseRunning;
@@ -210,7 +227,7 @@ public class Projectile : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (rotation != ProjectileRotation.FaceVelocity || hasHit) return;
+        if (rotation != ProjectileRotation.FaceVelocity || hasHit || stuck) return;
 
         Vector2 velocity = body.linearVelocity;
         if (velocity.sqrMagnitude < 0.01f) return;   // too slow to have a meaningful direction
@@ -237,6 +254,13 @@ public class Projectile : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // Sticky: glue on to the first thing touched, then just wait for the fuse.
+        if (stickOnImpact)
+        {
+            if (!stuck && !hasHit) Stick(collision);
+            return;
+        }
+
         // Fused projectile: just bounce/roll. Touching something may start the fuse.
         if (!explodeOnImpact)
         {
@@ -249,6 +273,37 @@ public class Projectile : MonoBehaviour
 
         if (!hasHit) OnImpact?.Invoke(collision.collider, collision.GetContact(0).point);
         Explode(collision.GetContact(0).point);
+    }
+
+    /// <summary>
+    /// Freezes the projectile where it touched. Static things (the ground) just hold it; anything
+    /// with its own Rigidbody2D (a cockroach, a crate) carries it along, see LateUpdate.
+    /// </summary>
+    private void Stick(Collision2D collision)
+    {
+        stuck = true;
+
+        body.linearVelocity = Vector2.zero;
+        body.angularVelocity = 0f;
+        body.simulated = false;   // no more physics or collisions; it explodes from here
+
+        Rigidbody2D carrier = collision.rigidbody;
+        if (carrier != null)
+        {
+            stuckTo = carrier.transform;
+            stuckOffset = (Vector2)transform.position - (Vector2)stuckTo.position;
+        }
+
+        if (!fuseRunning) StartFuse();
+        Sfx.PlayRandom(stickSounds, stickVolume, 0.1f);
+    }
+
+    // Ride along with whatever it is stuck to. A world offset (not parenting), so it stays on the
+    // same side of a cockroach when the cockroach turns around.
+    private void LateUpdate()
+    {
+        if (!stuck || stuckTo == null || hasHit) return;
+        transform.position = (Vector2)stuckTo.position + stuckOffset;
     }
 
     /// <summary>Spawns the explosion at the given point and removes this projectile (runs once).</summary>

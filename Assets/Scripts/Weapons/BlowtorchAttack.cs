@@ -23,8 +23,25 @@ public class BlowtorchAttack : SpecialAttack
     [SerializeField] private AudioClip torchSound;
     [SerializeField, Range(0f, 1f)] private float volume = 0.7f;
 
+    [Tooltip("Colour of the tunnel preview shown while the Blowtorch is selected.")]
+    [SerializeField] private Color previewColor = new Color(1f, 0.55f, 0.15f, 1f);
+
     public override SpecialActivation Activation => SpecialActivation.RightClick;
     public override bool ShowsCrosshair => true;
+
+    /// <summary>The crosshair sits at the far end of the tunnel, so it shows exactly where the burn stops.</summary>
+    public override float CrosshairDistance => length;
+
+    /// <summary>
+    /// Shows the exact tunnel: from the body's centre (where the burn starts), at full length and
+    /// width, straight through walls. The crosshair marks the far end (see CrosshairDistance).
+    /// </summary>
+    public override void ShowAimPreview(CockroachShooting shooter, Vector2 aimOrigin, Vector2 aimDirection)
+    {
+        Collider2D body = shooter.GetComponent<Collider2D>();
+        Vector2 start = body != null ? (Vector2)body.bounds.center : aimOrigin;
+        PathPreview.ShowPath(start, aimDirection, length, radius * 2f, previewColor, false);
+    }
 
     public override Projectile Begin(AttackContext context)
     {

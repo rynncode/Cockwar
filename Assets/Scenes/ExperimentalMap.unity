@@ -734,6 +734,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
   - {fileID: 11400000, guid: 93a9617b2b3225045a9a439f23053698, type: 2}
   - {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
+  - {fileID: 11400000, guid: be40dbf57c79486f88e06efd68a81bab, type: 2}
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
   minPower: 10
   maxPower: 70
@@ -913,6 +914,7 @@ MonoBehaviour:
   popupColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   fullHealthColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   lowHealthColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+  shieldColor: {r: 0.3, g: 0.65, b: 1, a: 1}
 --- !u!114 &96414081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1750,6 +1752,7 @@ MonoBehaviour:
   grassColor: {r: 0.3, g: 0.62, b: 0.2, a: 1}
   grassThickness: 2
   terrainSortingOrder: -10
+  colliderStrips: 8
   turnManager: {fileID: 780781123}
   spawnDropHeight: 4
   spawnFlatHalfWidth: 6
@@ -3062,6 +3065,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
   - {fileID: 11400000, guid: 93a9617b2b3225045a9a439f23053698, type: 2}
   - {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
+  - {fileID: 11400000, guid: be40dbf57c79486f88e06efd68a81bab, type: 2}
   projectilePrefab: {fileID: 258008830510017049, guid: d37d6ea396ae66c4889a7ffda35ce6d7, type: 3}
   minPower: 10
   maxPower: 70
@@ -3382,6 +3386,7 @@ MonoBehaviour:
   popupColor: {r: 1, g: 0.25, b: 0.2, a: 1}
   fullHealthColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   lowHealthColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+  shieldColor: {r: 0.3, g: 0.65, b: 1, a: 1}
 --- !u!114 &777903173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3515,6 +3520,7 @@ MonoBehaviour:
   - {fileID: 777903164}
   turnTimeLimit: 25
   endTurnDelay: 3
+  settleAfterSpecialAttack: 1.5
   gameOverSequence: {fileID: 0}
   skipHealthCountKey: 13
   toggleCameraViewKey: 32
@@ -3528,6 +3534,8 @@ MonoBehaviour:
   skipIntroKey: 32
   autoAddTurnTimer: 1
   autoAddPlayerBubbles: 1
+  autoAddCrateDrops: 1
+  crateDrops: {fileID: 0}
 --- !u!4 &780781124
 Transform:
   m_ObjectHideFlags: 0

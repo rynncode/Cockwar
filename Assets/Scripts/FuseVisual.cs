@@ -29,6 +29,7 @@ public class FuseVisual : MonoBehaviour
     private SpriteRenderer bodyRenderer;
     private Color bodyBaseColor = Color.white;
     private Collider2D bodyCollider;
+    private float knownBodySize;
 
     private GameObject badgeRoot;
     private SpriteRenderer disc;
@@ -142,7 +143,9 @@ public class FuseVisual : MonoBehaviour
         float radius = halfHeight * projectile.fuseBadgeSize;
 
         // Float above the grenade: above its body, by the badge's own size.
-        float bodySize = bodyCollider != null ? Mathf.Max(bodyCollider.bounds.size.x, bodyCollider.bounds.size.y) : radius;
+        // Remembered, because a stuck sticky bomb switches its physics off and its collider bounds go empty.
+        if (bodyCollider != null) knownBodySize = Mathf.Max(knownBodySize, bodyCollider.bounds.size.x, bodyCollider.bounds.size.y);
+        float bodySize = knownBodySize > 0f ? knownBodySize : radius;
         Vector3 center = transform.position + Vector3.up * (bodySize * 0.5f + radius * 1.6f);
         badgeRoot.transform.position = center;
         badgeRoot.transform.rotation = Quaternion.identity;   // never turns with the grenade

@@ -68,6 +68,15 @@ public class CockroachShooting : MonoBehaviour
     /// <summary>Whether firing the current weapon ends the turn. TurnManager reads this.</summary>
     public bool EndsTurnOnFire => CurrentWeapon != null ? CurrentWeapon.endsTurnOnFire : singleWeaponEndsTurn;
 
+    /// <summary>
+    /// True while retreating after a fused shot: the cockroach can still move, but cannot fire,
+    /// aim or switch weapon. Set by TurnManager, cleared when the next turn starts.
+    /// </summary>
+    public bool FiringLocked { get; set; }
+
+    /// <summary>Whether the shot just fired ends the turn. TurnManager reads this in OnFired.</summary>
+    public bool LastShotEndsTurn { get; private set; } = true;
+
     /// <summary>Shots left for the weapon at this index. -1 = unlimited.</summary>
     public int GetAmmo(int index)
     {
@@ -221,6 +230,8 @@ public class CockroachShooting : MonoBehaviour
     {
         bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
+        if (CanFireCurrentWeapon()) special.ShowAimPreview(this, aim.AimOrigin, aim.AimDirection);
+
         if (special.Activation == SpecialActivation.ClickTarget)
         {
             Vector2 mouse = WeaponFx.MouseWorld();
@@ -275,7 +286,8 @@ public class CockroachShooting : MonoBehaviour
             return;
         }
 
-        if (!movement.isMyTurn)
+        // Not our turn, or retreating after a fused shot (we may walk, but not fire or switch).
+        if (!movement.isMyTurn || FiringLocked)
         {
             // Also reset the charge, so a turn that ends mid-charge
             // does not leave a half-full power bar behind.
@@ -439,6 +451,10 @@ public class CockroachShooting : MonoBehaviour
     /// <summary>After any firing action: the fire sound event, one ammo used, then OnFired for the TurnManager.</summary>
     private void FinishFiring(WeaponData weapon)
     {
+        // Decided now, from the weapon that actually fired: using the last shot switches to
+        // another weapon below, and that one must not decide whether this shot ends the turn.
+        LastShotEndsTurn = weapon != null ? weapon.endsTurnOnFire : singleWeaponEndsTurn;
+
         OnWeaponFired?.Invoke(weapon);
 
         // Use up one shot of limited ammo, and let the panel refresh.
