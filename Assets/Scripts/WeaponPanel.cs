@@ -34,8 +34,7 @@ public class WeaponPanel : MonoBehaviour
     public TurnManager turnManager;
 
     [Header("Controls")]
-    [Tooltip("Press this key to open or close the weapon panel. Set to None to turn the hotkey off. Already used elsewhere: A, D, Space, Tab (next weapon, skip intro), Enter, F1.")]
-    public KeyCode toggleKey = KeyCode.Q;
+    // The open/close key is the Weapon Panel binding in the settings menu (GameSettings).
 
     [Tooltip("Right-click opens and closes the panel, like Worms. (Right-click while charging still cancels the shot instead.)")]
     public bool rightClickOpens = true;
@@ -112,6 +111,7 @@ public class WeaponPanel : MonoBehaviour
     private TextMeshProUGUI cardName;
     private Image cardAmmo;
     private TextMeshProUGUI cardHint;
+    private KeyCode hintKeyShown;
 
     private RectTransform panel;
     private CanvasGroup panelGroup;
@@ -257,7 +257,14 @@ public class WeaponPanel : MonoBehaviour
         hintRect.offsetMin = new Vector2(textX, 8f);
         hintRect.offsetMax = new Vector2(-12f, 34f);
 
-        string hint = toggleKey != KeyCode.None ? toggleKey.ToString().ToUpperInvariant() : "";
+        RefreshHint();
+    }
+
+    /// <summary>Shows the current panel key on the card (it can be rebound in the settings menu).</summary>
+    private void RefreshHint()
+    {
+        hintKeyShown = GameSettings.Key(GameAction.WeaponPanel);
+        string hint = hintKeyShown != KeyCode.None ? hintKeyShown.ToString().ToUpperInvariant() : "";
         if (rightClickOpens) hint += (hint.Length > 0 ? " / " : "") + "RIGHT-CLICK";
         cardHint.text = hint;
     }
@@ -543,7 +550,12 @@ public class WeaponPanel : MonoBehaviour
 
     private void Update()
     {
+        // Paused: no hotkeys, and the panel just waits under the menu.
+        if (GameMenu.IsPaused) return;
+
         float dt = Time.deltaTime;
+        KeyCode toggleKey = GameSettings.Key(GameAction.WeaponPanel);
+        if (cardHint != null && toggleKey != hintKeyShown) RefreshHint();
 
         CockroachMovement player = turnManager.CurrentPlayer;
         CockroachShooting shooting = player != null ? player.GetComponent<CockroachShooting>() : null;

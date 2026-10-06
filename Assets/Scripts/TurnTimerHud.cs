@@ -329,7 +329,7 @@ public class TurnTimerHud : MonoBehaviour
         {
             // A little higher each second as time runs out.
             audioSource.pitch = 1f + Mathf.Max(0, warningSeconds - seconds) * 0.04f;
-            audioSource.PlayOneShot(tickSound, tickVolume);
+            audioSource.PlayOneShot(tickSound, tickVolume * GameSettings.SfxVolume);
         }
     }
 

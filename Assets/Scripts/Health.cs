@@ -20,6 +20,9 @@ public class Health : MonoBehaviour
     /// <summary>True once health has reached 0.</summary>
     public bool IsDead => currentHealth <= 0;
 
+    /// <summary>Fires every time damage is actually taken, carrying the amount. CockroachSfx listens to this.</summary>
+    public event Action<int> OnDamaged;
+
     /// <summary>Fires exactly once, the moment health reaches 0.</summary>
     public event Action OnDeath;
 
@@ -40,6 +43,8 @@ public class Health : MonoBehaviour
         currentHealth = Mathf.Max(0, currentHealth - amount);
 
         Debug.Log(gameObject.name + " took " + amount + " damage. Health now: " + currentHealth + "/" + maxHealth);
+
+        OnDamaged?.Invoke(amount);
 
         if (IsDead)
         {

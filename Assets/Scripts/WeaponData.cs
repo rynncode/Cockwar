@@ -59,6 +59,10 @@ public class WeaponData : ScriptableObject
     [Tooltip("Launch speed when fully charged. Set equal to Min Power for a weapon with fixed power.")]
     public float maxPower = 70f;
 
+    [Header("Sound")]
+    [Tooltip("Played when this weapon fires. Leave empty to use the cockroach's Default Fire Sound (on CockroachSfx).")]
+    public AudioClip fireSound;
+
     [Header("Held Weapon")]
     [Tooltip("Optional. Sprite drawn in front of the cockroach, rotating to point at the crosshair (needs the AimGun component on the cockroach). The art should point right.")]
     public Sprite heldSprite;
