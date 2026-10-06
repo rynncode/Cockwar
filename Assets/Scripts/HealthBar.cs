@@ -56,6 +56,9 @@ public class HealthBar : OverheadBar
     public Color fullHealthColor = new Color(0.2f, 0.85f, 0.3f);
     public Color lowHealthColor = new Color(0.9f, 0.15f, 0.15f);
 
+    [Tooltip("Bar colour while health is above the normal max (from a shield crate).")]
+    public Color shieldColor = new Color(0.3f, 0.65f, 1f);
+
     private enum Phase { Idle, Pause, Count }
 
     private class Popup
@@ -260,6 +263,10 @@ public class HealthBar : OverheadBar
         if (animating)
             return true;
 
+        // A shielded cockroach always shows its (blue) bar, so everyone can see the extra health.
+        if (health.CurrentHealth > health.BaseMaxHealth)
+            return true;
+
         bool damaged = health.CurrentHealth < health.maxHealth;
         if (!damaged)
             return false;
@@ -270,7 +277,9 @@ public class HealthBar : OverheadBar
     protected override float Value01() =>
         health.maxHealth > 0 ? (float)displayedHealth / health.maxHealth : 0f;
 
-    protected override Color FillColor(float value01) => Color.Lerp(lowHealthColor, fullHealthColor, value01);
+    // Health above the starting max (from a shield crate) shows in the shield colour.
+    protected override Color FillColor(float value01) =>
+        displayedHealth > health.BaseMaxHealth ? shieldColor : Color.Lerp(lowHealthColor, fullHealthColor, value01);
 
     protected override void AfterBarUpdate(bool visible, float alpha)
     {

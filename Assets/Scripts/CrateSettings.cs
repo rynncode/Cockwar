@@ -1,7 +1,42 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>One weapon a supply crate can contain, and how likely it is.</summary>
+/// <summary>The kinds of supply crate. Each has its own look and contents.</summary>
+public enum CrateKind
+{
+    /// <summary>A normal weapon (wooden crate).</summary>
+    Weapon,
+
+    /// <summary>A special weapon: Reneitor, Satelaser... (black and gold crate).</summary>
+    Special,
+
+    /// <summary>Restores health (white crate, red cross).</summary>
+    Health,
+
+    /// <summary>Raises max health and fills it (steel blue crate, shield).</summary>
+    Shield,
+
+    /// <summary>A tool for the Utilities row: Teleporter, Blowtorch (green crate, wrench).</summary>
+    Tool
+}
+
+/// <summary>How likely one kind of crate is.</summary>
+[System.Serializable]
+public class CrateKindChance
+{
+    public CrateKind kind;
+
+    [Tooltip("Untick to stop this kind of crate appearing.")]
+    public bool enabled = true;
+
+    [Tooltip("Relative chance against the other crate kinds.")]
+    [Min(0f)] public float weight = 10f;
+
+    [Tooltip("Worked out automatically: this kind's real chance per crate.")]
+    public string chance = "";
+}
+
+/// <summary>One weapon (or tool) a supply crate can contain, and how likely it is.</summary>
 [System.Serializable]
 public class CrateLoot
 {
@@ -11,27 +46,65 @@ public class CrateLoot
     [Tooltip("Untick to take this weapon out of crates without deleting the row.")]
     public bool enabled = true;
 
-    [Tooltip("Relative chance. A weapon with weight 30 is 6x as common as one with weight 5. Low = rare, but never impossible (only 0 or unticked is impossible).")]
+    [Tooltip("Relative chance inside its list. A weapon with weight 30 is 6x as common as one with weight 5. Low = rare, but never impossible (only 0 or unticked is impossible).")]
     [Min(0f)] public float weight = 10f;
 
     [Tooltip("Shots the crate gives.")]
     [Min(1)] public int ammo = 1;
 
-    [Tooltip("Worked out automatically from all the weights: this weapon's real chance per crate.")]
+    [Tooltip("Worked out automatically from all the weights: this weapon's real chance per crate of its kind.")]
     public string chance = "";
+}
+
+/// <summary>What one particular crate holds. Rolled when the crate is created.</summary>
+public struct CrateContents
+{
+    public CrateKind kind;
+    public CrateLoot loot;   // Weapon, Special and Tool crates
+    public int amount;       // Health and Shield crates: points of health
 }
 
 /// <summary>
 /// All the supply crate settings in one asset (Assets/Resources/CrateSettings), so balancing
 /// never needs a code change. CrateDropManager loads it automatically.
-/// Make another with Assets > Create > Cockwar > Crate Settings and drag it onto a
-/// CrateDropManager to give a scene its own rules.
+/// Each crate first rolls its kind (Crate Kinds), then what is inside (the matching list, or
+/// a health/shield amount). Make another with Assets > Create > Cockwar > Crate Settings and
+/// drag it onto a CrateDropManager to give a scene its own rules.
 /// </summary>
 [CreateAssetMenu(fileName = "CrateSettings", menuName = "Cockwar/Crate Settings")]
 public class CrateSettings : ScriptableObject
 {
-    [Header("Crate contents (weighted random)")]
+    [Header("Crate kinds (weighted random)")]
+    public List<CrateKindChance> crateKinds = new List<CrateKindChance>
+    {
+        new CrateKindChance { kind = CrateKind.Weapon, weight = 45f },
+        new CrateKindChance { kind = CrateKind.Health, weight = 22f },
+        new CrateKindChance { kind = CrateKind.Special, weight = 12f },
+        new CrateKindChance { kind = CrateKind.Shield, weight = 11f },
+        new CrateKindChance { kind = CrateKind.Tool, weight = 10f },
+    };
+
+    [Header("Weapon crate contents (weighted random)")]
     public List<CrateLoot> loot = new List<CrateLoot>();
+
+    [Header("Special crate contents (weighted random)")]
+    public List<CrateLoot> specialLoot = new List<CrateLoot>();
+
+    [Header("Tool crate contents (weighted random)")]
+    public List<CrateLoot> toolLoot = new List<CrateLoot>();
+
+    [Header("Health crate")]
+    [Tooltip("Health restored, rolled between these (never above the cockroach's max).")]
+    [Min(1)] public int healMin = 25;
+    [Min(1)] public int healMax = 40;
+
+    [Header("Shield crate")]
+    [Tooltip("Max health added (and filled), rolled between these.")]
+    [Min(1)] public int shieldMin = 25;
+    [Min(1)] public int shieldMax = 50;
+
+    [Tooltip("Shields can never raise a cockroach's max health more than this above its starting max, however many it collects.")]
+    [Min(0)] public int maxShieldBonus = 50;
 
     [Header("Starting crates")]
     [Min(0)] public int minStartingCrates = 2;
@@ -114,7 +187,12 @@ public class CrateSettings : ScriptableObject
     [Min(0f)] public float pingSeconds = 4f;
 
     [Header("Art (optional; empty = built-in pixel art)")]
+    [Tooltip("Crate art per kind. Empty = built-in pixel art (wooden, black and gold, white with a red cross, steel blue with a shield, green with a wrench).")]
     public Sprite crateSprite;
+    public Sprite specialCrateSprite;
+    public Sprite healthCrateSprite;
+    public Sprite shieldCrateSprite;
+    public Sprite toolCrateSprite;
     public Sprite parachuteSprite;
 
     [Tooltip("Should face right; it is flipped when flying left.")]
@@ -144,47 +222,98 @@ public class CrateSettings : ScriptableObject
         CrateSettings settings = Resources.Load<CrateSettings>("CrateSettings");
         if (settings != null) return settings;
 
-        Debug.LogWarning("CrateSettings: no Assets/Resources/CrateSettings asset found. Using defaults with no weapons, so crates are switched off.");
+        Debug.LogWarning("CrateSettings: no Assets/Resources/CrateSettings asset found. Using defaults with no weapons (only health and shield crates).");
         return CreateInstance<CrateSettings>();
     }
 
     private static bool CanDrop(CrateLoot entry) => entry != null && entry.enabled && entry.weapon != null;
 
-    /// <summary>True if at least one weapon can come out of a crate.</summary>
-    public bool HasAnyLoot()
+    private static bool AnyDroppable(List<CrateLoot> list)
     {
-        foreach (CrateLoot entry in loot)
+        if (list == null) return false;
+        foreach (CrateLoot entry in list)
             if (CanDrop(entry)) return true;
         return false;
     }
 
-    /// <summary>
-    /// Weighted random pick: each weapon's chance is its weight divided by the total.
-    /// If every weight is 0, all enabled weapons are equally likely. Null if there are none.
-    /// </summary>
-    public CrateLoot PickLoot()
+    /// <summary>The weapon list for a kind of crate, or null for Health and Shield.</summary>
+    public List<CrateLoot> LootFor(CrateKind kind)
     {
-        float total = 0f;
-        int usable = 0;
-
-        foreach (CrateLoot entry in loot)
+        switch (kind)
         {
-            if (!CanDrop(entry)) continue;
-            usable++;
-            total += Mathf.Max(0f, entry.weight);
+            case CrateKind.Weapon: return loot;
+            case CrateKind.Special: return specialLoot;
+            case CrateKind.Tool: return toolLoot;
+            default: return null;
+        }
+    }
+
+    /// <summary>True if this kind of crate is switched on and has something to give.</summary>
+    public bool CanSpawn(CrateKindChance entry)
+    {
+        if (entry == null || !entry.enabled) return false;
+        if (entry.kind == CrateKind.Health || entry.kind == CrateKind.Shield) return true;
+        return AnyDroppable(LootFor(entry.kind));
+    }
+
+    /// <summary>True if at least one kind of crate can appear.</summary>
+    public bool HasAnyContent()
+    {
+        foreach (CrateKindChance entry in crateKinds)
+            if (CanSpawn(entry)) return true;
+        return false;
+    }
+
+    /// <summary>Rolls a whole crate: first its kind, then what is inside.</summary>
+    public CrateContents RollContents()
+    {
+        CrateKindChance kindEntry = WeightedPick(crateKinds, CanSpawn, entry => entry.weight);
+        CrateContents contents = new CrateContents { kind = kindEntry != null ? kindEntry.kind : CrateKind.Weapon };
+
+        switch (contents.kind)
+        {
+            case CrateKind.Health:
+                contents.amount = Random.Range(healMin, Mathf.Max(healMin, healMax) + 1);
+                break;
+            case CrateKind.Shield:
+                contents.amount = Random.Range(shieldMin, Mathf.Max(shieldMin, shieldMax) + 1);
+                break;
+            default:
+                contents.loot = WeightedPick(LootFor(contents.kind), CanDrop, entry => entry.weight);
+                break;
         }
 
-        if (usable == 0) return null;
+        return contents;
+    }
+
+    /// <summary>
+    /// Weighted random pick: each entry's chance is its weight divided by the total of the
+    /// usable entries. If every weight is 0, the usable entries are equally likely. Null if none.
+    /// </summary>
+    private static T WeightedPick<T>(List<T> list, System.Func<T, bool> usable, System.Func<T, float> weightOf) where T : class
+    {
+        if (list == null) return null;
+
+        float total = 0f;
+        int count = 0;
+        foreach (T entry in list)
+        {
+            if (!usable(entry)) continue;
+            count++;
+            total += Mathf.Max(0f, weightOf(entry));
+        }
+
+        if (count == 0) return null;
 
         bool equalChances = total <= 0f;
-        float roll = Random.value * (equalChances ? usable : total);
+        float roll = Random.value * (equalChances ? count : total);
 
-        CrateLoot last = null;
-        foreach (CrateLoot entry in loot)
+        T last = null;
+        foreach (T entry in list)
         {
-            if (!CanDrop(entry)) continue;
+            if (!usable(entry)) continue;
 
-            roll -= equalChances ? 1f : Mathf.Max(0f, entry.weight);
+            roll -= equalChances ? 1f : Mathf.Max(0f, weightOf(entry));
             if (roll < 0f) return entry;
             last = entry;
         }
@@ -195,23 +324,36 @@ public class CrateSettings : ScriptableObject
     private void OnValidate()
     {
         if (maxStartingCrates < minStartingCrates) maxStartingCrates = minStartingCrates;
+        if (healMax < healMin) healMax = healMin;
+        if (shieldMax < shieldMin) shieldMax = shieldMin;
+
+        FillChances(crateKinds, CanSpawn, entry => entry.weight, (entry, text) => entry.chance = text);
+        FillChances(loot, CanDrop, entry => entry.weight, (entry, text) => entry.chance = text);
+        FillChances(specialLoot, CanDrop, entry => entry.weight, (entry, text) => entry.chance = text);
+        FillChances(toolLoot, CanDrop, entry => entry.weight, (entry, text) => entry.chance = text);
+    }
+
+    /// <summary>Writes each entry's real percentage into its Chance field, for the Inspector.</summary>
+    private static void FillChances<T>(List<T> list, System.Func<T, bool> usable, System.Func<T, float> weightOf, System.Action<T, string> write) where T : class
+    {
+        if (list == null) return;
 
         float total = 0f;
-        int usable = 0;
-        foreach (CrateLoot entry in loot)
+        int count = 0;
+        foreach (T entry in list)
         {
-            if (!CanDrop(entry)) continue;
-            usable++;
-            total += Mathf.Max(0f, entry.weight);
+            if (entry == null || !usable(entry)) continue;
+            count++;
+            total += Mathf.Max(0f, weightOf(entry));
         }
 
-        foreach (CrateLoot entry in loot)
+        foreach (T entry in list)
         {
             if (entry == null) continue;
 
-            if (!CanDrop(entry)) entry.chance = "never";
-            else if (total <= 0f) entry.chance = (100f / usable).ToString("0.#") + "% (all weights are 0)";
-            else entry.chance = (100f * Mathf.Max(0f, entry.weight) / total).ToString("0.#") + "%";
+            if (!usable(entry)) write(entry, "never");
+            else if (total <= 0f) write(entry, (100f / count).ToString("0.#") + "% (all weights are 0)");
+            else write(entry, (100f * Mathf.Max(0f, weightOf(entry)) / total).ToString("0.#") + "%");
         }
     }
 }

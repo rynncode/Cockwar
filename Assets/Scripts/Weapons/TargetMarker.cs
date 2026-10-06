@@ -12,7 +12,10 @@ public class TargetMarker : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private int shownFrame = -1;
 
-    public static void ShowAt(Sprite sprite, Vector2 position, float width)
+    public static void ShowAt(Sprite sprite, Vector2 position, float width) => ShowAt(sprite, position, width, Color.white);
+
+    /// <summary>Same, tinted (the Teleporter shows red over spots it cannot use).</summary>
+    public static void ShowAt(Sprite sprite, Vector2 position, float width, Color tint)
     {
         if (sprite == null) return;
 
@@ -25,6 +28,7 @@ public class TargetMarker : MonoBehaviour
 
         instance.spriteRenderer.enabled = true;
         instance.spriteRenderer.sprite = sprite;
+        instance.spriteRenderer.color = tint;
         instance.transform.position = position;
 
         // A slow spin and a little pulse so it reads as "locking on".

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
+  m_Name: Blowtorch
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  displayName: 'BLOWTORCH'
+  icon: {fileID: 0}
+  category: 4
+  description: 'Aim and right-click to burn a tunnel you can walk through. Does not end your turn.'
+  roundDelay: 0
+  projectilePrefab: {fileID: 0}
+  specialAttack: {fileID: 11400000, guid: 1470025ad4c140bcb90096e244c6e41c, type: 2}
+  minPower: 10
+  maxPower: 10
+  fireSound: {fileID: 0}
+  heldSprite: {fileID: 0}
+  heldScale: 1
+  aimStyle: 0
+  aimIndicatorPrefab: {fileID: 0}
+  indicatorDistance: 0
+  rotateIndicatorWithAim: 0
+  aimColor: {r: 1, g: 0.85, b: 0.2, a: 0.9}
+  aimColorFull: {r: 1, g: 0.35, b: 0.05, a: 1}
+  coneWidth: 0
+  coneStartOffset: 1.5
+  lineWidth: 0.25
+  lineMaxLength: 150
+  endsTurnOnFire: 0
+  ammo: 1
+  multiShotCount: 1
+  multiShotSpreadDegrees: 12

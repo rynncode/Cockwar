@@ -62,6 +62,15 @@ public abstract class SpecialAttack : ScriptableObject
     /// <summary>Marker that follows the mouse for ClickTarget weapons. Null = none.</summary>
     public virtual Sprite TargetMarker => null;
 
+    /// <summary>
+    /// ClickTarget weapons: can this spot be chosen right now? An invalid spot shows the marker in red
+    /// and clicking it does nothing (the Teleporter refuses spots inside the ground).
+    /// </summary>
+    public virtual bool IsValidTarget(Vector2 target, CockroachShooting shooter) => true;
+
+    /// <summary>True for a weapon that is aimed even though it is not charged (the Blowtorch), so the crosshair stays.</summary>
+    public virtual bool ShowsCrosshair => false;
+
     /// <summary>World width of the target marker.</summary>
     public virtual float TargetMarkerSize => 10f;
 
@@ -99,7 +108,7 @@ public abstract class SpecialAttack : ScriptableObject
     public static bool HidesCrosshair(WeaponData weapon)
     {
         SpecialAttack special = Of(weapon);
-        return special != null && special.Activation != SpecialActivation.ChargeShot;
+        return special != null && special.Activation != SpecialActivation.ChargeShot && !special.ShowsCrosshair;
     }
 
     /// <summary>True if the right mouse button triggers this weapon (so it must not open the weapon panel).</summary>

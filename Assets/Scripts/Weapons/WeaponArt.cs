@@ -206,6 +206,51 @@ public static class WeaponArt
         "KK....................",
     }, true));
 
+    // ---------------- TOOLS ----------------
+
+    /// <summary>Teleporter gun: grey body with glowing cyan coils, pointing right.</summary>
+    public static Sprite Teleporter() => Get("teleporter", () => FromRows(new[]
+    {
+        "....gggggggg...",
+        "..ggGGCGCGCGgCC",
+        "..gGGGCGCGCGGCW",
+        "..ggGGCGCGCGgCC",
+        "..gggggggggg...",
+        "...gG..........",
+        "...gG..........",
+        "...gg..........",
+    }, true));
+
+    /// <summary>Where the Teleporter will put you: a cyan ring.</summary>
+    public static Sprite TeleportMarker() => Get("teleportMarker", () => FromRows(new[]
+    {
+        "....CCCCC....",
+        "..CC.....CC..",
+        ".C....C....C.",
+        ".C....C....C.",
+        "C...........C",
+        "C...........C",
+        "CCC.......CCC",
+        "C...........C",
+        "C...........C",
+        ".C....C....C.",
+        ".C....C....C.",
+        "..CC.....CC..",
+        "....CCCCC....",
+    }, true));
+
+    /// <summary>Blowtorch: red gas tank with a nozzle and a blue flame tip, pointing right.</summary>
+    public static Sprite Blowtorch() => Get("blowtorch", () => FromRows(new[]
+    {
+        ".RRRR..........",
+        "RRWRRR.........",
+        "RRRRRRggggggg..",
+        "RRRRRRGGGGGGGwC",
+        "RRRRRRggggggg..",
+        "RRRRRR.........",
+        ".RRRR..........",
+    }, true));
+
     // ---------------- Shared ----------------
 
     /// <summary>Soft round blob for smoke and sparks (white, tint it). No outline.</summary>

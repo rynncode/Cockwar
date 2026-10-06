@@ -3,9 +3,10 @@ using UnityEngine;
 /// <summary>
 /// One supply crate lying on (or falling onto) the battlefield. Made in code by CrateDropManager.
 ///
-/// Its weapon is rolled (weighted random, see CrateSettings) when it is created. The first living
-/// cockroach to touch it opens it: the weapon goes into that cockroach's weapon list through
-/// CockroachShooting.GiveWeapon, the weapon name floats up, and the crate disappears. It opens
+/// Its kind and contents are rolled (weighted random, see CrateSettings) when it is created, and the
+/// crate looks like its kind. The first living cockroach to touch it opens it: a weapon or tool goes
+/// into its weapon list (CockroachShooting.GiveWeapon), health or shield goes to its Health, the
+/// result floats up as text, and the crate disappears. It opens
 /// only once, even if two cockroaches touch it in the same moment.
 ///
 /// It is a normal physics object, so it falls again when an explosion digs the ground out from
@@ -22,8 +23,11 @@ public class SupplyCrate : MonoBehaviour
     /// <summary>Turns this crate has been on the map, for crates that expire.</summary>
     public int TurnsAlive { get; set; }
 
-    /// <summary>The weapon inside. Null only if every weapon is switched off in CrateSettings.</summary>
-    public CrateLoot Loot { get; private set; }
+    /// <summary>What is inside: the kind, and the weapon or the health amount.</summary>
+    public CrateContents Contents { get; private set; }
+
+    /// <summary>The weapon or tool inside, or null for health and shield crates.</summary>
+    public CrateLoot Loot => Contents.loot;
 
     private CrateDropManager manager;
     private CrateSettings settings;
@@ -34,6 +38,7 @@ public class SupplyCrate : MonoBehaviour
     private float swayPhase;
     private bool opened;
     private float fadeOut = -1f;   // counts down from 1 while expiring
+    private float glintTimer;
 
     /// <summary>Creates a crate at a world position. withParachute = it floats down (plane drops).</summary>
     public static SupplyCrate Create(CrateDropManager manager, CrateSettings settings, Vector2 position, bool withParachute, float acidY)
@@ -51,7 +56,7 @@ public class SupplyCrate : MonoBehaviour
         manager = owner;
         settings = crateSettings;
         acidY = acidSurfaceY;
-        Loot = settings.PickLoot();
+        Contents = settings.RollContents();
         swayPhase = Random.value * 10f;
 
         float size = Mathf.Max(0.5f, settings.crateSize);
@@ -60,7 +65,7 @@ public class SupplyCrate : MonoBehaviour
         GameObject art = new GameObject("Art");
         art.transform.SetParent(transform, false);
         crateRenderer = art.AddComponent<SpriteRenderer>();
-        crateRenderer.sprite = settings.crateSprite != null ? settings.crateSprite : CrateArt.Crate();
+        crateRenderer.sprite = CrateSpriteFor(Contents.kind);
         crateRenderer.sortingOrder = SortingOrder;
         ScaleToWidth(crateRenderer, size);
 
@@ -132,6 +137,19 @@ public class SupplyCrate : MonoBehaviour
             Destroy(gameObject, 0.5f);
         }
 
+        // Special crates glint now and then, so a rare one stands out.
+        if (Contents.kind == CrateKind.Special && !opened && fadeOut < 0f)
+        {
+            glintTimer -= Time.deltaTime;
+            if (glintTimer <= 0f)
+            {
+                glintTimer = Random.Range(0.25f, 0.6f);
+                Vector2 spot = (Vector2)transform.position + new Vector2(Random.Range(-0.5f, 0.5f), Random.Range(-0.5f, 0.5f)) * settings.crateSize;
+                FxPuff.Spawn(WeaponArt.Puff(), spot, settings.crateSize * 0.12f, settings.crateSize * 0.32f,
+                             new Color(1f, 0.85f, 0.3f, 1f), 0.4f, Vector2.up * 1.5f, SortingOrder + 2);
+            }
+        }
+
         if (fadeOut >= 0f)
         {
             fadeOut -= Time.deltaTime / 0.6f;
@@ -172,8 +190,28 @@ public class SupplyCrate : MonoBehaviour
         Health health = collector.GetComponent<Health>();
         if (health != null && health.IsDead) return;
 
-        // Old single-weapon cockroaches have no weapon list to add to: leave the crate for someone else.
-        if (Loot != null && !collector.GiveWeapon(Loot.weapon, Loot.ammo)) return;
+        // Hand over the contents. A crate that cannot be used by this cockroach stays for someone else.
+        string text;
+        switch (Contents.kind)
+        {
+            case CrateKind.Health:
+                if (health == null) return;
+                int healed = health.Heal(Contents.amount);
+                text = healed > 0 ? "+" + healed + " HEALTH" : "FULL HEALTH";
+                break;
+
+            case CrateKind.Shield:
+                if (health == null) return;
+                int added = health.AddShield(Contents.amount, settings.maxShieldBonus);
+                text = added > 0 ? "+" + added + " SHIELD" : "SHIELD FULL";
+                break;
+
+            default:
+                // Old single-weapon cockroaches have no weapon list to add to.
+                if (Loot != null && !collector.GiveWeapon(Loot.weapon, Loot.ammo)) return;
+                text = Loot != null ? "+" + Loot.ammo + " " + Loot.weapon.displayName : "EMPTY";
+                break;
+        }
 
         opened = true;
         manager?.Forget(this);
@@ -181,15 +219,26 @@ public class SupplyCrate : MonoBehaviour
         if (settings.pickupSound != null) Sfx.Play(settings.pickupSound, settings.crateVolume);
 
         if (settings.showPickupText)
-        {
-            string text = Loot != null ? "+" + Loot.ammo + " " + Loot.weapon.displayName : "EMPTY";
             CratePickupText.Show(text, transform.position + Vector3.up * settings.crateSize, settings.pickupTextPixelSize, collector);
-        }
 
-        string who = collector.name;
-        Debug.Log("SupplyCrate: " + who + " got " + (Loot != null ? Loot.ammo + "x " + Loot.weapon.displayName : "nothing") + ".");
+        Debug.Log("SupplyCrate: " + collector.name + " opened a " + Contents.kind + " crate: " + text + ".");
 
         Destroy(gameObject);
+    }
+
+    /// <summary>The crate art for a kind: the sprite from CrateSettings if set, else the built-in pixel crate.</summary>
+    private Sprite CrateSpriteFor(CrateKind kind)
+    {
+        Sprite custom = null;
+        switch (kind)
+        {
+            case CrateKind.Weapon: custom = settings.crateSprite; break;
+            case CrateKind.Special: custom = settings.specialCrateSprite; break;
+            case CrateKind.Health: custom = settings.healthCrateSprite; break;
+            case CrateKind.Shield: custom = settings.shieldCrateSprite; break;
+            case CrateKind.Tool: custom = settings.toolCrateSprite; break;
+        }
+        return custom != null ? custom : CrateArt.Crate(kind);
     }
 
     /// <summary>Fades the crate out and removes it (crates with a lifetime).</summary>

@@ -85,9 +85,9 @@ public class CrateDropManager : MonoBehaviour
             return;
         }
 
-        if (!settings.HasAnyLoot())
+        if (!settings.HasAnyContent())
         {
-            Debug.LogWarning("CrateDropManager: no weapons are enabled in CrateSettings, so supply crates are switched off.");
+            Debug.LogWarning("CrateDropManager: every crate kind is switched off (or empty) in CrateSettings, so supply crates are switched off.");
             enabled = false;
             return;
         }

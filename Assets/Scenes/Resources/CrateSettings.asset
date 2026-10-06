@@ -12,57 +12,95 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a059c1b78ba448d5b9027e15e962a279, type: 3}
   m_Name: CrateSettings
   m_EditorClassIdentifier: 
+  crateKinds:
+  - kind: 0
+    enabled: 1
+    weight: 45
+    chance: 45%
+  - kind: 2
+    enabled: 1
+    weight: 22
+    chance: 22%
+  - kind: 1
+    enabled: 1
+    weight: 12
+    chance: 12%
+  - kind: 3
+    enabled: 1
+    weight: 11
+    chance: 11%
+  - kind: 4
+    enabled: 1
+    weight: 10
+    chance: 10%
   loot:
   - weapon: {fileID: 11400000, guid: 93a9617b2b3225045a9a439f23053698, type: 2}
     enabled: 1
     weight: 30
     ammo: 1
-    chance: 24%
+    chance: 33%
   - weapon: {fileID: 11400000, guid: 282ef9f7ca341cf4b88d14cc1eef6f1b, type: 2}
     enabled: 1
     weight: 24
     ammo: 1
-    chance: 19.2%
+    chance: 26.4%
   - weapon: {fileID: 11400000, guid: babb7a95b1f99814d9834fc64f791d67, type: 2}
     enabled: 1
     weight: 20
     ammo: 1
-    chance: 16%
+    chance: 22%
   - weapon: {fileID: 11400000, guid: d209ea28343983648a97c2c097f41228, type: 2}
     enabled: 1
     weight: 12
     ammo: 1
-    chance: 9.6%
+    chance: 13.2%
   - weapon: {fileID: 11400000, guid: 73a374d14dd00b241ac43cca9d834486, type: 2}
     enabled: 1
     weight: 5
     ammo: 1
-    chance: 4%
+    chance: 5.5%
+  specialLoot:
   - weapon: {fileID: 11400000, guid: ae93b4b84c65462db578f738319b30aa, type: 2}
     enabled: 1
     weight: 10
     ammo: 1
-    chance: 8%
+    chance: 29.4%
   - weapon: {fileID: 11400000, guid: d29bb6ed33b847bcbbb57f6c1c4da600, type: 2}
     enabled: 1
     weight: 8
     ammo: 1
-    chance: 6.4%
+    chance: 23.5%
   - weapon: {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
     enabled: 1
     weight: 8
     ammo: 1
-    chance: 6.4%
+    chance: 23.5%
   - weapon: {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}
     enabled: 1
     weight: 6
     ammo: 1
-    chance: 4.8%
+    chance: 17.6%
   - weapon: {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
     enabled: 1
     weight: 2
     ammo: 1
-    chance: 1.6%
+    chance: 5.9%
+  toolLoot:
+  - weapon: {fileID: 11400000, guid: 1dd03874fc9b4fee83777c5f7b755f0a, type: 2}
+    enabled: 1
+    weight: 60
+    ammo: 1
+    chance: 60%
+  - weapon: {fileID: 11400000, guid: a0f85996407e46f8949a20108452d72f, type: 2}
+    enabled: 1
+    weight: 40
+    ammo: 1
+    chance: 40%
+  healMin: 25
+  healMax: 40
+  shieldMin: 25
+  shieldMax: 50
+  maxShieldBonus: 50
   minStartingCrates: 2
   maxStartingCrates: 4
   minimumCrateDistance: 40
@@ -90,6 +128,10 @@ MonoBehaviour:
   pickupTextPixelSize: 0.4
   pingSeconds: 4
   crateSprite: {fileID: 0}
+  specialCrateSprite: {fileID: 0}
+  healthCrateSprite: {fileID: 0}
+  shieldCrateSprite: {fileID: 0}
+  toolCrateSprite: {fileID: 0}
   parachuteSprite: {fileID: 0}
   aircraftSprite: {fileID: 0}
   aircraftSound: {fileID: 0}
@@ -104,6 +146,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
   - {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}
   - {fileID: 11400000, guid: 683962670e4f4d8ebcaf4d00d0b7d602, type: 2}
+  - {fileID: 11400000, guid: 1dd03874fc9b4fee83777c5f7b755f0a, type: 2}
+  - {fileID: 11400000, guid: a0f85996407e46f8949a20108452d72f, type: 2}
   giveEveryPlayerAtStart:
   - {fileID: 11400000, guid: a7086b9f398d4cd08bf45816c8de17de, type: 2}
   - {fileID: 11400000, guid: 43fa2a0a48c5436a8a6d4ff7ad16f664, type: 2}

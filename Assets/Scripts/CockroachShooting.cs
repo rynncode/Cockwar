@@ -224,9 +224,10 @@ public class CockroachShooting : MonoBehaviour
         if (special.Activation == SpecialActivation.ClickTarget)
         {
             Vector2 mouse = WeaponFx.MouseWorld();
-            TargetMarker.ShowAt(special.TargetMarker, mouse, special.TargetMarkerSize);
+            bool valid = special.IsValidTarget(mouse, this);
+            TargetMarker.ShowAt(special.TargetMarker, mouse, special.TargetMarkerSize, valid ? Color.white : new Color(1f, 0.25f, 0.2f, 1f));
 
-            if (Input.GetMouseButtonDown(0) && !overUI && CanFireCurrentWeapon())
+            if (Input.GetMouseButtonDown(0) && !overUI && valid && CanFireCurrentWeapon())
                 FireSpecial(special, mouse, 0f);
         }
         else if (special.Activation == SpecialActivation.RightClick)
