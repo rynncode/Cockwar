@@ -222,6 +222,11 @@ public class CockroachMovement : MonoBehaviour
 
         defaultGravityScale = body.gravityScale;
 
+        // Standing on a slope switches gravity off and stops the body, which lets Unity put it to
+        // sleep. A sleeping body keeps its old contacts, so it could go on "standing" on ground
+        // that has been blown away and hang in the air for ever. Never sleeping keeps them fresh.
+        body.sleepMode = RigidbodySleepMode2D.NeverSleep;
+
         // Only touching the Ground layer counts as a slope.
         groundFilter = new ContactFilter2D();
         groundFilter.SetLayerMask(groundLayer);
@@ -396,7 +401,14 @@ public class CockroachMovement : MonoBehaviour
         groundedStreak = 0f;
         bounceCount = maxBounces;   // a rope landing should not bounce
         lastAirborneVerticalSpeed = body.linearVelocity.y;
+
+        // Letting go is done with the Jump key: that press must not also count as a jump.
+        ignoreJumpUntilFrame = Time.frameCount + 1;
+        jumpBufferTimer = 0f;
+        CancelJumpCharge();
     }
+
+    private int ignoreJumpUntilFrame = -1;
 
     /// <summary>
     /// Looks for ground in a small circle at the feet.
@@ -434,7 +446,10 @@ public class CockroachMovement : MonoBehaviour
 
         body.GetContacts(groundFilter, contactBuffer);
 
-        float centerY = bodyCollider.bounds.center.y;
+        // Only contacts down at the feet can be ground. (It used to be the whole lower half, which let a
+        // cockroach knocked against the side of a hill "stand" on it at hip height and hang in the air.)
+        Bounds bounds = bodyCollider.bounds;
+        float feetTopY = bounds.min.y + bounds.size.y * 0.3f;
         float bestUp = 0f;
         Vector2 bestNormal = Vector2.up;
         bool found = false;
@@ -443,8 +458,7 @@ public class CockroachMovement : MonoBehaviour
         {
             ContactPoint2D contact = contactBuffer[i];
 
-            // Only contacts on the lower half of the body can be ground.
-            if (contact.point.y > centerY)
+            if (contact.point.y > feetTopY)
                 continue;
 
             // Make the normal point upward whichever way Unity reports it.
@@ -571,6 +585,10 @@ public class CockroachMovement : MonoBehaviour
     /// </summary>
     private void HandleJumpInput()
     {
+        // The Jump press that let go of the grappling hook is not also a jump (it would otherwise
+        // be stored and fire the moment we land).
+        if (Time.frameCount <= ignoreJumpUntilFrame) return;
+
         bool canJump = CanJump();
         KeyCode jumpKey = GameSettings.Key(GameAction.Jump);
 

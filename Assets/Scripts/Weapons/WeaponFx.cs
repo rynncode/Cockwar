@@ -37,10 +37,14 @@ public static class WeaponFx
         return body != null ? (Vector2)body.bounds.center : (Vector2)player.transform.position;
     }
 
-    /// <summary>Deals damage through the normal Health component (health bar, "-10" label, death all still work).</summary>
-    public static void Damage(CockroachMovement player, int amount)
+    /// <summary>
+    /// Deals damage through the normal Health component (health bar, "-10" label, death all still work).
+    /// A cockroach inside the tank is armoured and takes nothing, unless ignoreArmour (the nuke).
+    /// </summary>
+    public static void Damage(CockroachMovement player, int amount, bool ignoreArmour = false)
     {
         if (!IsAlive(player)) return;
+        if (!ignoreArmour && TankVehicle.IsInside(player)) return;
         Health health = player.GetComponent<Health>();
         if (health != null) health.TakeDamage(amount);
     }

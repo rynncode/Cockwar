@@ -104,7 +104,7 @@ public class DoomAttack : SpecialAttack
         }, cloud, cloudWidth, fps, 0.25f);
 
         foreach (CockroachMovement player in WeaponFx.AllPlayers())
-            WeaponFx.Damage(player, damage);
+            WeaponFx.Damage(player, damage, true);   // no hiding from the nuke, not even in the tank
     }
 
     protected override Sprite BuildIcon() => WeaponArt.Nuke();

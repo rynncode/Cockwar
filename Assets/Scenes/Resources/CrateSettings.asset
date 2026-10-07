@@ -111,6 +111,10 @@ MonoBehaviour:
   shieldMin: 25
   shieldMax: 50
   maxShieldBonus: 50
+  tankEnabled: 1
+  tankDropChance: 0.25
+  tankShellPrefab: {fileID: 258008830510017049, guid: 09c5565e024191d4587a11dfa7351ef4, type: 3}
+  tankExplosionPrefab: {fileID: 3412598755270650874, guid: ff3b1c2ec0418f745a7038aaee789b0a, type: 3}
   minStartingCrates: 2
   maxStartingCrates: 4
   minimumCrateDistance: 40

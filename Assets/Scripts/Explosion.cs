@@ -145,6 +145,7 @@ public class Explosion : MonoBehaviour
     {
         CockroachMovement mover = hit.GetComponent<CockroachMovement>();
         if (mover == null) return; // Only cockroaches get pushed for now.
+        if (TankVehicle.IsInside(mover)) return; // safe inside the tank
 
         // Use the collider's center, not its pivot. The pivot is at the feet,
         // which is often right at the blast point and gives no usable direction.
@@ -168,6 +169,7 @@ public class Explosion : MonoBehaviour
     {
         Health health = hit.GetComponent<Health>();
         if (health == null) return; // Not something that can take damage (e.g. the ground).
+        if (TankVehicle.IsInside(hit.GetComponent<CockroachMovement>())) return; // the tank takes the hit instead
 
         float distance = Vector2.Distance(transform.position, hit.transform.position);
 

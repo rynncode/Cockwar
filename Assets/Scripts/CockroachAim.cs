@@ -58,7 +58,7 @@ public class CockroachAim : MonoBehaviour
         if (crosshair != null && !indicatorSystemPresent)
         {
             CockroachShooting shooting = GetComponent<CockroachShooting>();
-            bool hide = shooting != null && (shooting.FiringLocked || SpecialAttack.HidesCrosshair(shooting.CurrentWeapon));
+            bool hide = shooting != null && (shooting.CannotFire || SpecialAttack.HidesCrosshair(shooting.CurrentWeapon));
             crosshair.gameObject.SetActive(movement.isMyTurn && !hide);
         }
 

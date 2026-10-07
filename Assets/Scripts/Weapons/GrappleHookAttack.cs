@@ -101,7 +101,10 @@ public class GrappleHookAttack : SpecialAttack
         int groundMask = movement != null && movement.groundLayer.value != 0 ? movement.groundLayer.value : LayerMask.GetMask("Ground");
 
         hit = Physics2D.Raycast(origin, direction.normalized, maxLength, groundMask);
-        return hit.collider != null && !hit.collider.isTrigger;
+
+        // A hit right at the start means the aim point is already inside the ground (standing
+        // against a wall): it would hook onto your own feet, so that does not count.
+        return hit.collider != null && !hit.collider.isTrigger && hit.distance > 1f;
     }
 
     protected override Sprite BuildIcon() => WeaponArt.GrappleGun();

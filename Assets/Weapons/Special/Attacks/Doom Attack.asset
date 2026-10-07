@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
-  nukeChance: 0.2
+  nukeChance: 1
   countdownSeconds: 10
   damage: 100000
   craterRadius: 320

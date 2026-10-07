@@ -106,6 +106,54 @@ public class CrateSettings : ScriptableObject
     [Tooltip("Shields can never raise a cockroach's max health more than this above its starting max, however many it collects.")]
     [Min(0)] public int maxShieldBonus = 50;
 
+    [Header("Tank (dropped by the plane, only one at a time)")]
+    [Tooltip("Let the plane drop a tank.")]
+    public bool tankEnabled = true;
+
+    [Tooltip("Chance, after each finished turn while there is no tank on the map, that the plane brings a tank instead of a crate. 0.25 = 25%.")]
+    [Range(0f, 1f)] public float tankDropChance = 0.25f;
+
+    [Tooltip("Width of the tank in world units (a cockroach is about 5).")]
+    public float tankWidth = 26f;
+
+    [Tooltip("The tank's health. The driver can't be hurt while inside; the tank takes the hits instead.")]
+    [Min(1)] public int tankHealth = 150;
+
+    [Tooltip("Driving speed, in world units per second.")]
+    public float tankSpeed = 10f;
+
+    [Tooltip("How close (world units, from the tank's edge) a cockroach must be to climb in.")]
+    public float tankEnterRange = 4f;
+
+    [Tooltip("The shell the cannon fires (a projectile prefab; its explosion decides the damage).")]
+    public GameObject tankShellPrefab;
+
+    [Tooltip("Shell speed on a quick click, and when fully charged.")]
+    public float tankMinPower = 20f;
+    public float tankMaxPower = 100f;
+
+    [Tooltip("Seconds of holding the mouse to reach full power.")]
+    public float tankChargeSeconds = 1.3f;
+
+    [Tooltip("Explosion when the tank is destroyed (its numbers are replaced by the ones below).")]
+    public GameObject tankExplosionPrefab;
+    public int tankExplosionDamage = 35;
+    public float tankExplosionRadius = 22f;
+
+    [Tooltip("Damage the driver takes when the tank is destroyed with them inside.")]
+    public int tankEjectDamage = 20;
+
+    [Tooltip("The ground under a dropped tank must be flat for this far to each side.")]
+    public float tankFlatHalfWidth = 10f;
+
+    [Tooltip("Optional art (empty = built-in pixel tank).")]
+    public Sprite tankHullSprite;
+    public Sprite tankBarrelSprite;
+
+    public AudioClip tankFireSound;
+    public AudioClip tankEnterSound;
+    public AudioClip tankDestroyedSound;
+
     [Header("Starting crates")]
     [Min(0)] public int minStartingCrates = 2;
     [Min(0)] public int maxStartingCrates = 4;

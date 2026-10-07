@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21824c790808a0b40ab442b37ec4ff9a, type: 3}
   m_Name: Grappling Hook
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  displayName: 'GRAPPLING HOOK'
+  displayName: GRAPPLING HOOK
   icon: {fileID: 0}
   category: 4
-  description: 'Aim and left-click to hook the ground (green line = it will catch). W/S climb, A/D swing, Jump lets go. Two uses. Does not end your turn.'
+  description: Aim and left-click to hook the ground (green line = it will catch). W/S climb, A/D swing, Jump lets go. Two uses. Does not end your turn.
   roundDelay: 0
   projectilePrefab: {fileID: 0}
   specialAttack: {fileID: 11400000, guid: da7868042a334e32abfff000676c7514, type: 2}

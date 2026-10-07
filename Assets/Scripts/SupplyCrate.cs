@@ -185,6 +185,14 @@ public class SupplyCrate : MonoBehaviour
         if (opened || fadeOut >= 0f) return;
 
         CockroachShooting collector = other.GetComponentInParent<CockroachShooting>();
+
+        // Driving the tank into a crate collects it for the driver.
+        if (collector == null)
+        {
+            TankVehicle tank = other.GetComponentInParent<TankVehicle>();
+            if (tank != null && tank.Driver != null) collector = tank.Driver.GetComponent<CockroachShooting>();
+        }
+
         if (collector == null) return;
 
         Health health = collector.GetComponent<Health>();

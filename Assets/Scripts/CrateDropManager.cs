@@ -166,9 +166,14 @@ public class CrateDropManager : MonoBehaviour
     /// A spot is valid if it is flat top-surface ground (open sky above, inside the map, above
     /// the acid) and is far enough from every living player and every crate.
     /// </summary>
-    private bool IsValidSpot(float x, out Vector2 spot)
+    private bool IsValidSpot(float x, out Vector2 spot) => IsValidSpot(x, settings.flatHalfWidth, out spot);
+
+    private bool IsValidSpot(float x, float flatHalfWidth, out Vector2 spot)
     {
-        if (!terrain.TryFindSurface(x, settings.flatHalfWidth, settings.maxSlope, out spot)) return false;
+        if (!terrain.TryFindSurface(x, flatHalfWidth, settings.maxSlope, out spot)) return false;
+
+        // Keep clear of the tank too.
+        if (TankVehicle.Current != null && Vector2.Distance(TankVehicle.Current.transform.position, spot) < settings.minimumCrateDistance) return false;
         if (spot.y < acidY + settings.minHeightAboveAcid) return false;
 
         foreach (CockroachMovement player in LivingPlayers())
@@ -200,20 +205,29 @@ public class CrateDropManager : MonoBehaviour
         if (!enabled || dropRunning || terrain == null) return false;
 
         CleanUpList();
-        if (settings.maxCratesOnMap > 0 && crates.Count >= settings.maxCratesOnMap) return false;
-        if (Random.value >= settings.dropChance) return false;
 
-        if (!TryPickDropSpot(PeekNextPlayer(), out Vector2 spot))
+        // The tank: at most one on the map. While there is none, each turn has a chance that the
+        // plane brings a tank instead of a crate.
+        bool dropTank = settings.tankEnabled && TankVehicle.Current == null && Random.value < settings.tankDropChance;
+
+        if (!dropTank)
         {
-            Debug.Log("CrateDropManager: no free spot for a crate drop this turn.");
+            if (settings.maxCratesOnMap > 0 && crates.Count >= settings.maxCratesOnMap) return false;
+            if (Random.value >= settings.dropChance) return false;
+        }
+
+        float flat = dropTank ? settings.tankFlatHalfWidth : settings.flatHalfWidth;
+        if (!TryPickDropSpot(PeekNextPlayer(), flat, out Vector2 spot))
+        {
+            Debug.Log("CrateDropManager: no free spot for a " + (dropTank ? "tank" : "crate") + " drop this turn.");
             return false;
         }
 
-        StartCoroutine(RunDrop(spot, onFinished));
+        StartCoroutine(RunDrop(spot, onFinished, dropTank));
         return true;
     }
 
-    private IEnumerator RunDrop(Vector2 spot, System.Action onFinished)
+    private IEnumerator RunDrop(Vector2 spot, System.Action onFinished, bool dropTank)
     {
         dropRunning = true;
         float timeLeft = Mathf.Max(2f, settings.maxDropSeconds);
@@ -232,9 +246,17 @@ public class CrateDropManager : MonoBehaviour
         CrateAircraft plane = CrateAircraft.Launch(settings, spot.x + side * approach, spot.x, spot.x - side * approach, height,
             dropPoint =>
             {
+                if (settings.dropSound != null) Sfx.Play(settings.dropSound, settings.crateVolume);
+
+                if (dropTank)
+                {
+                    TankVehicle tank = TankVehicle.Create(this, settings, dropPoint + Vector2.down * settings.tankWidth * 0.2f, true, acidY);
+                    if (settings.cameraFollowsDrop && cameraController != null) cameraController.SetTarget(tank.transform);
+                    return;
+                }
+
                 crate = SupplyCrate.Create(this, settings, dropPoint, true, acidY);
                 crates.Add(crate);
-                if (settings.dropSound != null) Sfx.Play(settings.dropSound, settings.crateVolume);
                 if (settings.cameraFollowsDrop && cameraController != null) cameraController.SetTarget(crate.transform);
             });
 
@@ -260,7 +282,7 @@ public class CrateDropManager : MonoBehaviour
     /// crates and recent drops, further from the player who moves next, plus random noise so
     /// the result never becomes predictable.
     /// </summary>
-    private bool TryPickDropSpot(CockroachMovement nextPlayer, out Vector2 best)
+    private bool TryPickDropSpot(CockroachMovement nextPlayer, float flatHalfWidth, out Vector2 best)
     {
         Rect map = terrain.WorldBounds;
         float left = map.xMin + settings.edgeMargin;
@@ -274,7 +296,7 @@ public class CrateDropManager : MonoBehaviour
         for (int i = 0; i < 40; i++)
         {
             float x = left + Random.value * width;
-            if (!IsValidSpot(x, out Vector2 spot)) continue;
+            if (!IsValidSpot(x, flatHalfWidth, out Vector2 spot)) continue;
 
             float spread = Cap;
             foreach (SupplyCrate crate in crates)

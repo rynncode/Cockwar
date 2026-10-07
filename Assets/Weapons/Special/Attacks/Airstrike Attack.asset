@@ -15,18 +15,18 @@ MonoBehaviour:
   icon: {fileID: 0}
   heldSprite: {fileID: 0}
   rocketCount: 40
-  damagePerRocket: 40
+  damagePerRocket: 20
   edgeDamageFraction: 0.5
-  blastRadius: 12
-  craterRadius: 11
+  blastRadius: 35
+  craterRadius: 15
   knockback: 45
   explosionPrefab: {fileID: 5379489956093211821, guid: 73554bde830900045a94a39973f783f8, type: 3}
-  aimedAtPlayersShare: 0.323
+  aimedAtPlayersShare: 0
   scatter: 2
   planeSpeed: 110
   planeHeightAboveGround: 45
-  planeSize: 34
-  rocketSize: 6
+  planeSize: 100
+  rocketSize: 12
   rocketGravity: 70
   buttonSeconds: 0.9
   planeSprite: {fileID: 0}

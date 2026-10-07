@@ -275,6 +275,45 @@ public static class WeaponArt
         "...G...",
     }, true));
 
+    // ---------------- TANK ----------------
+
+    /// <summary>Tank hull with treads and the turret dome, facing right. Pivot in the centre.</summary>
+    public static Sprite TankHull() => Get("tankHull", () => FromRows(new[]
+    {
+        "...........vvvvvvvv...........",
+        ".........vvVVVVVVVVvv.........",
+        "........vVVVVVVVVVVVVv........",
+        "...vvvvvvvvvvvvvvvvvvvvvvvv...",
+        "..vVVVVVVVVVVVVVVVVVVVVVVVVv..",
+        ".vVVVYYVVVVVVVVVVVVVVVVVVVVVv.",
+        ".vVVVYYVVVVVVVVVVVVVVVVVVVVVv.",
+        ".vvvvvvvvvvvvvvvvvvvvvvvvvvvv.",
+        "gggggggggggggggggggggggggggggg",
+        "gGwGgGwGgGwGgGwGgGwGgGwGgGwGgg",
+        "gwKwgwKwgwKwgwKwgwKwgwKwgwKwgg",
+        "gGwGgGwGgGwGgGwGgGwGgGwGgGwGgg",
+        ".gggggggggggggggggggggggggggg.",
+    }, true));
+
+    /// <summary>Tank barrel, pointing right. Pivot at its left end, where it joins the turret.</summary>
+    public static Sprite TankBarrel() => Get("tankBarrel", () => FromRows(new[]
+    {
+        "GGGGGGGGGGGGgg",
+        "wwwwwwwwwwwwKK",
+        "GGGGGGGGGGGGgg",
+    }, true, new Vector2(0f, 0.5f)));
+
+    /// <summary>A small flag in white (tint it with the driver's team colour).</summary>
+    public static Sprite Flag() => Get("flag", () => FromRows(new[]
+    {
+        "gWWWW",
+        "gWWWW",
+        "gWWW.",
+        "g....",
+        "g....",
+        "g....",
+    }, true, new Vector2(0f, 0f)));
+
     // ---------------- Shared ----------------
 
     /// <summary>Soft round blob for smoke and sparks (white, tint it). No outline.</summary>

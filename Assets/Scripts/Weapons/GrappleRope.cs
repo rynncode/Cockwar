@@ -22,7 +22,8 @@ public class GrappleRope : MonoBehaviour
     private DistanceJoint2D joint;
 
     private Vector2 anchor;          // where the claw is
-    private Vector2 anchorInGround;  // a point just inside the ground behind the claw, to see if it is still there
+    private Vector2 surfaceNormal;   // points out of the ground at the claw
+    private bool checkGround;        // false if no solid ground could be found behind the claw at all
     private float swingInput;
     private float groundCheckTimer;
 
@@ -45,7 +46,12 @@ public class GrappleRope : MonoBehaviour
     {
         hook = attack;
         anchor = point;
-        anchorInGround = point - surfaceNormal.normalized * 0.75f;
+        this.surfaceNormal = surfaceNormal.sqrMagnitude > 0.0001f ? surfaceNormal.normalized : Vector2.up;
+
+        // The collision outline is a smoothed copy of the pixel ground, so the claw can sit a little
+        // outside the real pixels. Only watch for the ground being blown away if there is solid
+        // ground behind the claw right now; otherwise it would let go the moment it hooked.
+        checkGround = GroundBehindClaw();
 
         if (joint == null)
         {
@@ -103,8 +109,7 @@ public class GrappleRope : MonoBehaviour
         if (groundCheckTimer <= 0f)
         {
             groundCheckTimer = 0.1f;
-            TerrainGenerator terrain = TerrainGenerator.Instance;
-            if (terrain != null && !terrain.IsSolidAt(anchorInGround) && !terrain.IsSolidAt(anchor))
+            if (checkGround && !GroundBehindClaw())
             {
                 Release();
                 return;
@@ -134,8 +139,20 @@ public class GrappleRope : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!IsAttached || swingInput == 0f) return;
-        body.AddForce(Vector2.right * swingInput * hook.SwingForce * body.mass, ForceMode2D.Force);
+        if (!IsAttached) return;
+
+        // On the ground (rope slack): A / D walk as normal, so you can still move around while hooked.
+        if (movement != null && movement.IsGrounded)
+        {
+            Vector2 velocity = body.linearVelocity;
+            velocity.x = swingInput * movement.walkSpeed;
+            body.linearVelocity = velocity;
+            return;
+        }
+
+        // In the air: A / D swing.
+        if (swingInput != 0f)
+            body.AddForce(Vector2.right * swingInput * hook.SwingForce * body.mass, ForceMode2D.Force);
     }
 
     private void LateUpdate()
@@ -154,6 +171,19 @@ public class GrappleRope : MonoBehaviour
         clawSprite.enabled = true;
         clawSprite.transform.position = anchor;
         clawSprite.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg - 90f);
+    }
+
+    /// <summary>True if there is solid ground at the claw or a little way behind it (into the surface).</summary>
+    private bool GroundBehindClaw()
+    {
+        TerrainGenerator terrain = TerrainGenerator.Instance;
+        if (terrain == null) return true;
+
+        for (float depth = 0f; depth <= 3f; depth += 0.5f)
+        {
+            if (terrain.IsSolidAt(anchor - surfaceNormal * depth)) return true;
+        }
+        return false;
     }
 
     private Vector2 BodyCentre() => bodyCollider != null ? (Vector2)bodyCollider.bounds.center : (Vector2)transform.position;

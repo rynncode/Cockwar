@@ -9,7 +9,8 @@ public enum GameAction
     Jump,
     NextWeapon,
     WeaponPanel,
-    EndTurn
+    EndTurn,
+    Vehicle
 }
 
 /// <summary>
@@ -32,12 +33,13 @@ public static class GameSettings
         KeyCode.Space,  // Jump
         KeyCode.Tab,    // NextWeapon
         KeyCode.Q,      // WeaponPanel
-        KeyCode.Return  // EndTurn
+        KeyCode.Return, // EndTurn
+        KeyCode.F       // Vehicle (get in / out of the tank)
     };
 
     private static readonly string[] ActionNames =
     {
-        "Move Left", "Move Right", "Jump", "Next Weapon", "Weapon Panel", "End Turn"
+        "Move Left", "Move Right", "Jump", "Next Weapon", "Weapon Panel", "End Turn", "Tank In / Out"
     };
 
     private static bool loaded;

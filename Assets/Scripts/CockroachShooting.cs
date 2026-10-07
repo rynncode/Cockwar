@@ -74,6 +74,23 @@ public class CockroachShooting : MonoBehaviour
     /// </summary>
     public bool FiringLocked { get; set; }
 
+    /// <summary>True while driving a vehicle (the tank): the tank fires instead of this cockroach.</summary>
+    public bool InVehicle { get; set; }
+
+    /// <summary>True while this cockroach's own weapons can't be aimed or fired (retreating, or in a vehicle).</summary>
+    public bool CannotFire => FiringLocked || InVehicle;
+
+    /// <summary>
+    /// A vehicle this cockroach is driving fired a shot: report it exactly like a normal shot, so the
+    /// camera follows the shell and the TurnManager ends the turn once it lands.
+    /// </summary>
+    public void ReportVehicleShot(Projectile shell)
+    {
+        LastShotEndsTurn = true;
+        if (shell != null) OnProjectileLaunched?.Invoke(shell);
+        OnFired?.Invoke();
+    }
+
     /// <summary>Whether the shot just fired ends the turn. TurnManager reads this in OnFired.</summary>
     public bool LastShotEndsTurn { get; private set; } = true;
 
@@ -287,7 +304,7 @@ public class CockroachShooting : MonoBehaviour
         }
 
         // Not our turn, or retreating after a fused shot (we may walk, but not fire or switch).
-        if (!movement.isMyTurn || FiringLocked)
+        if (!movement.isMyTurn || CannotFire)
         {
             // Also reset the charge, so a turn that ends mid-charge
             // does not leave a half-full power bar behind.

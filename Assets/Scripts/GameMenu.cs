@@ -514,14 +514,14 @@ public class GameMenu : MonoBehaviour
 
     private void KeyRow(RectTransform panel, int action, float left, ref float y)
     {
-        const float rowHeight = 48f;
+        const float rowHeight = 42f;
 
         TextMeshProUGUI label = NewText("Action" + action, panel, GameSettings.ActionName((GameAction)action).ToUpperInvariant(), 26f, DarkText);
         label.alignment = TextAlignmentOptions.Left;
         PlaceRow(label.rectTransform, left, y, 330f, rowHeight);
 
-        Button button = NewTextButton("Key" + action, panel, "", new Vector2(270f, 40f), 24f);
-        PlaceRow((RectTransform)button.transform, left + 415f, y - 4f, 270f, 40f);
+        Button button = NewTextButton("Key" + action, panel, "", new Vector2(270f, 36f), 22f);
+        PlaceRow((RectTransform)button.transform, left + 415f, y - 3f, 270f, 36f);
         button.onClick.AddListener(() => StartRebind(action));
         keyLabels.Add(button.GetComponentInChildren<TextMeshProUGUI>());
 
