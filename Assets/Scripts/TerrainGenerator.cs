@@ -1089,7 +1089,7 @@ public class TerrainGenerator : MonoBehaviour
     /// Splits the map into one slot per player and puts each cockroach on the
     /// surface somewhere inside its slot, on flat ground with open sky above.
     /// </summary>
-    private void PlacePlayers()
+    public void PlacePlayers()
     {
         if (turnManager == null || turnManager.players == null || turnManager.players.Count == 0)
         {

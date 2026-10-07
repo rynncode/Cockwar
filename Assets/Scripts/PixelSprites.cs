@@ -54,6 +54,19 @@ public static class PixelSprites
         "...K...",
     }, Vector4.zero));
 
+
+    /// <summary>A crown, 11 x 8 pixels (white with a black outline; tint it gold). Marks the leading team.</summary>
+    public static Sprite Crown() => Get("crown", () => FromColorRows(new[]
+    {
+        "K....K....K",
+        "KK..KWK..KK",
+        "KWKKWWWKKWK",
+        "KWWWWWWWWWK",
+        "KWWWWWWWWWK",
+        "KKKKKKKKKKK",
+        "KWWWWWWWWWK",
+        "KKKKKKKKKKK",
+    }, Vector4.zero));
     /// <summary>Arrow head pointing right, 6 x 7 pixels with its outline.</summary>
     public static Sprite ArrowRight() => Get("arrow", () => FromMask(new[]
     {

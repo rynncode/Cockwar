@@ -59,8 +59,12 @@ public class CrateDropManager : MonoBehaviour
     }
 
     // Start, not Awake: the terrain builds itself and places the players in its own Awake.
-    private void Start()
+    private IEnumerator Start()
     {
+        // Wait for the CHOOSE MATCH screen: 2 VS 2 adds cockroaches and moves everyone, so crates
+        // (and testing weapons) must wait until the line-up is final.
+        while (!MatchSetup.IsReady) yield return null;
+
         terrain = TerrainGenerator.Instance != null ? TerrainGenerator.Instance : FindFirstObjectByType<TerrainGenerator>();
         cameraController = turnManager != null && turnManager.cameraController != null
             ? turnManager.cameraController
@@ -82,14 +86,14 @@ public class CrateDropManager : MonoBehaviour
         {
             Debug.LogWarning("CrateDropManager: no TerrainGenerator in the scene, so supply crates are switched off.");
             enabled = false;
-            return;
+            yield break;
         }
 
         if (!settings.HasAnyContent())
         {
             Debug.LogWarning("CrateDropManager: every crate kind is switched off (or empty) in CrateSettings, so supply crates are switched off.");
             enabled = false;
-            return;
+            yield break;
         }
 
         // Same surface line the acid uses; a map with no acid just uses the map's bottom.

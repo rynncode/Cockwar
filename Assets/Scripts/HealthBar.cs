@@ -90,6 +90,12 @@ public class HealthBar : OverheadBar
     public bool IsAnimating =>
         health != null && (phase != Phase.Idle || displayedHealth > health.CurrentHealth);
 
+    /// <summary>
+    /// The health number as currently shown: it lags behind the real health while a hit is
+    /// counting down. The head bubbles (PlayerBubbles) show this number, Worms-style.
+    /// </summary>
+    public int DisplayedHealth => displayedHealth;
+
     private void Reset()
     {
         // Bigger than the other bars so the number fits on it.
@@ -254,6 +260,10 @@ public class HealthBar : OverheadBar
 
     protected override bool ShouldShow()
     {
+        // Worms-style: the head bubble already shows the health number (counting down the same
+        // way), so the bar stays hidden. The "-10" labels still float up.
+        if (PlayerBubbles.ShowsHealth) return false;
+
         bool animating = IsAnimating;
 
         // A dead cockroach keeps its bar only until the number has counted down to 0.

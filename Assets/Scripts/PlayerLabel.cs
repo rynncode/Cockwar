@@ -99,9 +99,14 @@ public class PlayerLabel : MonoBehaviour
         return 1;
     }
 
-    /// <summary>The color for a player number (1 red, 2 blue, 3 green, 4 yellow). Also used by DistanceHud.</summary>
+    /// <summary>
+    /// The color for a player number (1 red, 2 blue, 3 green, 4 yellow). Also used by DistanceHud.
+    /// In a team match it is the team's colour instead: P1 and P3 red, P2 and P4 blue.
+    /// </summary>
     public static Color GetPlayerColor(int number)
     {
+        if (MatchSetup.UsesTeams && number > 2) number = (number - 1) % 2 + 1;
+
         switch (number)
         {
             case 1: return new Color(0.95f, 0.15f, 0.15f); // red

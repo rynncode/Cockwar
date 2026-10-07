@@ -204,12 +204,14 @@ public class GameOverSequence : MonoBehaviour
     private void Retry()
     {
         Time.timeScale = 1f;
+        MatchSetup.KeepModeForRestart();   // a rematch keeps 1 VS 1 / 2 VS 2
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void Home()
     {
         Time.timeScale = 1f;
+        MatchSetup.ForgetMode();
         SceneManager.LoadScene(homeSceneIndex);
     }
 

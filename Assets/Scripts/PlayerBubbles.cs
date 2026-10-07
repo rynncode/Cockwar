@@ -3,8 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Head bubbles: a small pixel speech bubble ("P1", "P2" ...) in each player's color, floating
-/// above their head (above any bars), so you can always see who is where.
+/// Head bubbles: a small pixel speech bubble ("P1", "P2" ...) in each player's (team) color, floating
+/// above their head (above any bars), so you can always see who is where. Worms-style, the bubble
+/// also shows that cockroach's health number under the name (Show Health), counting down after a hit.
 ///  - The player whose turn it is gets a full-size bubble that bobs gently and pops in when the
 ///    turn starts (right after the big P1 / P2 label from PlayerLabel fades, so they don't double up).
 ///  - Everyone else gets a smaller, slightly faded bubble.
@@ -28,6 +29,9 @@ public class PlayerBubbles : MonoBehaviour
     [Tooltip("On = a bubble over every living player. Off = only over the player whose turn it is.")]
     public bool showOtherPlayers = true;
 
+    [Tooltip("Worms-style: each bubble also shows that cockroach's health number, always visible, and the health bar over the head is hidden.")]
+    public bool showHealth = true;
+
     [Header("Off-screen")]
     [Tooltip("Keep an off-screen player's bubble at the edge of the screen, with an arrow pointing at them.")]
     public bool clampToScreenEdge = true;
@@ -40,7 +44,7 @@ public class PlayerBubbles : MonoBehaviour
 
     [Header("Look")]
     [Tooltip("Size of one pixel of the bubble, in UI units at 1920x1080.")]
-    public float pixelSize = 5f;
+    public float pixelSize = 4f;
 
     [Tooltip("World units between the top of the head (or the highest bar) and the tip of the bubble.")]
     public float gapAboveHead = 1f;
@@ -84,6 +88,11 @@ public class PlayerBubbles : MonoBehaviour
         public Vector2 panelSize;     // unscaled UI units
         public float panelCenterY;    // unscaled, from the tail tip
 
+        public Health health;
+        public HealthBar healthBar;
+        public Image healthText;
+        public int shownHealth;
+
         public float scale;
         public float scaleVelocity;
         public float lift = float.NaN;   // world units from the cockroach's position to the tip
@@ -93,11 +102,19 @@ public class PlayerBubbles : MonoBehaviour
     }
 
     private readonly List<Bubble> bubbles = new List<Bubble>();
+    private bool bubblesBuilt;
+
+    private static PlayerBubbles instance;
+
+    /// <summary>True while the bubbles show the health numbers (HealthBar then hides its own bar).</summary>
+    public static bool ShowsHealth => instance != null && instance.isActiveAndEnabled && instance.showHealth;
     private GameObject canvasObject;
     private RectTransform canvasRect;
 
     private void Awake()
     {
+        instance = this;
+
         if (turnManager == null)
             turnManager = GetComponent<TurnManager>();
         if (turnManager == null)
@@ -120,7 +137,15 @@ public class PlayerBubbles : MonoBehaviour
             turnManager.opponentIndicator.gameObject.SetActive(false);
 
         BuildCanvas();
+    }
 
+    /// <summary>
+    /// One bubble per player, made once the CHOOSE MATCH screen has set the line-up (2 VS 2 adds
+    /// two cockroaches after the scene has started).
+    /// </summary>
+    private void BuildBubbles()
+    {
+        bubblesBuilt = true;
         for (int i = 0; i < turnManager.players.Count; i++)
         {
             if (turnManager.players[i] != null)
@@ -142,6 +167,9 @@ public class PlayerBubbles : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (instance == this)
+            instance = null;
+
         if (canvasObject != null)
             Destroy(canvasObject);
     }
@@ -190,7 +218,14 @@ public class PlayerBubbles : MonoBehaviour
 
         Sprite textSprite = PixelSprites.Text("P" + number);
         Vector2 textPixels = textSprite.rect.size;
-        Vector2 panelPixels = textPixels + new Vector2(PadX * 2, PadY * 2);
+
+        // Worms-style: a second line with the health number, under the name. The panel is sized
+        // for three digits so it doesn't jump around as the number changes.
+        Vector2 healthPixels = showHealth ? PixelSprites.Text("888").rect.size : Vector2.zero;
+        Vector2 contentPixels = showHealth
+            ? new Vector2(Mathf.Max(textPixels.x, healthPixels.x), textPixels.y + healthPixels.y - 1f) // outlines overlap by a pixel
+            : textPixels;
+        Vector2 panelPixels = contentPixels + new Vector2(PadX * 2, PadY * 2);
 
         // Root sits at the tip of the tail; the panel is above it.
         b.panelSize = panelPixels * pixelSize;
@@ -204,7 +239,19 @@ public class PlayerBubbles : MonoBehaviour
 
         Image text = NewImage("Text", panel.rectTransform, textSprite, Color.white);
         text.rectTransform.sizeDelta = textPixels * pixelSize;
-        text.rectTransform.anchoredPosition = Vector2.zero;
+        text.rectTransform.anchoredPosition = showHealth
+            ? new Vector2(0f, (contentPixels.y - textPixels.y) * 0.5f * pixelSize)
+            : Vector2.zero;
+
+        if (showHealth)
+        {
+            b.health = player.GetComponent<Health>();
+            b.healthBar = player.GetComponent<HealthBar>();
+            b.healthText = NewImage("Health", panel.rectTransform, null, Color.white);
+            b.healthText.rectTransform.anchoredPosition = new Vector2(0f, -(contentPixels.y - healthPixels.y) * 0.5f * pixelSize);
+            b.shownHealth = int.MinValue;
+            UpdateHealthText(b);
+        }
 
         // Drawn after the panel so its top row covers the panel's bottom outline and the two join.
         Image tail = NewImage("Tail", b.root, PixelSprites.TailDown(), color);
@@ -220,6 +267,20 @@ public class PlayerBubbles : MonoBehaviour
 
         b.scale = otherPlayersScale;
         return b;
+    }
+
+    /// <summary>Shows the health number: the one the health bar is counting down, so hits tick down Worms-style.</summary>
+    private void UpdateHealthText(Bubble b)
+    {
+        if (b.healthText == null) return;
+
+        int value = b.healthBar != null ? b.healthBar.DisplayedHealth : (b.health != null ? b.health.CurrentHealth : 0);
+        value = Mathf.Max(0, value);
+        if (value == b.shownHealth) return;
+
+        b.shownHealth = value;
+        b.healthText.sprite = PixelSprites.Text(value.ToString());
+        b.healthText.rectTransform.sizeDelta = b.healthText.sprite.rect.size * pixelSize;
     }
 
     private static RectTransform NewRect(string name, Transform parent)
@@ -246,8 +307,14 @@ public class PlayerBubbles : MonoBehaviour
     {
         if (cam == null)
             cam = Camera.main;
-        if (cam == null)
+        if (cam == null || canvasRect == null)
             return;
+
+        if (!bubblesBuilt)
+        {
+            if (!MatchSetup.IsReady) return;
+            BuildBubbles();
+        }
 
         // Very long frames would make the springs jump; cap the step.
         float dt = Mathf.Min(Time.deltaTime, 0.05f);
@@ -266,6 +333,7 @@ public class PlayerBubbles : MonoBehaviour
         }
 
         bool alive = IsAlive(b.player);
+        UpdateHealthText(b);
 
         // "Active" = in control right now. Once they've fired, the camera is on the shot,
         // so their bubble steps back to the normal size.

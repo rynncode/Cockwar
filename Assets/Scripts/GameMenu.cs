@@ -175,12 +175,14 @@ public class GameMenu : MonoBehaviour
 
     public void Restart()
     {
+        MatchSetup.KeepModeForRestart();   // same 1 VS 1 / 2 VS 2 again, without asking
         Resume();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void GoToMainMenu()
     {
+        MatchSetup.ForgetMode();   // the next match asks for the mode again
         Resume();
         SceneManager.LoadScene(mainMenuScene);
     }

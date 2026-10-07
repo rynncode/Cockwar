@@ -32,9 +32,10 @@ using UnityEngine;
 /// does not move on until that sequence has finished, and when only one player is left
 /// the GameOverSequence takes over (camera to the winner, "WINNER", then the panel).
 ///
-/// Dead players are skipped. When only one player is left alive, turns stop
-/// and a message is logged. Step 14 (Game rules) will replace that message
-/// with a real win screen.
+/// Teams (Worms rules): when the match starts, MatchSetup asks for 1 VS 1 or 2 VS 2 and builds a
+/// red and a blue team. The teams take turns, and inside a team the cockroaches take turns in
+/// rotation (dead ones are skipped). Friendly fire is on. When only one team has anyone left, the
+/// match ends and the GameOverSequence names the winning team.
 ///
 /// Step 10: also tells the CameraController who to follow at the start of
 /// each turn, instead of a pass-the-device screen.
@@ -107,8 +108,15 @@ public class TurnManager : MonoBehaviour
     [Tooltip("Press this key to skip the intro and start playing straight away.")]
     public KeyCode skipIntroKey = KeyCode.Tab;
 
+    [Header("Teams")]
+    [Tooltip("Name of the red team (P1, and P3 in 2 VS 2). Shown on the team display.")]
+    public string team1Name = "RED TEAM";
+
+    [Tooltip("Name of the blue team (P2, and P4 in 2 VS 2).")]
+    public string team2Name = "BLUE TEAM";
+
     [Header("HUD")]
-    [Tooltip("Adds the turn timer (top middle of the screen) when the match starts, unless the scene already has a TurnTimerHud.")]
+    [Tooltip("Adds the team display (team health list, turn timer and match clock, bottom-left) when the match starts, unless the scene already has a TeamHud.")]
     public bool autoAddTurnTimer = true;
 
     [Tooltip("Adds the P1 / P2 bubbles over the players' heads when the match starts, unless the scene already has a PlayerBubbles.")]
@@ -168,7 +176,28 @@ public class TurnManager : MonoBehaviour
     private float retreatSlowTime;
     private bool retreatCameraOnPlayer;
 
+    // The teams (built by MatchSetup). Empty = no teams: every cockroach plays for itself.
+    private readonly List<MatchTeam> teams = new List<MatchTeam>();
+
     // --- Read-only state for other scripts (turn UI in step 15) ---
+
+    /// <summary>The teams in this match, in team order. Empty if the match has no teams.</summary>
+    public IReadOnlyList<MatchTeam> Teams => teams;
+
+    /// <summary>The team a cockroach plays for, or null.</summary>
+    public MatchTeam TeamOf(CockroachMovement player)
+    {
+        foreach (MatchTeam team in teams)
+            if (team.Contains(player)) return team;
+        return null;
+    }
+
+    /// <summary>Called by MatchSetup once the mode is chosen. From then on the teams take turns.</summary>
+    public void SetTeams(List<MatchTeam> newTeams)
+    {
+        teams.Clear();
+        if (newTeams != null) teams.AddRange(newTeams);
+    }
 
     /// <summary>True while a turn-ending shot is in flight. The weapon panel uses this to lock itself.</summary>
     public bool IsShotInFlight => waitingForImpact;
@@ -195,9 +224,16 @@ public class TurnManager : MonoBehaviour
 
     private void Awake()
     {
+        // Nobody moves while the match is being set up (the CHOOSE MATCH screen).
+        foreach (CockroachMovement player in players)
+            if (player != null) player.isMyTurn = false;
+
+        // Ask for 1 VS 1 or 2 VS 2 and build the teams (Start waits for it).
+        MatchSetup.Begin(this);
+
         // The HUD pieces build themselves; add them to this object (or anywhere) yourself to tune them.
-        if (autoAddTurnTimer && FindFirstObjectByType<TurnTimerHud>() == null)
-            gameObject.AddComponent<TurnTimerHud>();
+        if (autoAddTurnTimer && FindFirstObjectByType<TeamHud>() == null)
+            gameObject.AddComponent<TeamHud>();
 
         if (autoAddPlayerBubbles && FindFirstObjectByType<PlayerBubbles>() == null)
             gameObject.AddComponent<PlayerBubbles>();
@@ -206,13 +242,16 @@ public class TurnManager : MonoBehaviour
         if (crateDrops == null && autoAddCrateDrops) crateDrops = gameObject.AddComponent<CrateDropManager>();
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
         if (players.Count == 0)
         {
             Debug.LogWarning("TurnManager: the Players list is empty. Drag your cockroaches into it.");
-            return;
+            yield break;
         }
+
+        // Wait for the CHOOSE MATCH screen: the mode decides who is playing (2 VS 2 adds two cockroaches).
+        while (!MatchSetup.IsReady) yield return null;
 
         foreach (CockroachMovement player in players)
         {
@@ -378,7 +417,7 @@ public class TurnManager : MonoBehaviour
 
             // Everyone else is gone (for example they fell in the acid) and their death
             // has finished: the match is over, no need to wait for this turn to run out.
-            if (players.Count > 1 && CountAlivePlayers() <= 1 && !IsAnyDeathSequencePlaying())
+            if (IsMatchDecided() && !IsAnyDeathSequencePlaying())
             {
                 EndTurn();
                 return;
@@ -643,9 +682,9 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        // With 2+ players in the match, one survivor means the match is over.
+        // One team (or one player, without teams) left standing: the match is over.
         // (With a single cockroach in the scene we keep going so you can test alone.)
-        if (players.Count > 1 && CountAlivePlayers() <= 1)
+        if (IsMatchDecided())
         {
             EndGame();
             return;
@@ -664,13 +703,19 @@ public class TurnManager : MonoBehaviour
             }
         }
 
+        if (teams.Count > 0)
+        {
+            AdvanceToNextTeam();
+            return;
+        }
+
         for (int i = 1; i <= players.Count; i++)
         {
             int candidate = (currentIndex + i) % players.Count;
 
             if (IsAlive(players[candidate]))
             {
-                StartTurn(candidate);
+                StartTurn(candidate, currentIndex < 0 || candidate <= currentIndex);
                 return;
             }
         }
@@ -679,10 +724,33 @@ public class TurnManager : MonoBehaviour
         EndGame();
     }
 
-    private void StartTurn(int index)
+    /// <summary>
+    /// Worms rules: the teams take turns (red, blue, red, blue...), and inside a team the cockroaches
+    /// take turns in rotation, so a team that has lost a member still gets every other turn.
+    /// </summary>
+    private void AdvanceToNextTeam()
     {
-        // Wrapping back to (or past) the start of the list begins a new round.
-        if (currentIndex < 0 || index <= currentIndex)
+        int currentTeam = currentIndex >= 0 ? teams.IndexOf(TeamOf(players[currentIndex])) : -1;
+
+        for (int step = 1; step <= teams.Count; step++)
+        {
+            int teamIndex = (currentTeam + step) % teams.Count;
+            if (teamIndex < 0) teamIndex += teams.Count;
+
+            CockroachMovement next = teams[teamIndex].TakeNextLivingMember();
+            if (next == null) continue;
+
+            // Back round to the first team = a new round.
+            StartTurn(players.IndexOf(next), currentTeam < 0 || teamIndex <= currentTeam);
+            return;
+        }
+
+        EndGame();
+    }
+
+    private void StartTurn(int index, bool newRound)
+    {
+        if (newRound)
         {
             roundNumber++;
 
@@ -771,6 +839,12 @@ public class TurnManager : MonoBehaviour
             }
         }
 
+        // With teams the winner is the surviving team: the camera goes to one of its cockroaches,
+        // and the text names the team.
+        if (gameOverSequence == null) gameOverSequence = FindFirstObjectByType<GameOverSequence>();
+        MatchTeam winningTeam = winner != null ? TeamOf(winner) : null;
+        if (winningTeam != null && gameOverSequence != null) gameOverSequence.winnerText = winningTeam.name + " WINS";
+
         if (winner != null)
         {
             Debug.Log("TurnManager: game over. Winner: " + winner.name);
@@ -808,6 +882,23 @@ public class TurnManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// True once the match is over: with teams, when at most one team has anyone left; without
+    /// teams, when at most one player is left (a lone test cockroach never ends it).
+    /// </summary>
+    private bool IsMatchDecided()
+    {
+        if (teams.Count > 1)
+        {
+            int teamsLeft = 0;
+            foreach (MatchTeam team in teams)
+                if (team.HasLivingMember) teamsLeft++;
+            return teamsLeft <= 1;
+        }
+
+        return players.Count > 1 && CountAlivePlayers() <= 1;
     }
 
     private int CountAlivePlayers()
